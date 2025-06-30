@@ -1,0 +1,17 @@
+Package: logitPQbound
+Title: Implementation of the Novel Piece-Wise Quadratic Bound for Logistic Log-Likelihoods
+Version: 0.0.0.9000
+Author: Niccolò Anceschi
+Maintainer: Niccolò Anceschi <your.email@example.com>
+Description: Reproduction of the results from the main manuscript.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
+Imports:
+    Rcpp,
+    RcppArmadillo
+LinkingTo:
+    Rcpp,
+    RcppArmadillo
+

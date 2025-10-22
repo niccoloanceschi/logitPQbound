@@ -2,6 +2,7 @@
 % Please edit documentation in R/admm_genlasso.R
 \name{solve_admm_genenet_PQ}
 \alias{solve_admm_genenet_PQ}
+\alias{solve_admm_genenet_WLS}
 \title{Compute the generalized elastic-net solution using the ADMM algorithm}
 \usage{
 solve_admm_genenet_PQ(
@@ -10,7 +11,7 @@ solve_admm_genenet_PQ(
   w,
   nu,
   D = diag(ncol(X)),
-  d = rep(0, nrow(D)),
+  d = numeric(nrow(D)),
   beta0 = NULL,
   z0 = NULL,
   u0 = NULL,
@@ -24,7 +25,34 @@ solve_admm_genenet_PQ(
   spthr = 0.9,
   smw = FALSE,
   precondition = FALSE,
-  objtol = 0.001,
+  objtol = 1e-05,
+  reltol = 0.01,
+  abstol = 1e-04,
+  maxiter = 1000,
+  verbose = FALSE,
+  freq = 10
+)
+
+solve_admm_genenet_WLS(
+  X,
+  y,
+  w,
+  D = diag(ncol(X)),
+  d = numeric(nrow(D)),
+  beta0 = NULL,
+  z0 = NULL,
+  u0 = NULL,
+  lambda = 1,
+  alpha = 0.99,
+  eps = 1e-08,
+  rho = 1,
+  tau = 0,
+  gamma = 0,
+  intercept = TRUE,
+  spthr = 0.9,
+  smw = FALSE,
+  precondition = FALSE,
+  objtol = 1e-05,
   reltol = 0.01,
   abstol = 1e-04,
   maxiter = 1000,
@@ -33,41 +61,53 @@ solve_admm_genenet_PQ(
 )
 }
 \arguments{
-\item{X}{Design matrix}
+\item{X}{design matrix}
 
-\item{y}{Response vector}
+\item{y}{response vector}
 
-\item{w}{L2 Weight vector}
+\item{w}{L2 weight vector}
 
 \item{nu}{L1 weight vector}
 
-\item{D}{Penalty matrix}
+\item{D}{penalty matrix}
 
-\item{beta0}{Optional initial value}
+\item{beta0}{optional initial value for beta}
 
-\item{lambda}{Penalty parameter}
+\item{z0}{optional initial value for the primal variables}
 
-\item{alpha}{Elastic-net mixing parameter}
+\item{u0}{optional initial value for the dual variables}
 
-\item{eps}{Intercept specific penalty parameter}
+\item{lambda}{penalty parameter}
 
-\item{rho}{Augmented Lagrangian penalty parameter}
+\item{alpha}{elastic-net mixing parameter}
 
-\item{tau}{Dual over-relaxation parameter}
+\item{eps}{intercept specific penalty parameter}
 
-\item{gamma}{Proximal regularization parameter}
+\item{rho}{augmented Lagrangian penalty parameter}
 
-\item{intercept}{If \code{TRUE}, do not penalize per first column of \code{X}}
+\item{tau}{dual over-relaxation parameter}
 
-\item{spthr}{Proportion of zero entries to transform \code{X} and \code{D} into sparse matrices}
+\item{gamma}{proximal regularization parameter}
 
-\item{smw}{If \code{TRUE}, allows for the SMW solver in the \code{p>n} regime}
+\item{intercept}{if \code{TRUE}, do not penalize per first column of \code{X}}
 
-\item{reltol}{Relative tolerance stopping criterion}
+\item{spthr}{proportion of zero entries to transform \code{X} and \code{D} into sparse matrices}
 
-\item{abstol}{Absolute tolerance stopping criterion}
+\item{smw}{if \code{TRUE}, allows for the SMW solver in the \code{p>n} regime}
 
-\item{maxiter}{Maximum number of iterations}
+\item{precondition}{if \code{TRUE}, allows for diagonal preconditioning}
+
+\item{objtol}{objective tolerance stopping criterion}
+
+\item{reltol}{relative tolerance stopping criterion}
+
+\item{abstol}{absolute tolerance stopping criterion}
+
+\item{maxiter}{maximum number of iterations}
+
+\item{verbose}{if \code{TRUE}, print the current optimization status}
+
+\item{freq}{frequency of printing of the optimization status}
 }
 \value{
 \itemize{

@@ -21,29 +21,29 @@ solve_admm_ridge_PQ(
 )
 }
 \arguments{
-\item{X}{(real matrix) design matrix.}
+\item{X}{design matrix}
 
-\item{y}{(real vector) response vector.}
+\item{y}{response vector}
 
-\item{w}{(real vector) weight vector.}
+\item{w}{weight vector}
 
-\item{nu}{(real vector) penalty weight vector.}
+\item{nu}{penalty weight vector}
 
-\item{pL2}{(real vector) ridge penalty vector.}
+\item{pL2}{ridge penalty vector}
 
-\item{beta0}{(real vector) initial values.}
+\item{beta0}{initial values}
 
-\item{rho}{(real) augmented Lagrangian penalty parameter.}
+\item{rho}{augmented Lagrangian penalty parameter}
 
-\item{objtol}{(real) objective tolerance parameter.}
+\item{objtol}{objective tolerance parameter}
 
-\item{reltol}{(real) relative tolerance parameter.}
+\item{reltol}{relative tolerance parameter}
 
-\item{abstol}{(real) absolute tolerance parameter.}
+\item{abstol}{absolute tolerance parameter}
 
-\item{maxiter}{(int) maximum number of iterations.}
+\item{maxiter}{maximum number of iterations}
 
-\item{lambda}{(real) generalized lasso penalty parameter.}
+\item{lambda}{generalized lasso penalty parameter}
 }
 \value{
 A list containing the estimated coefficients and the optimization history.

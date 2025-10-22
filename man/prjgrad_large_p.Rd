@@ -2,18 +2,12 @@
 % Please edit documentation in R/RcppExports.R
 \name{prjgrad_large_p}
 \alias{prjgrad_large_p}
-\title{projected gradient descent, optimized for large-p-small-n problems}
+\title{Projected gradient descent, optimized for large-p-small-n problems}
 \usage{
-prjgrad_large_p(u, y_nu, nu_w, xPxt_nu, cholQ, alpha, thrs, maxiter)
+prjgrad_large_p(u, Ny, NW, XPXtN, cholQ, alpha, thrs, maxiter)
 }
 \arguments{
 \item{u}{(arma::vec(n)) initial solution}
-
-\item{y_nu}{(arma::vec(n)) auxiliary vector 1}
-
-\item{nu_w}{(arma::vec(n)) auxiliary vector 2}
-
-\item{xPxt_nu}{(arma::mat(n,n)) auxiliary}
 
 \item{cholQ}{(arma::mat(n,n)) auxiliary Cholesky matrix}
 
@@ -22,10 +16,16 @@ prjgrad_large_p(u, y_nu, nu_w, xPxt_nu, cholQ, alpha, thrs, maxiter)
 \item{thrs}{(double) stopping threshold on relative absolute change}
 
 \item{maxiter}{(int) maximum number of iterations}
+
+\item{y_nu}{(arma::vec(n)) auxiliary vector 1}
+
+\item{nu_w}{(arma::vec(n)) auxiliary vector 2}
+
+\item{xPxt_nu}{(arma::mat(n,n)) auxiliary}
 }
 \value{
 logistic penalized log likelihood
 }
 \description{
-projected gradient descent, optimized for large-p-small-n problems
+Projected gradient descent, optimized for large-p-small-n problems
 }

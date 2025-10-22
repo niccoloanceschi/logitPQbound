@@ -1,6 +1,6 @@
 # logitPQbound
 
-The repository includes the R functions to implement the novel piece-wise qaudratic bound for logistic loglikelihoods from the paper
+The repository includes the R functions to implement the novel piece-wise qaudratic bound for logistic log-likelihoods from the paper
 
 * Anceschi, N. and Rigon, T. and Zanella, G. and Durante, D. (2024), [Optimal lower bounds for logistic log-likelihoods](https://arxiv.org/abs/2410.10309), ArXiv. 
 
@@ -23,5 +23,5 @@ devtools::install_github("niccoloanceschi/logitPQbound")
 
 Install packages:
 ```R
-install.packages(c("devtools", "RcppArmadillo", "ggplot2", "dplyr"))
+install.packages(c("devtools", "RcppArmadillo", "Rmpfr", "Matrix", "sparseinv", "BayesLogit", "ggplot2", "dplyr"))
 ```

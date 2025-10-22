@@ -1,2 +1,26 @@
+
+# VS-Code related
+^\.vscode$
+
+# R related
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^\.Rhistory$
+^\.RData$
+^\.Rproj$
+
+# C++ related
+^test/
+
+# GitHub related
+^\.git$
+^\.github$
+^\.gitignore$
+^\.gitattributes$
+^\.svn$
+
+# Other
+^data/
+^img/
+^old/
+^sandbox/

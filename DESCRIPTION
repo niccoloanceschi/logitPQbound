@@ -10,8 +10,15 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Imports:
     Rcpp,
-    RcppArmadillo
+    RcppArmadillo,
+    Matrix,
+    Rmpfr,
+    sparseinv,
+    BayesLogit
 LinkingTo:
     Rcpp,
     RcppArmadillo
+Suggests: 
+    dplyr,
+    ggplot2
 

@@ -11,92 +11,54 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// invQ_r_Rcpp
-arma::vec invQ_r_Rcpp(const arma::mat& cholQ, const arma::vec& r);
-RcppExport SEXP _logitPQbound_invQ_r_Rcpp(SEXP cholQSEXP, SEXP rSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::mat& >::type cholQ(cholQSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type r(rSEXP);
-    rcpp_result_gen = Rcpp::wrap(invQ_r_Rcpp(cholQ, r));
-    return rcpp_result_gen;
-END_RCPP
-}
 // prjgrad_large_p
-arma::vec prjgrad_large_p(arma::vec u, const arma::vec& y_nu, const arma::vec& nu_w, const arma::mat& xPxt_nu, const arma::mat& cholQ, double alpha, double thrs, int maxiter);
-RcppExport SEXP _logitPQbound_prjgrad_large_p(SEXP uSEXP, SEXP y_nuSEXP, SEXP nu_wSEXP, SEXP xPxt_nuSEXP, SEXP cholQSEXP, SEXP alphaSEXP, SEXP thrsSEXP, SEXP maxiterSEXP) {
+arma::vec prjgrad_large_p(arma::vec u, const arma::vec& Ny, const arma::vec& NW, const arma::mat& XPXtN, const arma::mat& cholQ, double alpha, double thrs, int maxiter);
+RcppExport SEXP _logitPQbound_prjgrad_large_p(SEXP uSEXP, SEXP NySEXP, SEXP NWSEXP, SEXP XPXtNSEXP, SEXP cholQSEXP, SEXP alphaSEXP, SEXP thrsSEXP, SEXP maxiterSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::vec >::type u(uSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type y_nu(y_nuSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type nu_w(nu_wSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type xPxt_nu(xPxt_nuSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type Ny(NySEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type NW(NWSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type XPXtN(XPXtNSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type cholQ(cholQSEXP);
     Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
     Rcpp::traits::input_parameter< double >::type thrs(thrsSEXP);
     Rcpp::traits::input_parameter< int >::type maxiter(maxiterSEXP);
-    rcpp_result_gen = Rcpp::wrap(prjgrad_large_p(u, y_nu, nu_w, xPxt_nu, cholQ, alpha, thrs, maxiter));
+    rcpp_result_gen = Rcpp::wrap(prjgrad_large_p(u, Ny, NW, XPXtN, cholQ, alpha, thrs, maxiter));
     return rcpp_result_gen;
 END_RCPP
 }
 // prjgrad_large_n
-arma::vec prjgrad_large_n(arma::vec u, const arma::vec& y_nu, const arma::mat& nu_x, const arma::mat& cholQ, double alpha, double thrs, int maxiter);
-RcppExport SEXP _logitPQbound_prjgrad_large_n(SEXP uSEXP, SEXP y_nuSEXP, SEXP nu_xSEXP, SEXP cholQSEXP, SEXP alphaSEXP, SEXP thrsSEXP, SEXP maxiterSEXP) {
+arma::vec prjgrad_large_n(arma::vec u, const arma::vec& Ny, const arma::mat& NX, const arma::mat& cholQ, double alpha, double thrs, int maxiter);
+RcppExport SEXP _logitPQbound_prjgrad_large_n(SEXP uSEXP, SEXP NySEXP, SEXP NXSEXP, SEXP cholQSEXP, SEXP alphaSEXP, SEXP thrsSEXP, SEXP maxiterSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::vec >::type u(uSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type y_nu(y_nuSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type nu_x(nu_xSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type Ny(NySEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type NX(NXSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type cholQ(cholQSEXP);
     Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
     Rcpp::traits::input_parameter< double >::type thrs(thrsSEXP);
     Rcpp::traits::input_parameter< int >::type maxiter(maxiterSEXP);
-    rcpp_result_gen = Rcpp::wrap(prjgrad_large_n(u, y_nu, nu_x, cholQ, alpha, thrs, maxiter));
+    rcpp_result_gen = Rcpp::wrap(prjgrad_large_n(u, Ny, NX, cholQ, alpha, thrs, maxiter));
     return rcpp_result_gen;
 END_RCPP
 }
-// plogis
-arma::vec plogis(arma::vec eta);
-RcppExport SEXP _logitPQbound_plogis(SEXP etaSEXP) {
+// coeff_PG
+arma::vec coeff_PG(arma::vec eta);
+RcppExport SEXP _logitPQbound_coeff_PG(SEXP etaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::vec >::type eta(etaSEXP);
-    rcpp_result_gen = Rcpp::wrap(plogis(eta));
-    return rcpp_result_gen;
-END_RCPP
-}
-// logpost
-double logpost(arma::vec eta, arma::vec y, arma::vec beta, double alpha, double lambda);
-RcppExport SEXP _logitPQbound_logpost(SEXP etaSEXP, SEXP ySEXP, SEXP betaSEXP, SEXP alphaSEXP, SEXP lambdaSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::vec >::type eta(etaSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type y(ySEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type beta(betaSEXP);
-    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
-    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
-    rcpp_result_gen = Rcpp::wrap(logpost(eta, y, beta, alpha, lambda));
-    return rcpp_result_gen;
-END_RCPP
-}
-// w_PG
-arma::vec w_PG(arma::vec eta);
-RcppExport SEXP _logitPQbound_w_PG(SEXP etaSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::vec >::type eta(etaSEXP);
-    rcpp_result_gen = Rcpp::wrap(w_PG(eta));
+    rcpp_result_gen = Rcpp::wrap(coeff_PG(eta));
     return rcpp_result_gen;
 END_RCPP
 }
 // coeff_PQ
-arma::vec coeff_PQ(arma::vec eta);
+arma::mat coeff_PQ(arma::vec eta);
 RcppExport SEXP _logitPQbound_coeff_PQ(SEXP etaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -106,15 +68,37 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// admm_genlasso_PQ
+Rcpp::List admm_genlasso_PQ(const arma::vec& y, const arma::mat& X, const arma::vec& w, const arma::vec& nu, const arma::vec& pL2, const arma::vec& beta0, const double& lambda, const double& rho, const bool& precondition, const double& objtol, const double& reltol, const double& abstol, const int& maxiter, const bool& history);
+RcppExport SEXP _logitPQbound_admm_genlasso_PQ(SEXP ySEXP, SEXP XSEXP, SEXP wSEXP, SEXP nuSEXP, SEXP pL2SEXP, SEXP beta0SEXP, SEXP lambdaSEXP, SEXP rhoSEXP, SEXP preconditionSEXP, SEXP objtolSEXP, SEXP reltolSEXP, SEXP abstolSEXP, SEXP maxiterSEXP, SEXP historySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type w(wSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type nu(nuSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type pL2(pL2SEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type beta0(beta0SEXP);
+    Rcpp::traits::input_parameter< const double& >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< const double& >::type rho(rhoSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type precondition(preconditionSEXP);
+    Rcpp::traits::input_parameter< const double& >::type objtol(objtolSEXP);
+    Rcpp::traits::input_parameter< const double& >::type reltol(reltolSEXP);
+    Rcpp::traits::input_parameter< const double& >::type abstol(abstolSEXP);
+    Rcpp::traits::input_parameter< const int& >::type maxiter(maxiterSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type history(historySEXP);
+    rcpp_result_gen = Rcpp::wrap(admm_genlasso_PQ(y, X, w, nu, pL2, beta0, lambda, rho, precondition, objtol, reltol, abstol, maxiter, history));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_logitPQbound_invQ_r_Rcpp", (DL_FUNC) &_logitPQbound_invQ_r_Rcpp, 2},
     {"_logitPQbound_prjgrad_large_p", (DL_FUNC) &_logitPQbound_prjgrad_large_p, 8},
     {"_logitPQbound_prjgrad_large_n", (DL_FUNC) &_logitPQbound_prjgrad_large_n, 7},
-    {"_logitPQbound_plogis", (DL_FUNC) &_logitPQbound_plogis, 1},
-    {"_logitPQbound_logpost", (DL_FUNC) &_logitPQbound_logpost, 5},
-    {"_logitPQbound_w_PG", (DL_FUNC) &_logitPQbound_w_PG, 1},
+    {"_logitPQbound_coeff_PG", (DL_FUNC) &_logitPQbound_coeff_PG, 1},
     {"_logitPQbound_coeff_PQ", (DL_FUNC) &_logitPQbound_coeff_PQ, 1},
+    {"_logitPQbound_admm_genlasso_PQ", (DL_FUNC) &_logitPQbound_admm_genlasso_PQ, 14},
     {NULL, NULL, 0}
 };
 

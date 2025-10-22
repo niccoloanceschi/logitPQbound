@@ -1,13 +1,32 @@
-.Rproj.user
+# History files
 .Rhistory
-.RData
+.Rapp.history
+
+# RStudio files
+.Rproj.user
+.Rproj.user/
+.Rproj.user/**
+
+# User-specific files
 .Ruserdata
+
+# Session Data files
+.RData
+.RDataTmp
+
+# C++ files
 src/*.o
 src/*.so
 src/*.dll
+
+# Image folder
 img/
 img/**
+
+# Test folder
 test/
 test/**
+
+# Sandbox folder
 sandbox/
 sandbox/**

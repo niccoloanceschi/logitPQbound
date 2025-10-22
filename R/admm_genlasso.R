@@ -1,18 +1,18 @@
 
 #' ADMM optimizer for the PQ generalized lasso problem
 #' 
-#' @param X (real matrix) design matrix.
-#' @param y (real vector) response vector.
-#' @param w (real vector) weight vector.
-#' @param nu (real vector) penalty weight vector.
-#' @param pL2 (real vector) ridge penalty vector.
-#' @param beta0 (real vector) initial values.
-#' @param lambda (real) generalized lasso penalty parameter.
-#' @param rho (real) augmented Lagrangian penalty parameter.
-#' @param objtol (real) objective tolerance parameter.
-#' @param reltol (real) relative tolerance parameter.
-#' @param abstol (real) absolute tolerance parameter.
-#' @param maxiter (int) maximum number of iterations.
+#' @param X design matrix
+#' @param y response vector
+#' @param w weight vector
+#' @param nu penalty weight vector
+#' @param pL2 ridge penalty vector
+#' @param beta0 initial values
+#' @param lambda generalized lasso penalty parameter
+#' @param rho augmented Lagrangian penalty parameter
+#' @param objtol objective tolerance parameter
+#' @param reltol relative tolerance parameter
+#' @param abstol absolute tolerance parameter
+#' @param maxiter maximum number of iterations
 #' 
 #' @return A list containing the estimated coefficients and the optimization history.
 #' 
@@ -48,24 +48,30 @@ solve_admm_ridge_PQ <- function(X, y, w, nu, pL2, beta0=NULL,
 
 #' Compute the generalized elastic-net solution using the ADMM algorithm
 #' 
-#' @param X Design matrix
-#' @param y Response vector
-#' @param w L2 Weight vector 
+#' @param X design matrix
+#' @param y response vector
+#' @param w L2 weight vector 
 #' @param nu L1 weight vector 
-#' @param D Penalty matrix
-#' @param beta0 Optional initial value
-#' @param lambda Penalty parameter
-#' @param alpha Elastic-net mixing parameter 
-#' @param eps Intercept specific penalty parameter
-#' @param rho Augmented Lagrangian penalty parameter
-#' @param tau Dual over-relaxation parameter
-#' @param gamma Proximal regularization parameter
-#' @param intercept If `TRUE`, do not penalize per first column of `X` 
-#' @param spthr Proportion of zero entries to transform `X` and `D` into sparse matrices
-#' @param smw If `TRUE`, allows for the SMW solver in the `p>n` regime 
-#' @param reltol Relative tolerance stopping criterion
-#' @param abstol Absolute tolerance stopping criterion
-#' @param maxiter Maximum number of iterations
+#' @param D penalty matrix
+#' @param beta0 optional initial value for beta
+#' @param z0 optional initial value for the primal variables
+#' @param u0 optional initial value for the dual variables
+#' @param lambda penalty parameter
+#' @param alpha elastic-net mixing parameter 
+#' @param eps intercept specific penalty parameter
+#' @param rho augmented Lagrangian penalty parameter
+#' @param tau dual over-relaxation parameter
+#' @param gamma proximal regularization parameter
+#' @param intercept if `TRUE`, do not penalize per first column of `X` 
+#' @param spthr proportion of zero entries to transform `X` and `D` into sparse matrices
+#' @param smw if `TRUE`, allows for the SMW solver in the `p>n` regime 
+#' @param precondition if `TRUE`, allows for diagonal preconditioning
+#' @param objtol objective tolerance stopping criterion
+#' @param reltol relative tolerance stopping criterion
+#' @param abstol absolute tolerance stopping criterion
+#' @param maxiter maximum number of iterations
+#' @param verbose if `TRUE`, print the current optimization status
+#' @param freq frequency of printing of the optimization status
 #' 
 #' @return 
 #' \itemize{
@@ -79,11 +85,11 @@ solve_admm_ridge_PQ <- function(X, y, w, nu, pL2, beta0=NULL,
 #' }
 #' 
 #' @export
-solve_admm_genenet_PQ <- function(X, y, w, nu, D=diag(ncol(X)), d=rep(.0, nrow(D)),
-                                  beta0=NULL, z0=NULL, u0=NULL, lambda=1.0, 
-                                  alpha=0.99, eps=1e-8, rho=1.0, tau=0.0, gamma=0.0,
-                                  intercept=TRUE, spthr=0.9, smw=FALSE, precondition=FALSE,
-                                  objtol=1e-3, reltol=1e-2, abstol=1e-4, 
+solve_admm_genenet_PQ <- function(X, y, w, nu, D=diag(ncol(X)), d=numeric(nrow(D)),
+                                  beta0=NULL, z0=NULL, u0=NULL, lambda=1.0, alpha=0.99, 
+                                  eps=1e-8, rho=1.0, tau=0.0, gamma=0.0, intercept=TRUE, 
+                                  spthr=0.9, smw=FALSE, precondition=FALSE,
+                                  objtol=1e-5, reltol=1e-2, abstol=1e-4, 
                                   maxiter=1000, verbose=FALSE, freq=10) {
   
   # Model dimensions
@@ -314,45 +320,13 @@ solve_admm_genenet_PQ <- function(X, y, w, nu, D=diag(ncol(X)), d=rep(.0, nrow(D
   return(list(beta=beta, z=z, u=u, r=r, s=s, niter=iter, trace=trace))
 }
 
-
-#' Compute the generalized elastic-net solution using the ADMM algorithm
-#' 
-#' @param X Design matrix
-#' @param y Response vector
-#' @param w Weight vector
-#' @param D Penalty matrix
-#' @param beta0 Optional initial value
-#' @param lambda Penalty parameter
-#' @param alpha Elastic-net mixing parameter 
-#' @param eps Intercept specific penalty parameter
-#' @param rho Augmented Lagrangian penalty parameter
-#' @param tau Dual over-relaxation parameter
-#' @param gamma Proximal regularization parameter
-#' @param intercept If `TRUE`, do not penalize per first column of `X` 
-#' @param spthr Proportion of zero entries to transform `X` and `D` into sparse matrices
-#' @param smw If `TRUE`, allows for the SMW solver in the `p>n` regime
-#' @param objtol Objective tolerance stopping criterion
-#' @param reltol Relative tolerance stopping criterion
-#' @param abstol Absolute tolerance stopping criterion
-#' @param maxiter Maximum number of iterations
-#' 
-#' @return 
-#' \itemize{
-#'   \item \code{beta}: estimated primal coefficients 
-#'   \item \code{z}: estimated primal variable
-#'   \item \code{u}: estimated dual variables
-#'   \item \code{r}: primal residuals
-#'   \item \code{s}: dual residuals
-#'   \item \code{niter}: number of iterations to reach convergence
-#'   \item \code{trace}: data-frame collecting the optimization history
-#' }
-#' 
+#' @rdname solve_admm_genenet_PQ
 #' @export
-solve_admm_genenet_WLS <- function(X, y, w, D=diag(ncol(X)), d=rep(.0, nrow(D)),
-                                   beta0=NULL, z0=NULL, u0=NULL, lambda=1.0, 
-                                   alpha=0.99, eps=1e-8, rho=1.0, tau=0.0, gamma=0.0,
-                                   intercept=TRUE, spthr=0.9, smw=FALSE, precondition=FALSE,
-                                   objtol=1e-4, reltol=1e-2, abstol=1e-4, 
+solve_admm_genenet_WLS <- function(X, y, w, D=diag(ncol(X)), d=numeric(nrow(D)),
+                                   beta0=NULL, z0=NULL, u0=NULL, lambda=1.0, alpha=0.99, 
+                                   eps=1e-8, rho=1.0, tau=0.0, gamma=0.0, intercept=TRUE, 
+                                   spthr=0.9, smw=FALSE, precondition=FALSE,
+                                   objtol=1e-5, reltol=1e-2, abstol=1e-4, 
                                    maxiter=1000, verbose=FALSE, freq=10) {
   
   # Model dimensions
@@ -442,8 +416,6 @@ solve_admm_genenet_WLS <- function(X, y, w, D=diag(ncol(X)), d=rep(.0, nrow(D)),
       is_sp_Q <- FALSE
     }
   }
-  
-  
   
   # Objective function 
   loss_WLS <- 0.5 * sum(w*(y - eta)^2)
@@ -584,31 +556,36 @@ solve_admm_genenet_WLS <- function(X, y, w, D=diag(ncol(X)), d=rep(.0, nrow(D)),
 }
 
 
-
-#' Compute the generalized elastic-net solution using the ADMM algorithm
+#' Compute the generalized elastic-net solution using the sparse ADMM algorithm
 #' 
-#' @param X Design matrix
-#' @param y Response vector
-#' @param w L2 Weight vector 
+#' @param X sparse design matrix
+#' @param y response vector
+#' @param w L2 weight vector 
 #' @param nu L1 weight vector 
-#' @param D Penalty matrix
-#' @param beta0 Optional initial value
-#' @param lambda Penalty parameter
-#' @param alpha Elastic-net mixing parameter 
-#' @param eps Intercept specific penalty parameter
-#' @param rho Augmented Lagrangian penalty parameter
-#' @param tau Dual over-relaxation parameter
-#' @param gamma Proximal regularization parameter
-#' @param intercept If `TRUE`, do not penalize per first column of `X` 
-#' @param spthr Proportion of zero entries to transform `X` and `D` into sparse matrices
-#' @param smw If `TRUE`, allows for the SMW solver in the `p>n` regime 
-#' @param reltol Relative tolerance stopping criterion
-#' @param abstol Absolute tolerance stopping criterion
-#' @param maxiter Maximum number of iterations
+#' @param D sparse penalty matrix
+#' @param beta0 optional initial value for beta
+#' @param z0 optional initial value for the primal variables
+#' @param u0 optional initial value for the dual variables
+#' @param lambda penalty parameter
+#' @param alpha elastic-net mixing parameter 
+#' @param eps (NOT USED) intercept specific penalty parameter
+#' @param rho augmented Lagrangian penalty parameter
+#' @param tau dual over-relaxation parameter
+#' @param gamma proximal regularization parameter
+#' @param intercept (NOT USED) if `TRUE`, do not penalize per first column of `X`
+#' @param spthr proportion of zero entries to transform `X` and `D` into sparse matrices
+#' @param smw (NOT USED) if `TRUE`, allows for the SMW solver in the `p>n` regime
+#' @param precondition if `TRUE`, allows for diagonal preconditioning
+#' @param objtol objective tolerance stopping criterion
+#' @param reltol relative tolerance stopping criterion
+#' @param abstol absolute tolerance stopping criterion
+#' @param maxiter maximum number of iterations
+#' @param verbose if `TRUE`, print the current optimization status
+#' @param freq frequency of printing of the optimization status
 #' 
 #' @return 
 #' \itemize{
-#'   \item \code{beta}: estimated primal coefficients 
+#'   \item \code{beta}: estimated primal coefficients
 #'   \item \code{z}: estimated primal variable
 #'   \item \code{u}: estimated dual variables
 #'   \item \code{r}: primal residuals
@@ -618,11 +595,11 @@ solve_admm_genenet_WLS <- function(X, y, w, D=diag(ncol(X)), d=rep(.0, nrow(D)),
 #' }
 #' 
 #' @export
-solve_admm_spenet_PQ <- function(X, y, w, nu, D=diag(ncol(X)), d=rep(.0, nrow(D)),
-                                 beta0=NULL, z0=NULL, u0=NULL, lambda=1.0, 
-                                 alpha=0.99, eps=1e-8, rho=1.0, tau=0.0, gamma=0.0,
-                                 intercept=TRUE, spthr=0.9, smw=FALSE, precondition=FALSE,
-                                 objtol=1e-3, reltol=1e-2, abstol=1e-4, 
+solve_admm_spenet_PQ <- function(X, y, w, nu, D=diag(ncol(X)), d=numeric(nrow(D)),
+                                 beta0=NULL, z0=NULL, u0=NULL, lambda=1.0, alpha=0.99, 
+                                 eps=1e-8, rho=1.0, tau=0.0, gamma=0.0, intercept=TRUE, 
+                                 spthr=0.9, smw=FALSE, precondition=FALSE,
+                                 objtol=1e-5, reltol=1e-2, abstol=1e-4, 
                                  maxiter=1000, verbose=FALSE, freq=10) {
   
   # Model dimensions
@@ -646,10 +623,6 @@ solve_admm_spenet_PQ <- function(X, y, w, nu, D=diag(ncol(X)), d=rep(.0, nrow(D)
   
   pL1 <- rep(lambda*alpha, m)
   pL2 <- rep(lambda*(1-alpha), m)
-  # pL2 <- rep(lambda*(1-alpha), p)
-  # if (intercept) {
-  #   pL2[1] <- eps*lambda*(1-alpha)
-  # }
   
   # Preconditioning
   pwts <- c(rep(1/lambda, times=n), rep(1, times=m))
@@ -807,45 +780,12 @@ solve_admm_spenet_PQ <- function(X, y, w, nu, D=diag(ncol(X)), d=rep(.0, nrow(D)
   return(list(beta=beta, z=z, u=u, r=r, s=s, niter=iter, trace=trace))
 }
 
-
-#' Compute the generalized elastic-net solution using the ADMM algorithm
-#' 
-#' @param X Design matrix
-#' @param y Response vector
-#' @param w Weight vector
-#' @param D Penalty matrix
-#' @param beta0 Optional initial value
-#' @param lambda Penalty parameter
-#' @param alpha Elastic-net mixing parameter 
-#' @param eps Intercept specific penalty parameter
-#' @param rho Augmented Lagrangian penalty parameter
-#' @param tau Dual over-relaxation parameter
-#' @param gamma Proximal regularization parameter
-#' @param intercept If `TRUE`, do not penalize per first column of `X` 
-#' @param spthr Proportion of zero entries to transform `X` and `D` into sparse matrices
-#' @param smw If `TRUE`, allows for the SMW solver in the `p>n` regime
-#' @param objtol Objective tolerance stopping criterion
-#' @param reltol Relative tolerance stopping criterion
-#' @param abstol Absolute tolerance stopping criterion
-#' @param maxiter Maximum number of iterations
-#' 
-#' @return 
-#' \itemize{
-#'   \item \code{beta}: estimated primal coefficients 
-#'   \item \code{z}: estimated primal variable
-#'   \item \code{u}: estimated dual variables
-#'   \item \code{r}: primal residuals
-#'   \item \code{s}: dual residuals
-#'   \item \code{niter}: number of iterations to reach convergence
-#'   \item \code{trace}: data-frame collecting the optimization history
-#' }
-#' 
+#' @rdname solve_admm_spenet_PQ
 #' @export
-solve_admm_spenet_WLS <- function(X, y, w, D, d=rep(.0, nrow(D)),
-                                  beta0=NULL, z0=NULL, u0=NULL, lambda=1.0, 
-                                  alpha=0.99, eps=1e-8, rho=1.0, tau=0.0, gamma=0.0,
-                                  intercept=TRUE, spthr=0.9, smw=FALSE, precondition=FALSE,
-                                  objtol=1e-4, reltol=1e-2, abstol=1e-4, 
+solve_admm_spenet_WLS <- function(X, y, w, D=diag(ncol(X)), d=numeric(nrow(D)),
+                                  beta0=NULL, z0=NULL, u0=NULL, lambda=1.0, alpha=0.99, 
+                                  eps=1e-8, rho=1.0, tau=0.0, gamma=0.0, intercept=TRUE, 
+                                  spthr=0.9, smw=FALSE, precondition=FALSE,
                                   maxiter=1000, verbose=FALSE, freq=10) {
   
   # Model dimensions
@@ -868,10 +808,6 @@ solve_admm_spenet_WLS <- function(X, y, w, D, d=rep(.0, nrow(D)),
   
   pL1 <- rep(lambda*alpha, m)
   pL2 <- rep(lambda*(1-alpha), m)
-  # pL2 <- rep(lambda*(1-alpha), p)
-  # if (intercept) {
-  #   pL2[1] <- eps*lambda*(1-alpha)
-  # }
   
   # Preconditioning
   if (precondition) {
@@ -943,7 +879,6 @@ solve_admm_spenet_WLS <- function(X, y, w, D, d=rep(.0, nrow(D)),
   for (iter in 2:maxiter) {
     
     # Primal update: beta
-    # e <- XWy + (rho*lambda*alpha) * as.vector(Matrix::crossprod(D, d+z-u))
     e <- XWy + rho * as.vector(Matrix::crossprod(D, pwts*(d+z-u))) + gamma*beta
     beta[] <- sp_chol_solve(cholQ, e)
     
@@ -1033,3 +968,4 @@ solve_admm_spenet_WLS <- function(X, y, w, D, d=rep(.0, nrow(D)),
   # Return the results
   return(list(beta=beta, z=z, u=u, r=r, s=s, niter=iter, trace=trace))
 }
+

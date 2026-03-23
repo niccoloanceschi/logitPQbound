@@ -26,13 +26,12 @@
 #' 
 #' @export
 fit_logit_genlasso <- function(y, X, D, type=c('NR','BL','PG','PQ'), beta_start=NULL, 
-                               lambda=1.0, alpha=.99, eps=1e-10, intercept=FALSE,
-                               maxiter=1000, abstol=1e-4, reltol=1e-4, etatol=1e-4, 
+                               lambda=1.0, alpha=.99, eps=1e-10, phi=0.9, intercept=FALSE,
+                               approx=TRUE, maxiter=1000, abstol=1e-4, reltol=1e-4, etatol=1e-4, 
                                verbose=FALSE, freq=10, ctr_admm=set_ctr_admm()){
   
   # Check the bound type and QP method
   type = match.arg(type)
-  method = match.arg(method)
   
   # Set the model dimensions
   p <- ncol(X)
@@ -45,11 +44,12 @@ fit_logit_genlasso <- function(y, X, D, type=c('NR','BL','PG','PQ'), beta_start=
   if ((alpha>1) || (alpha<0))
     stop("GENLASSO-LOGIT: alpha must be a value in the interval [0,1].", call.=FALSE)
   
-  pL2 <- rep(lambda*(1-alpha), p)
+  pL2 <- rep(lambda*(1-alpha), m)
   pL1 <- rep(lambda*alpha, m)
   
   if (alpha==0) pL1 <- eps
-  if (intercept) pL2[1] <- eps*lambda*alpha
+  if (intercept) pL2[1] <- eps*lambda*(1-alpha)
+  if (intercept) pL1[1] <- eps*lambda*alpha
   
   # Parameter initialization
   if(is.null(beta_start)){
@@ -63,10 +63,18 @@ fit_logit_genlasso <- function(y, X, D, type=c('NR','BL','PG','PQ'), beta_start=
   eta_stable <- FALSE
   if (type=='PQ') {
     coeff_pq <- coeff_PQ(eta)
+    s  <- sign(eta) * (abs(eta) > 1e-2)
     w  <- as.vector(coeff_pq[,1])
     nu <- as.vector(coeff_pq[,2])
-    u <- numeric(n+m)
-    z <- c(nu * as.vector(X %*% beta), as.vector(D %*% beta))
+    # u <- numeric(n+m)
+    # z <- c(nu * as.vector(X %*% beta), as.vector(D %*% beta))
+    if (approx) {
+      u <- numeric(m)
+      z <- as.vector(D %*% beta)
+    } else {
+      u <- numeric(n+m)
+      z <- c(nu*as.vector(X %*% beta), as.vector(D %*% beta))
+    }
   } else if (type=='PG') {
     w <- as.vector(coeff_PG(eta))
     u <- numeric(m)
@@ -146,7 +154,7 @@ fit_logit_genlasso <- function(y, X, D, type=c('NR','BL','PG','PQ'), beta_start=
       'NR' = update_genlasso_NR(beta, z, u, eta, prob, y, X, w, D, lambda, alpha, eps, ctr_admm),
       'BL' = update_genlasso_BL(beta, z, u, eta, prob, y, X, D, lambda, alpha, eps, ctr_admm),
       'PG' = update_genlasso_PG(beta, z, u, y, X, w, D, lambda, alpha, eps, ctr_admm),
-      'PQ' = update_genlasso_PQ(beta, z, u, eta, eta_stable, y, X, w, nu, D, lambda, alpha, eps, ctr_admm)
+      'PQ' = update_genlasso_PQ(beta, z, u, s, eta, y, X, w, nu, D, lambda, alpha, eps, phi, approx, ctr_admm)
     )
     
     beta_old <- beta
@@ -154,6 +162,7 @@ fit_logit_genlasso <- function(y, X, D, type=c('NR','BL','PG','PQ'), beta_start=
     beta <- admmbeta$beta
     u <- admmbeta$u
     z <- admmbeta$z
+    s <- admmbeta$s
     
     # Update bound
     eta_old <- eta
@@ -302,7 +311,7 @@ fit_logit_splasso <- function(y, X, D, type=c('NR','BL','PG','PQ'), beta_start=N
   eta_stable <- FALSE
   if (type=='PQ') {
     coeff_pq <- coeff_PQ(eta)
-    s <- sign(eta) * (abs(eta) > 1e-2)
+    s  <- sign(eta) * (abs(eta) > 1e-2)
     w  <- as.vector(coeff_pq[,1])
     nu <- as.vector(coeff_pq[,2])
     if (approx) {

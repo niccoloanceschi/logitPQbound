@@ -1,6 +1,6 @@
 
 
-#' Generalized lasso solution path for logistic regression via MM optimization
+#' Ridge solution path for logistic regression via MM optimization
 #'
 #' @param y A \verb{n} dimensional binary vector
 #' @param x A \verb{n x p} dimensional design matrix. The intercept must be manually included
@@ -25,15 +25,17 @@
 #' 
 #' @export
 #' 
-fit_logit_genlasso_path <- function(y, X, D, type=c('NR','BL','PG','PQ'), 
-                                    beta_start=NULL, lambda=NULL, alpha=0.99, 
-                                    eps=1e-10, gamma=1.0, phi=0.9, approx=TRUE, 
-                                    intercept=FALSE, maxiter=1000L, abstol=1e-4, 
-                                    reltol=1e-4, etatol=1e-4, verbose=FALSE, 
-                                    freq=10L, ctr_admm=set_ctr_admm()){
+fit_logit_ridge_path <- function(y, X, type=c('NR','BL','PG','PQ'), 
+                                 beta_start=NULL, lambda=NULL, eps=1e-10, 
+                                 gamma=1.0, intercept=FALSE, phi=0.9, maxiter=1000L, 
+                                 abstol=1e-4, reltol=1e-4, etatol=1e-4, 
+                                 verbose=FALSE, freq=10L, 
+                                 solver=c("auto", "chol", "smw", "admm"),
+                                 ctr_admm=set_ctr_admm()){
   
   # Check the bound type and QP method
   type <- match.arg(type)
+  solver <- match.arg(solver)
   
   # Set the lambda vector
   if (is.null(lambda)) {
@@ -58,7 +60,7 @@ fit_logit_genlasso_path <- function(y, X, D, type=c('NR','BL','PG','PQ'),
   # Set the beta path
   out <- list()
   out$lambdas <- lambda
-  out$alpha   <- alpha
+  out$alpha   <- .0
   out$beta    <- matrix(NA, nrow=p, ncol=K)
   out$loglik  <- rep(NA, times=K)
   out$niter   <- rep(NA, times=K)
@@ -80,16 +82,13 @@ fit_logit_genlasso_path <- function(y, X, D, type=c('NR','BL','PG','PQ'),
     # Set the starting time
     timek <- proc.time()
     
-    # Scale the ADMM penalty parameter
-    ctr <- ctr_admm
-    ctr$rho <- ctr_admm$rho * lambda[k]
-    
     # Fit the current model with warm-start initialization
-    fitk <- fit_logit_genlasso(y=y, X=X, D=D, type=type, 
-                               beta_start=beta_start, lambda=lambda[k], alpha=alpha,
-                               eps=eps, phi=phi, intercept=intercept, approx=approx, 
-                               maxiter=maxiter, abstol=abstol, reltol=reltol, etatol=etatol, 
-                               verbose=verbose, freq=freq, ctr_admm=ctr)
+    fitk <- fit_logit_ridge(y=y, X=X, type=type, beta_start=beta_start, lambda=lambda[k], 
+                            eps=eps, phi=phi, intercept=intercept, maxiter=maxiter, 
+                            abstol=abstol, reltol=reltol, etatol=etatol, 
+                            verbose=verbose, freq=freq, solver=solver,
+                            ctr_admm=ctr_admm)
+    
     
     # Set the next initial estimate
     beta_start <- fitk$beta
@@ -102,18 +101,25 @@ fit_logit_genlasso_path <- function(y, X, D, type=c('NR','BL','PG','PQ'),
     if (intercept) pL2[1] <- eps
     
     # GoF and complexity measures
-    edf <- NaN
-    logdet <- NaN
-    reml <- NaN
-    dev <- NaN
-    gcv <- NaN
-    aic <- NaN
-    bic <- NaN
-    # reml <- fitk$loglik - 0.5*logdet
-    # dev <- mean(binomial()$dev.resid(y, pr, 1), na.rm=TRUE)
-    # gcv <- dev / (1 - gamma*edf/n)
-    # aic <- dev + (edf/n) * 2
-    # bic <- dev + (edf/n) * log(n)
+    if (p>n) {
+      # cat("SMW")
+      XPXt <- X %*% (t(X)/pL2)
+      R <- chol(diag(1/wts) + XPXt)
+      edf <- smw_chol_edf(R, XPXt, wts, pL2)
+      logdet <- smw_chol_logdet(R, wts, pL2)
+    } else {
+      # cat("Chol")
+      XtWX <- crossprod(X, wts*X)
+      R <- chol(XtWX + diag(pL2))
+      edf <- chol_edf(R, XtWX, exact=FALSE, rank=10, nsample=100)
+      logdet <- chol_logdet(R) - p*log(lambda[k])
+    }
+    
+    reml <- fitk$loglik - 0.5*logdet
+    dev <- mean(binomial()$dev.resid(y, pr, 1), na.rm=TRUE)
+    gcv <- dev / (1 - gamma*edf/n)
+    aic <- dev + (edf/n) * 2
+    bic <- dev + (edf/n) * log(n)
     
     # Current execution time
     timek <- (proc.time() - timek)[3]
@@ -140,7 +146,7 @@ fit_logit_genlasso_path <- function(y, X, D, type=c('NR','BL','PG','PQ'),
 
 
 
-#' Generalized lasso solution path for logistic regression via MM optimization
+#' Ridge solution path for logistic regression via MM optimization
 #'
 #' @param y A \verb{n} dimensional binary vector
 #' @param x A \verb{n x p} dimensional design matrix. The intercept must be manually included
@@ -165,15 +171,19 @@ fit_logit_genlasso_path <- function(y, X, D, type=c('NR','BL','PG','PQ'),
 #' 
 #' @export
 #' 
-fit_logit_splasso_path <- function(y, X, D, type=c('NR','BL','PG','PQ'), 
-                                   beta_start=NULL, lambda=NULL, alpha=0.99, 
-                                   gamma=1.0, phi=0.9, approx=TRUE, maxiter=1000L, 
+fit_logit_spridge_path <- function(y, X, D, type=c('NR','BL','PG','PQ'), 
+                                   beta_start=NULL, lambda=NULL, eps=1e-10, 
+                                   gamma=1.0, intercept=FALSE, phi=0.9, maxiter=1000L, 
                                    abstol=1e-4, reltol=1e-4, etatol=1e-4, 
-                                   verbose=FALSE, freq=10L, 
-                                   ctr_admm=set_ctr_admm()){
+                                   verbose=FALSE, freq=10L, use_nn=FALSE, 
+                                   method=c("prjg", "dual", "admm"), 
+                                   ctr_admm=set_ctr_admm(), 
+                                   ctr_prjg=set_ctr_prjg(),
+                                   ctr_dual=set_ctr_dual()){
   
-  # Check the bound type
+  # Check the bound type and QP method
   type <- match.arg(type)
+  method <- match.arg(method)
   
   # Set the lambda vector
   if (is.null(lambda)) {
@@ -185,26 +195,22 @@ fit_logit_splasso_path <- function(y, X, D, type=c('NR','BL','PG','PQ'),
   # Set the lambda dimension
   n <- nrow(X)
   p <- ncol(X)
-  m <- nrow(D)
   K <- length(lambda)
   
   # Set the model matrices
   X <- Matrix::Matrix(X, sparse=TRUE)
   D <- Matrix::Matrix(D, sparse=TRUE)
+  P <- Matrix::crossprod(D)
   
   # Set the initial beta
   if (is.null(beta_start)) {
     beta_start <- rep(0, p)
-    if (intercept) {
-      beta_start[1] <- qlogis(mean(y))
-    }
   }
   
   # Set the beta path
   out <- list()
-  out$type    <- type
   out$lambdas <- lambda
-  out$alpha   <- alpha
+  out$alpha   <- .0
   out$beta    <- matrix(NA, nrow=p, ncol=K)
   out$niter   <- rep(NA, times=K)
   out$exetime <- rep(NA, times=K)
@@ -222,30 +228,17 @@ fit_logit_splasso_path <- function(y, X, D, type=c('NR','BL','PG','PQ'),
   
   # Solution path
   for (k in K:1) {
-    if (!verbose) {
-      cat(".")
-    } else {
-      .progress <- 100*(1-(k-1)/K)
-      .loglam <- log10(lambda[k])
-      .niter <- ifelse(k<K, fitk$niter, Inf)
-      cat(gettextf(" - progress: %3.0f/100", .progress),
-          gettextf("   log-lambda: %7.3f", .loglam),
-          gettextf("   niter: %4.0f\n", .niter))
-    }
+    if (!verbose) cat(".")
     
     # Set the starting time
     timek <- proc.time()
     
-    # Scale the ADMM penalty parameter
-    ctr <- ctr_admm
-    ctr$rho <- ctr_admm$rho * lambda[k]
-    
     # Fit the current model with warm-start initialization
-    fitk <- fit_logit_splasso(y=y, X=X, D=D, type=type, 
-                              beta_start=beta_start, lambda=lambda[k], alpha=alpha, 
-                              eps=.0, intercept=FALSE, phi=phi, approx=approx, 
-                              maxiter=maxiter, abstol=abstol, reltol=reltol, 
-                              etatol=etatol, verbose=FALSE, freq=freq, ctr_admm=ctr)
+    fitk <- fit_logit_spridge(y=y, X=X, D=D, type=type, beta_start=beta_start, 
+                              lambda=lambda[k], eps=eps, intercept=intercept, phi=phi,
+                              maxiter=maxiter, abstol=abstol, reltol=reltol, etatol=etatol, 
+                              verbose=FALSE, freq=freq, use_nn=use_nn, method=method,
+                              ctr_admm=ctr_admm, ctr_prjg=ctr_prjg, ctr_dual=ctr_dual)
     
     # Set the next initial estimate
     beta_start <- fitk$beta
@@ -254,17 +247,14 @@ fit_logit_splasso_path <- function(y, X, D, type=c('NR','BL','PG','PQ'),
     eta <- as.vector(X %*% fitk$beta)
     pr <- 1 / (1+exp(-eta))
     wts <- pmax(1e-8, pr*(1-pr))
-    active <- ifelse(abs(fitk$z)<1e-3, 1, 0)
-    pwts <- alpha*2*active + (1-alpha)*rep(1,m)
     XtWX <- Matrix::crossprod(sqrt(wts)*X)
-    P <- Matrix::crossprod(sqrt(pwts)*D)
     R <- Matrix::Cholesky(XtWX+lambda[k]*P)
     
     # GoF and complexity measures
-    edf <- NaN
-    logdet <- sp_chol_logdet(R) - sum(log(lambda[k]*pwts))
-    reml <- fitk$loglik - 0.5*logdet
     dev <- mean(binomial()$dev.resid(y, pr, 1), na.rm=TRUE)
+    edf <- sp_chol_edf(R, XtWX, exact=FALSE, rank=10, nsample=100)
+    logdet <- sp_chol_logdet(R) - p*log(lambda[k])
+    reml <- fitk$loglik - 0.5*logdet
     gcv <- dev / (1 - gamma * edf/n)
     aic <- dev + (edf/n) * 2 
     bic <- dev + (edf/n) * log(n)
@@ -292,6 +282,7 @@ fit_logit_splasso_path <- function(y, X, D, type=c('NR','BL','PG','PQ'),
 }
 
 
+
 #' Generalized lasso cross-validation for logistic regression via MM optimization
 #'
 #' @param y A \verb{n} dimensional binary vector
@@ -317,11 +308,15 @@ fit_logit_splasso_path <- function(y, X, D, type=c('NR','BL','PG','PQ'),
 #' 
 #' @export
 #' 
-fit_logit_splasso_cv <- function(y, X, D, type=c('NR','BL','PG','PQ'), 
-                                 nfold=5, seed=1234, beta_start=NULL, lambda=NULL, 
-                                 alpha=0.99, gamma=1.0, phi=0.9, approx=TRUE, 
-                                 maxiter=1000L, abstol=1e-4, reltol=1e-4, etatol=1e-4, 
-                                 verbose=FALSE, freq=10L, ctr_admm=set_ctr_admm()) {
+fit_logit_spridge_cv <- function(y, X, D, type=c('NR','BL','PG','PQ'), 
+                                 nfold=5, seed=1234, beta_start=NULL, 
+                                 lambda=NULL, gamma=1.0, phi=0.9, maxiter=1000L, 
+                                 abstol=1e-4, reltol=1e-4, etatol=1e-4, 
+                                 verbose=FALSE, freq=10L, use_nn=FALSE,
+                                 method=c("prjg", "dual", "admm"), 
+                                 ctr_admm=set_ctr_admm(), 
+                                 ctr_prjg=set_ctr_prjg(),
+                                 ctr_dual=set_ctr_dual()) {
   
   # Set the seed for RNG
   set.seed(seed)
@@ -350,11 +345,12 @@ fit_logit_splasso_cv <- function(y, X, D, type=c('NR','BL','PG','PQ'),
     lambdak <- lambda*(n_tr/n)
     
     # Fit the model on the training set
-    fit <- fit_logit_splasso_path(y[train], X[train,], D, type=type, 
-                                  beta_start=beta_start, lambda=lambdak, alpha=alpha, 
-                                  gamma=gamma, phi=phi, approx=approx, maxiter=maxiter, 
+    fit <- fit_logit_spridge_path(y[train], X[train,], D, type=type, 
+                                  beta_start=beta_start, lambda=lambdak, 
+                                  gamma=gamma, phi=phi, maxiter=maxiter, 
                                   abstol=abstol, reltol=reltol, etatol=etatol, 
-                                  verbose=verbose, freq=freq, ctr_admm=ctr_admm)
+                                  verbose=verbose, freq=freq, use_nn=use_nn, method=method,
+                                  ctr_admm=ctr_admm, ctr_prjg=ctr_prjg, ctr_dual=ctr_dual)
     
     # Compute the log-likelihood on the test set
     eta_ts <- as.matrix(X[test,] %*% fit$beta)
@@ -377,11 +373,11 @@ fit_logit_splasso_cv <- function(y, X, D, type=c('NR','BL','PG','PQ'),
   # Refit the model with the selected lambda
   cat("fold: refit \n")
   ctr_admm$rho <- ctr_admm$rho * lambda_best
-  fit <- fit_logit_splasso(y, X, D, type=type, beta_start=beta_start, 
-                           lambda=lambda_best, alpha=alpha, phi=phi,
-                           approx=approx, maxiter=maxiter, 
+  fit <- fit_logit_spridge(y, X, D, type=type, beta_start=beta_start, 
+                           lambda=lambda_best, phi=phi, maxiter=maxiter, 
                            abstol=abstol, reltol=reltol, etatol=etatol, 
-                           verbose=FALSE, freq=freq, ctr_admm=ctr_admm)
+                           verbose=FALSE, freq=freq, use_nn=use_nn, method=method,
+                           ctr_admm=ctr_admm, ctr_prjg=ctr_prjg, ctr_dual=ctr_dual)
   
   # Append the cross-validation results to the fitted model
   fit$cv <- df
@@ -389,6 +385,8 @@ fit_logit_splasso_cv <- function(y, X, D, type=c('NR','BL','PG','PQ'),
   # Return the cross-validation results 
   return(fit)
 }
+
+
 
 
 

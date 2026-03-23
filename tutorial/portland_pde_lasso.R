@@ -8,12 +8,8 @@ library(sparseinv)
 
 ## GLOBAL VARIABLES ----
 
-SHOW <- FALSE
-SAVE <- FALSE
-
-# DATAPATH <- "data/Portland"
-# SAVEPATH <- "tutorial/results"
-# IMGPATH  <- "img/portland_LASSO"
+SHOW <- TRUE
+SAVE <- TRUE
 
 DATAPATH <- "data/Portland"
 SAVEPATH <- "tutorial/results/Portland"
@@ -21,9 +17,13 @@ RDSPATH <- paste(SAVEPATH, "rds", sep="/")
 CSVPATH <- paste(SAVEPATH, "csv", sep="/")
 IMGPATH <- paste(SAVEPATH, "img/portland_LASSO", sep="/")
 
+DATALAB <- "portland"
 
-pch <- c(15:18)
-col <- c(2:4,7)
+# pch <- c(15:18)
+# col <- c(2:4,7)
+
+COLORS  <- c(2:4,7)
+MARKERS <- c(15:18)
 
 ## PORTLAND DATA ----
 
@@ -31,88 +31,7 @@ load(paste(DATAPATH, "PortlandData.RData", sep="/"))
 
 ## UTILITY FUNCTIONS ----
 
-plot_mesh <- function (mesh, incol="grey70", bndcol="grey30", ...) {
-  # Set the x-y limits
-  xrng <- range(mesh$nodes[, 1])
-  yrng <- range(mesh$nodes[, 2])
-  
-  # Plot the mesh nodes
-  plot(mesh$nodes, cex = 0.001, col=col, xlim=xrng, ylim=yrng, 
-       xlab="", ylab="", xaxt="n", yaxt="n", bty="n", ...)
-  
-  # Plot the mesh internal segments
-  x_in_start <- mesh$nodes[mesh$edges[, 1], 1]
-  y_in_start <- mesh$nodes[mesh$edges[, 2], 1]
-  x_in_end <- mesh$nodes[mesh$edges[, 1], 2]
-  y_in_end <- mesh$nodes[mesh$edges[, 2], 2]
-  segments(x_in_start, x_in_end, y_in_start, y_in_end, col=incol)
-  
-  # Plot the mesh boundary segments
-  x_bnd_start <- mesh$nodes[mesh$segments[, 1], 1]
-  y_bnd_start <- mesh$nodes[mesh$segments[, 2], 1]
-  x_bnd_end <- mesh$nodes[mesh$segments[, 1], 2]
-  y_bnd_end <- mesh$nodes[mesh$segments[, 2], 2]
-  segments(x_bnd_start, x_bnd_end, y_bnd_start, y_bnd_end, col=bndcol, lwd=1.5)
-}
-
-plot_field <- function(coefs, basis, ngrid, ...) {
-  # Set the x-y limits
-  xrng <- range(basis$mesh$nodes[,1])
-  yrng <- range(basis$mesh$nodes[,2])
-  
-  # Set the x-y grid
-  xs <- seq(from=xrng[1], to=xrng[2], length=ngrid)
-  ys <- seq(from=yrng[1], to=yrng[2], length=ngrid)
-  
-  # Set the x-y lattice
-  xx <- rep(xs, ngrid)
-  yy <- rep(ys, rep(ngrid, ngrid))
-  
-  # Set the FEM object
-  fem <- fdaPDE::FEM(coefs, basis)
-  
-  # Compute the FEM surface
-  field <- fdaPDE::eval.FEM(fem, cbind(xx, yy))
-  field <- matrix(field, nrow=ngrid, ncol=ngrid)
-  
-  # Plot the field
-  plot3D::image2D(x=xs, y=ys, z=field, colvar=field, xlab="", ylab="", ...)
-}
-
-plot_fit_path <- function (fit_list, field, log=FALSE, main="", position="bottomright", ...) {
-  # Get the lambda grid
-  loglambdas <- log10(fit_list[[1]]$lambdas)
-  
-  # Extract the specified field from each list 
-  mat <- fit_list %>% lapply(\(.) .[[field]]) %>% do.call("cbind", .)
-  
-  # If a "norm" field is required, compute it using the estimated coefficients
-  if (field== "norm") mat <- fit_list %>% lapply(\(.) sqrt(colMeans(.[["beta"]]^2))) %>% do.call("cbind", .)
-  if (field=="pnorm") mat <- fit_list %>% lapply(\(.) {
-    alpha <- .[["alpha"]]
-    r <- abs(D %*% .[["beta"]])
-    pL1 <- colMeans(r)
-    pL2 <- colMeans(r*r)/2
-    return(alpha*pL1+(1-alpha)*pL2)
-  }) %>% do.call("cbind", .)
-  
-  # If specified, transform the results in the logarithmic scale
-  if (log) mat <- log10(mat)
-  
-  # Plot the results
-  matplot(loglambdas, mat, type="o", xlab="", ylab="", main="", ...)
-  title(xlab=expression(log[10](lambda)), ylab=field, main=main)
-  legend(position, legend=names(fit_list), ...)
-  
-  # If required, plot vertical lines identifying the REML/GCV/AIC/BIC solution
-  if (field=="reml") {
-    abline(v=loglambdas[apply(mat, 2, which.max)], lty=2, col=8)
-  }
-  if (field %in% c("gcv", "aic", "bic")) {
-    abline(v=loglambdas[apply(mat, 2, which.min)], lty=2, col=8)
-  }
-}
-
+source("tutorial/tutorial_utils.R")
 
 ## OPTIM SET-UP ----
 
@@ -129,8 +48,13 @@ D <- (1/sqrt(colSums(mass))) * stiff
 
 # Penalty parameters
 lambdas <- 10^seq(-6, +1, by=0.25) # for solution path
+alphas <- seq(.05, 1, by=0.15) # for solution path
+
 lambda <- .0001 # for single fit
-alpha <- 0.8 # Mixing weight of L1 and L2 penalties
+alpha <- alphas[6] # Mixing weight of L1 and L2 penalties
+
+lalpha <- as.character(100*alpha)
+lalpha <- ifelse(100*alpha>10, lalpha, paste0("0", lalpha))
 
 # Cross-validation Seed and n of folds
 seed <- 123456
@@ -175,93 +99,107 @@ ctr <- set_ctr_admm(
 ## SINGLE FIT ----
 
 ### BL fit ----
-exetime_1run_BL <- proc.time()
-fit_1run_BL <- fit_logit_splasso(y, X, D, type='BL', beta_start=beta0, 
-                                 lambda=lambda, alpha=alpha, eps=eps, 
-                                 intercept=intercept, maxiter=maxiter, 
-                                 abstol=objtol, reltol=reltol, etatol=etatol,
-                                 verbose=verbose, freq=freq, ctr_admm=ctr)
-exetime_1run_BL <- (proc.time() - exetime_1run_BL)[3]
+{
+  time_init <- proc.time()
+  fit_1run_BL <- fit_logit_splasso(y, X, D, type='BL', beta_start=beta0, 
+                                   lambda=lambda, alpha=alpha, eps=eps, 
+                                   intercept=intercept, maxiter=maxiter, 
+                                   abstol=objtol, reltol=reltol, etatol=etatol,
+                                   verbose=verbose, freq=freq, ctr_admm=ctr)
+  fit_1run_BL$exetime <- (proc.time() - time_init)[3]
+}
 
 ### PG fit ----
-exetime_1run_PG <- proc.time()
-fit_1run_PG <- fit_logit_splasso(y, X, D, type='PG', beta_start=beta0, 
-                                 lambda=lambda, alpha=alpha, eps=eps, 
-                                 intercept=intercept, maxiter=maxiter, 
-                                 abstol=objtol, reltol=reltol, etatol=etatol, 
-                                 verbose=verbose, freq=freq, ctr_admm=ctr)
-exetime_1run_PG <- (proc.time() - exetime_1run_PG)[3]
+{
+  time_init <- proc.time()
+  fit_1run_PG <- fit_logit_splasso(y, X, D, type='PG', beta_start=beta0, 
+                                   lambda=lambda, alpha=alpha, eps=eps, 
+                                   intercept=intercept, maxiter=maxiter, 
+                                   abstol=objtol, reltol=reltol, etatol=etatol, 
+                                   verbose=verbose, freq=freq, ctr_admm=ctr)
+  fit_1run_PG$exetime <- (proc.time() - time_init)[3]
+}
 
 ### PQ fit ----
-exetime_1run_PQ <- proc.time()
-fit_1run_PQ <- fit_logit_splasso(y, X, D, type='PQ', beta_start=beta0, 
-                                 lambda=lambda, alpha=alpha, eps=eps, 
-                                 intercept=intercept, phi=phi, approx=approx, 
-                                 maxiter=maxiter, abstol=objtol, reltol=reltol, 
-                                 etatol=etatol, verbose=verbose, 
-                                 freq=freq, ctr_admm=ctr)
-exetime_1run_PQ <- (proc.time() - exetime_1run_PQ)[3]
+{
+  time_init <- proc.time()
+  fit_1run_PQ <- fit_logit_splasso(y, X, D, type='PQ', beta_start=beta0, 
+                                   lambda=lambda, alpha=alpha, eps=eps, 
+                                   intercept=intercept, phi=phi, approx=approx, 
+                                   maxiter=maxiter, abstol=objtol, reltol=reltol, 
+                                   etatol=etatol, verbose=verbose, 
+                                   freq=freq, ctr_admm=ctr)
+  fit_1run_PQ$exetime <- (proc.time() - time_init)[3]
+}
 
 ### NR fit ----
-exetime_1run_NR <- proc.time()
-fit_1run_NR <- fit_logit_splasso(y, X, D, type='NR', beta_start=beta0, 
-                                 lambda=lambda, alpha=alpha, eps=eps, 
-                                 intercept=intercept, maxiter=maxiter, 
-                                 abstol=objtol, reltol=reltol, etatol=etatol, 
-                                 verbose=verbose, freq=freq, ctr_admm=ctr)
-exetime_1run_NR <- (proc.time() - exetime_1run_NR)[3]
+{
+  time_init <- proc.time()
+  fit_1run_NR <- fit_logit_splasso(y, X, D, type='NR', beta_start=beta0, 
+                                   lambda=lambda, alpha=alpha, eps=eps, 
+                                   intercept=intercept, maxiter=maxiter, 
+                                   abstol=objtol, reltol=reltol, etatol=etatol, 
+                                   verbose=verbose, freq=freq, ctr_admm=ctr)
+  fit_1run_NR$exetime <- (proc.time() - time_init)[3]
+}
 
 ### Summary ----
-fit_1run_BL$exetime <- exetime_1run_BL
-fit_1run_PG$exetime <- exetime_1run_PG
-fit_1run_PQ$exetime <- exetime_1run_PQ
-fit_1run_NR$exetime <- exetime_1run_NR
-fit_1run_list <- list(BL=fit_1run_BL, PG=fit_1run_PG, 
-                      PQ=fit_1run_PQ, NR=fit_1run_NR)
+
+cat("BL:", fit_1run_BL$exetime, "\n",
+    "PG:", fit_1run_PG$exetime, "\n",
+    "PQ:", fit_1run_PQ$exetime, "\n",
+    "NR:", fit_1run_NR$exetime, "\n")
+
+# fit_1run_list <- list("BL"=fit_1run_BL, 
+#                       "PG"=fit_1run_PG, 
+#                       "PQ"=fit_1run_PQ, 
+#                       "NR"=fit_1run_NR)
+
+fit_1run_list <- list("BL"=fit_1run_BL, 
+                      "PG"=fit_1run_PG, 
+                      "PQ"=fit_1run_PQ)
 
 df_1run_summary <- data.frame(
-  method = c("BL", "PG", "PQ", "NR"),
+  method = names(fit_1run_list),
   niter = sapply(fit_1run_list, \(.) .$niter),
   exetime = sapply(fit_1run_list, \(.) .$exetime),
+  timegain = sapply(fit_1run_list, \(.) {1-fit_1run_PQ$exetime/.$exetime}),
   loglik = sapply(fit_1run_list, \(.) .$loglik),
-  row.names = c(1:4))
+  row.names = seq(length(fit_1run_list)))
 
 print(df_1run_summary)
 
 if (SAVE) {
-  filename <- "portland_lasso_1run_summary.csv"
+  filename <- paste0("portland_lasso_1run_alpha", lalpha, "_summary.csv")
   filepath <- paste(CSVPATH, filename, sep="/")
   write.csv2(df_1run_summary, file=filepath, row.names=FALSE)
 }
 
-
 if (SAVE) {
-  filename <- "portland_lasso_1run_loglik.pdf"
+  filename <- paste0("portland_lasso_1run_alpha", lalpha, "_loglik.pdf")
   filepath <- paste(IMGPATH, filename, sep="/")
   height <- 4; width <- 10; zoom <- 1
   pdf(file=filepath, height=zoom*height, width=zoom*width)
   layout(matrix(1:3, nrow = 1), widths = c(2, 1, 1))
-  pch <- c(15:18); col <- c(2:4,7)
   # Log-likelihood
   niter <- max(sapply(fit_1run_list, \(.) .$niter))
-  objval <- matrix(NA, nrow=niter, ncol=4)
-  objval[1:fit_1run_BL$niter,1] <- fit_1run_BL$trace$objval
-  objval[1:fit_1run_PG$niter,2] <- fit_1run_PG$trace$objval
-  objval[1:fit_1run_PQ$niter,3] <- fit_1run_PQ$trace$objval
-  objval[1:fit_1run_NR$niter,4] <- fit_1run_NR$trace$objval
-  colnames(objval) <- c("BL", "PG", "PQ", "NR")
-  matplot(objval[2:min(30, niter),], type="b", lty=1, col=col, pch=pch, xlab="", ylab="")
+  objval <- matrix(NA, nrow=niter, ncol=length(fit_1run_list))
+  colnames(objval) <- names(fit_1run_list)
+  for (k in 1:length(fit_1run_list)) {
+    objval[1:fit_1run_list[[k]]$niter, k] <- fit_1run_list[[k]]$trace$objval
+  }
+  matplot(objval[2:min(50, niter),], type="b", lty=1, col=COLORS, pch=MARKERS, xlab="", ylab="")
   title(xlab="Iteration", ylab="Log-Likelihood", main="Penalized Log-Likelihood")
-  legend("bottomright", col=col, pch=pch, legend=c("BL", "PG", "PQ", "NR"))
+  legend("bottomright", col=COLORS, pch=MARKERS, legend=colnames(objval))
   # Iterations
   with(df_1run_summary, {
-    barplt <- barplot(niter, names.arg=method, col=col, xlab="", ylab="")
+    barplt <- barplot(niter, names.arg=method, col=COLORS, border=COLORS, las=2, xlab="", ylab="")
     text(barplt, niter-0.05*max(niter), niter)
-    title(ylab="Iteration", main="Number of Iterations")
+    title(ylab="Iterations", main="Number of Iterations")
   })
   # Exetime
   with(df_1run_summary, {
-    barplt <- barplot(exetime, names.arg=method, col=col, xlab="", ylab="")
+    barplt <- barplot(exetime, names.arg=method, col=COLORS, border=COLORS, las=2, xlab="", ylab="")
     text(barplt, exetime-0.05*max(exetime), round(exetime, 2))
     title(ylab="Time (s)", main="Execution Time")
   })
@@ -269,7 +207,7 @@ if (SAVE) {
 }
 
 if (SAVE) {
-  filename <- "portland_lasso_1run_map_pr.pdf"
+  filename <- paste0("portland_lasso_1run_alpha", lalpha, "_map_pr.pdf")
   filepath <- paste(IMGPATH, filename, sep="/")
   height <- 9; width <- 10; zoom <- 1
   pdf(file=filepath, height=zoom*height, width=zoom*width)
@@ -298,99 +236,116 @@ ctr <- set_ctr_admm(rho=sqrt(p/n), gamma=0.01, smw=FALSE, precondition=FALSE,
                     objtol=.1*objtol, reltol=reltol, abstol=abstol, maxiter=1000)
 
 ### BL fit ----
-exetime_path_BL <- proc.time()
-fit_path_BL <- fit_logit_splasso_path(y, X, D, type='BL', beta_start=beta0, 
-                                 lambda=lambdas, alpha=alpha, gamma=gamma, maxiter=maxiter, 
-                                 abstol=objtol, reltol=reltol, etatol=etatol, 
-                                 verbose=verbose, freq=freq, ctr_admm=ctr)
-exetime_path_BL <- (proc.time() - exetime_path_BL)[3]
+{
+  time_init <- proc.time()
+  fit_path_BL <- fit_logit_splasso_path(y, X, D, type='BL', 
+                                        beta_start=beta0, lambda=lambdas, 
+                                        alpha=alpha, gamma=gamma, maxiter=maxiter, 
+                                        abstol=objtol, reltol=reltol, etatol=etatol, 
+                                        verbose=verbose, freq=freq, ctr_admm=ctr)
+  fit_path_BL$tottime <- (proc.time() - time_init)[3]
+}
 
 ### PG fit ----
-exetime_path_PG <- proc.time()
-fit_path_PG <- fit_logit_splasso_path(y, X, D, type='PG', beta_start=beta0, 
-                                 lambda=lambdas, alpha=alpha, gamma=gamma, maxiter=maxiter, 
-                                 abstol=objtol, reltol=reltol, etatol=etatol, 
-                                 verbose=verbose, freq=freq, ctr_admm=ctr)
-exetime_path_PG <- (proc.time() - exetime_path_PG)[3]
+{
+  time_init <- proc.time()
+  fit_path_PG <- fit_logit_splasso_path(y, X, D, type='PG', 
+                                        beta_start=beta0, lambda=lambdas, 
+                                        alpha=alpha, gamma=gamma, maxiter=maxiter, 
+                                        abstol=objtol, reltol=reltol, etatol=etatol, 
+                                        verbose=verbose, freq=freq, ctr_admm=ctr)
+  fit_path_PG$tottime <- (proc.time() - time_init)[3]
+}
 
 ### PQ fit ----
-exetime_path_PQ <- proc.time()
-fit_path_PQ <- fit_logit_splasso_path(y, X, D, type='PQ', beta_start=beta0, 
-                                 lambda=lambdas, alpha=alpha, gamma=gamma, maxiter=maxiter, 
-                                 abstol=objtol, reltol=reltol, etatol=etatol, 
-                                 verbose=verbose, freq=freq, ctr_admm=ctr)
-exetime_path_PQ <- (proc.time() - exetime_path_PQ)[3]
+{
+  time_init <- proc.time()
+  fit_path_PQ <- fit_logit_splasso_path(y, X, D, type='PQ', 
+                                        beta_start=beta0, lambda=lambdas, 
+                                        alpha=alpha, gamma=gamma, maxiter=maxiter, 
+                                        abstol=objtol, reltol=reltol, etatol=etatol, 
+                                        verbose=verbose, freq=freq, ctr_admm=ctr)
+  fit_path_PQ$tottime <- (proc.time() - time_init)[3]
+}
 
 ### NR fit ----
-exetime_path_NR <- proc.time()
-fit_path_NR <- fit_logit_splasso_path(y, X, D, type='NR', beta_start=beta0, 
-                                 lambda=lambdas, alpha=alpha, gamma=1., maxiter=maxiter, 
-                                 abstol=objtol, reltol=reltol, etatol=etatol, 
-                                 verbose=verbose, freq=freq, ctr_admm=ctr)
-exetime_path_NR <- (proc.time() - exetime_path_NR)[3]
+{
+  time_init <- proc.time()
+  fit_path_NR <- fit_logit_splasso_path(y, X, D, type='NR', 
+                                        beta_start=beta0, lambda=lambdas, 
+                                        alpha=alpha, gamma=1., maxiter=maxiter, 
+                                        abstol=objtol, reltol=reltol, etatol=etatol, 
+                                        verbose=verbose, freq=freq, ctr_admm=ctr)
+  fit_path_NR$tottime <- (proc.time() - time_init)[3]
+}
 
 ### Summary ----
 
-cat("BL:", exetime_path_BL, "\n",
-    "PG:", exetime_path_PG, "\n",
-    "PQ:", exetime_path_PQ, "\n",
-    "NR:", exetime_path_NR, "\n")
+cat("BL:", fit_path_BL$tottime, "\n",
+    "PG:", fit_path_PG$tottime, "\n",
+    "PQ:", fit_path_PQ$tottime, "\n",
+    "NR:", fit_path_NR$tottime, "\n")
 
-fit_path_BL$tottime <- exetime_path_BL
-fit_path_PG$tottime <- exetime_path_PG
-fit_path_PQ$tottime <- exetime_path_PQ
-fit_path_NR$tottime <- exetime_path_NR
-fit_path_list <- list(BL=fit_path_BL, PG=fit_path_PG, 
-                      PQ=fit_path_PQ, NR=fit_path_NR)
+# fit_path_list <- list("BL"=fit_path_BL, 
+#                       "PG"=fit_path_PG, 
+#                       "PQ"=fit_path_PQ, 
+#                       "NR"=fit_path_NR)
+
+fit_path_list <- list("BL"=fit_path_BL, 
+                      "PG"=fit_path_PG, 
+                      "PQ"=fit_path_PQ)
 
 df_path_summary <- data.frame(
-  method = c("BL", "PG", "PQ", "NR"),
-  niter = sapply(fit_path_list, \(.) mean(.$niter)),
+  method = names(fit_path_list),
+  niter = sapply(fit_path_list, \(.) sum(.$niter)),
   exetime = sapply(fit_path_list, \(.) .$tottime),
+  timegain = sapply(fit_path_list, \(.) {1-fit_path_PQ$tottime/.$tottime}),
   loglik = sapply(fit_path_list, \(.) mean(.$loglik)),
-  row.names = c(1:4))
+  row.names = seq(length(fit_path_list)))
 
 print(df_path_summary)
 
 if (SAVE) {
-  filename <- "portland_lasso_path_summary.csv"
+  filename <- paste("portland_lasso_path_alpha", lalpha, "_summary.csv", sep="")
   filepath <- paste(CSVPATH, filename, sep="/")
   write.csv2(df_path_summary, file=filepath, row.names=FALSE)
 }
 
 df_path_extended <- data.frame(
-  method = rep(c("BL", "PG", "PQ", "NR"), each=length(lambdas)),
+  method = rep(names(fit_path_list), each=length(lambdas)),
+  alpha = rep(alpha, times=length(fit_path_list)*length(lambdas)),
   lambda = c(sapply(fit_path_list, \(.) .$lambda)),
   niter = c(sapply(fit_path_list, \(.) .$niter)),
   exetime = c(sapply(fit_path_list, \(.) .$exetime)),
+  timegain = c(sapply(fit_path_list, \(.) {1-fit_path_PQ$exetime/.$exetime})),
   loglik = c(sapply(fit_path_list, \(.) .$loglik)))
 
 print(df_path_extended)
 
 if (SAVE) {
-  filename <- "portland_lasso_path_extended.csv"
+  filename <- paste("portland_lasso_path_alpha", lalpha, "_extended.csv", sep="")
   filepath <- paste(CSVPATH, filename, sep="/")
   write.csv2(df_path_extended, file=filepath, row.names=FALSE)
 }
 
 if (SAVE) {
-  filename <- "portland_lasso_path_timegain.pdf"
+  filename <- paste0("portland_lasso_path_alpha", lalpha, "_timegain.pdf")
   filepath <- paste(IMGPATH, filename, sep="/")
   height <- 4; width <- 10; zoom <- 1
   pdf(file=filepath, height=zoom*height, width=zoom*width)
   with(df_path_summary, {
     par(mfrow=c(1,3))
     # Total number of iterations
-    barplt <- barplot(29*niter, names.arg=method, col=col, xlab="", ylab="")
-    text(barplt, 29*niter-0.05*max(29*niter), round(29*niter, 2))
+    barplt <- barplot(niter, names.arg=method, col=COLORS, border=COLORS, xlab="", ylab="")
+    text(barplt, niter-0.05*max(niter), round(niter, 2))
     title(ylab="Iterations", main="Total number of iterations")
     # Total execution time
-    barplt <- barplot(exetime, names.arg=method, col=col, xlab="", ylab="")
+    barplt <- barplot(exetime, names.arg=method, col=COLORS, border=COLORS, xlab="", ylab="")
     text(barplt, exetime-0.05*max(exetime), round(exetime, 2))
     title(ylab="Time (s)", main="Total execution Time")
     # Relative time gain
     reltime <- 100*(1-exetime[3]/exetime)
-    barplt <- barplot(reltime, names.arg=method, col=col, xlab="", ylab="")
+    barplt <- barplot(reltime, names.arg=method, col=COLORS, border=COLORS, xlab="", ylab="")
     text(barplt, reltime-0.1*sign(reltime)*max(reltime), paste(floor(reltime), "%"))
     title(ylab="Time Gain", main="Time Gain")
     par(mfrow=c(1,1))
@@ -400,45 +355,45 @@ if (SAVE) {
 
 ### Solution path ----
 
-pch <- c(15:18)
-col <- c(2:4,7)
+# pch <- c(15:18)
+# col <- c(2:4,7)
 
-plot_fit_path(fit_path_list, field="dev", main="Deviance", position="bottomright", pch=pch, col=col, lty=1)
-plot_fit_path(fit_path_list, field="loglik", main="Penalized Log-Likelihood", position="topright", pch=pch, col=col, lty=1)
-plot_fit_path(fit_path_list, field="logdet", main="Hessian Log-Determinant", position="topright", pch=pch, col=col, lty=1)
-plot_fit_path(fit_path_list, field="reml", main="Restricted Log-Likelihood", position="bottomright", pch=pch, col=col, lty=1)
-plot_fit_path(fit_path_list, field="norm", main="Parameter Norm", position="topright", pch=pch, col=col, lty=1)
-plot_fit_path(fit_path_list, field="pnorm", main="Penalty Seminorm", position="topright", pch=pch, col=col, lty=1)
-plot_fit_path(fit_path_list, field="niter", main="Number of Iterations", position="topright", pch=pch, col=col, lty=1)
-plot_fit_path(fit_path_list, field="niter", main="Log Number of Iterations", position="topright", log=TRUE, pch=pch, col=col, lty=1)
-plot_fit_path(fit_path_list, field="exetime", main="Execution Time", position="topright", pch=pch, col=col, lty=1)
-plot_fit_path(fit_path_list, field="exetime", main="Log Execution Time", position="topright", log=TRUE, pch=pch, col=col, lty=1)
+plot_fit_path(fit_path_list, field="dev", main="Deviance", position="bottomright", pch=MARKERS, col=COLORS, lty=1)
+plot_fit_path(fit_path_list, field="loglik", main="Penalized Log-Likelihood", position="topright", pch=MARKERS, col=COLORS, lty=1)
+plot_fit_path(fit_path_list, field="logdet", main="Hessian Log-Determinant", position="topright", pch=MARKERS, col=COLORS, lty=1)
+plot_fit_path(fit_path_list, field="reml", main="Restricted Log-Likelihood", position="bottomright", pch=MARKERS, col=COLORS, lty=1)
+plot_fit_path(fit_path_list, field="norm", main="Parameter Norm", position="topright", pch=MARKERS, col=COLORS, lty=1)
+plot_fit_path(fit_path_list, field="pnorm", main="Penalty Seminorm", position="topright", pch=MARKERS, col=COLORS, lty=1)
+plot_fit_path(fit_path_list, field="niter", main="Number of Iterations", position="topright", pch=MARKERS, col=COLORS, lty=1)
+plot_fit_path(fit_path_list, field="niter", main="Log Number of Iterations", position="topright", log=TRUE, pch=MARKERS, col=COLORS, lty=1)
+plot_fit_path(fit_path_list, field="exetime", main="Execution Time", position="topright", pch=MARKERS, col=COLORS, lty=1)
+plot_fit_path(fit_path_list, field="exetime", main="Log Execution Time", position="topright", log=TRUE, pch=MARKERS, col=COLORS, lty=1)
 
 
 if (SAVE) {
-  filename <- "portland_lasso_path_exetime.pdf"
+  filename <- paste("portland_lasso_path_alpha", lalpha, "_exetime.pdf", sep="")
   filepath <- paste(IMGPATH, filename, sep="/")
   height <- 4; width <- 6; zoom <- 2
   pdf(file=filepath, height=zoom*height, width=zoom*width)
   par(mfrow=c(2,2))
-  plot_fit_path(fit_path_list, field="niter", main="Number of Iterations", position="topright", log=FALSE, pch=pch, col=col, lty=1)
-  plot_fit_path(fit_path_list, field="exetime", main="Execution Time", position="topright", log=FALSE, pch=pch, col=col, lty=1)
-  plot_fit_path(fit_path_list, field="niter", main="Log Number of Iterations", position="topright", log=TRUE, pch=pch, col=col, lty=1)
-  plot_fit_path(fit_path_list, field="exetime", main="Log Execution Time", position="topright", log=TRUE, pch=pch, col=col, lty=1)
+  plot_fit_path(fit_path_list, field="niter", main="Number of Iterations", position="topright", log=FALSE, pch=MARKERS, col=COLORS, lty=1)
+  plot_fit_path(fit_path_list, field="exetime", main="Execution Time", position="topright", log=FALSE, pch=MARKERS, col=COLORS, lty=1)
+  plot_fit_path(fit_path_list, field="niter", main="Log Number of Iterations", position="topright", log=TRUE, pch=MARKERS, col=COLORS, lty=1)
+  plot_fit_path(fit_path_list, field="exetime", main="Log Execution Time", position="topright", log=TRUE, pch=MARKERS, col=COLORS, lty=1)
   par(mfrow=c(1,1))
   dev.off()
 }
 
 if (SAVE) {
-  filename <- "portland_lasso_path_loglik.pdf"
+  filename <- paste("portland_lasso_path_alpha", lalpha, "_loglik.pdf", sep="")
   filepath <- paste(IMGPATH, filename, sep="/")
   height <- 4; width <- 6; zoom <- 2
   pdf(file=filepath, height=zoom*height, width=zoom*width)
   par(mfrow=c(2,2))
-  plot_fit_path(fit_path_list, field="loglik", main="Penalized Log-Likelihood", position="topright", pch=pch, col=col, lty=1)
-  plot_fit_path(fit_path_list, field="reml", main="Hessian Log-Determinant", position="bottomright", pch=pch, col=col, lty=1)
-  plot_fit_path(fit_path_list, field="norm", main="Coefficient Norm", position="topright", pch=pch, col=col, lty=1)
-  plot_fit_path(fit_path_list, field="pnorm", main="Penalty Seminorm", position="topright", pch=pch, col=col, lty=1)
+  plot_fit_path(fit_path_list, field="loglik", main="Penalized Log-Likelihood", position="topright", pch=MARKERS, col=COLORS, lty=1)
+  plot_fit_path(fit_path_list, field="reml", main="Hessian Log-Determinant", position="bottomright", pch=MARKERS, col=COLORS, lty=1)
+  plot_fit_path(fit_path_list, field="norm", main="Coefficient Norm", position="topright", pch=MARKERS, col=COLORS, lty=1)
+  plot_fit_path(fit_path_list, field="pnorm", main="Penalty Seminorm", position="topright", pch=MARKERS, col=COLORS, lty=1)
   par(mfrow=c(1,1))
   dev.off()
 }
@@ -446,13 +401,15 @@ if (SAVE) {
 ### Spatial maps ----
 
 if (SAVE) {
-  filename <- "portland_lasso_path_map_pr.pdf"
+  filename <- paste0("portland_lasso_path_alpha", lalpha, "_map_pr.pdf")
   filepath <- paste(IMGPATH, filename, sep="/")
   height <- 9; width <- 10; zoom <- 1
   pdf(file=filepath, height=zoom*height, width=zoom*width)
   with(as.data.frame(locs), {
     par(mfrow=c(2,2))
-    k <- sapply(fit_path_list, \(.) which.max(.$reml))
+    fit_path_list_tmp <- list(BL=fit_path_BL, PG=fit_path_PG, PQ=fit_path_PQ, NR=fit_path_NR)
+    
+    k <- sapply(fit_path_list_tmp, \(.) which.max(.$reml))
     pred_path_BL <- c(plogis(as.vector(X %*% fit_path_BL$beta[,k["BL"]])))
     pred_path_PG <- c(plogis(as.vector(X %*% fit_path_PG$beta[,k["PG"]])))
     pred_path_NR <- c(plogis(as.vector(X %*% fit_path_NR$beta[,k["NR"]])))
@@ -475,54 +432,60 @@ ctr <- set_ctr_admm(rho=sqrt(p/n), gamma=0.01, smw=FALSE, precondition=FALSE,
                     objtol=.1*objtol, reltol=reltol, abstol=abstol, maxiter=1000)
 
 ### BL fit ----
-exetime_cv_BL <- proc.time()
-fit_cv_BL <- fit_logit_splasso_cv(y, X, D, type='BL', nfold=nfold, seed=seed, 
-                               beta_start=beta0, lambda=lambdas, alpha=alpha, 
-                               gamma=gamma, maxiter=maxiter, abstol=objtol, 
-                               reltol=reltol, etatol=etatol, verbose=verbose, 
-                               freq=freq, ctr_admm=ctr)
-exetime_cv_BL <- (proc.time() - exetime_cv_BL)[3]
+{
+  time_init <- proc.time()
+  fit_cv_BL <- fit_logit_splasso_cv(y, X, D, type='BL', nfold=nfold, seed=seed, 
+                                    beta_start=beta0, lambda=lambdas, alpha=alpha, 
+                                    gamma=gamma, maxiter=maxiter, abstol=objtol, 
+                                    reltol=reltol, etatol=etatol, verbose=verbose, 
+                                    freq=freq, ctr_admm=ctr)
+  fit_cv_BL$tottime <- (proc.time() - time_init)[3]
+}
 
 ### PG fit ----
-exetime_cv_PG <- proc.time()
-fit_cv_PG <- fit_logit_splasso_cv(y, X, D, type='PG', nfold=nfold, seed=seed, 
-                               beta_start=beta0, lambda=lambdas, alpha=alpha, 
-                               gamma=gamma, maxiter=maxiter, abstol=objtol, 
-                               reltol=reltol, etatol=etatol, verbose=verbose, 
-                               freq=freq, ctr_admm=ctr)
-exetime_cv_PG <- (proc.time() - exetime_cv_PG)[3]
+{
+  time_init <- proc.time()
+  fit_cv_PG <- fit_logit_splasso_cv(y, X, D, type='PG', nfold=nfold, seed=seed, 
+                                    beta_start=beta0, lambda=lambdas, alpha=alpha, 
+                                    gamma=gamma, maxiter=maxiter, abstol=objtol, 
+                                    reltol=reltol, etatol=etatol, verbose=verbose, 
+                                    freq=freq, ctr_admm=ctr)
+  fit_cv_PG$tottime <- (proc.time() - time_init)[3]
+}
 
 ### PQ fit ----
-exetime_cv_PQ <- proc.time()
-fit_cv_PQ <- fit_logit_splasso_cv(y, X, D, type='PQ', nfold=nfold, seed=seed, 
-                               beta_start=beta0, lambda=lambdas, alpha=alpha, 
-                               gamma=gamma, maxiter=maxiter, abstol=objtol, 
-                               reltol=reltol, etatol=etatol, verbose=verbose, 
-                               freq=freq, ctr_admm=ctr)
-exetime_cv_PQ <- (proc.time() - exetime_cv_PQ)[3]
+{
+  time_init <- proc.time()
+  fit_cv_PQ <- fit_logit_splasso_cv(y, X, D, type='PQ', nfold=nfold, seed=seed, 
+                                    beta_start=beta0, lambda=lambdas, alpha=alpha, 
+                                    gamma=gamma, maxiter=maxiter, abstol=objtol, 
+                                    reltol=reltol, etatol=etatol, verbose=verbose, 
+                                    freq=freq, ctr_admm=ctr)
+  fit_cv_PQ$tottime <- (proc.time() - time_init)[3]
+}
 
 ### NR fit ----
-exetime_cv_NR <- proc.time()
-fit_cv_NR <- fit_logit_splasso_cv(y, X, D, type='NR', nfold=nfold, seed=seed, 
-                               beta_start=beta0, lambda=lambdas, alpha=alpha, 
-                               gamma=gamma, maxiter=maxiter, abstol=objtol, 
-                               reltol=reltol, etatol=etatol, verbose=verbose, 
-                               freq=freq, ctr_admm=ctr)
-exetime_cv_NR <- (proc.time() - exetime_cv_NR)[3]
+{
+  time_init <- proc.time()
+  fit_cv_NR <- fit_logit_splasso_cv(y, X, D, type='NR', nfold=nfold, seed=seed, 
+                                    beta_start=beta0, lambda=lambdas, alpha=alpha, 
+                                    gamma=gamma, maxiter=maxiter, abstol=objtol, 
+                                    reltol=reltol, etatol=etatol, verbose=verbose, 
+                                    freq=freq, ctr_admm=ctr)
+  fit_cv_NR$tottime <- (proc.time() - time_init)[3]
+}
 
 ### Summary ----
 
-cat("BL:", exetime_cv_BL, "\n",
-    "PG:", exetime_cv_PG, "\n",
-    "PQ:", exetime_cv_PQ, "\n",
-    "NR:", exetime_cv_NR, "\n")
+cat("BL:", fit_cv_BL$tottime, "\n",
+    "PG:", fit_cv_PG$tottime, "\n",
+    "PQ:", fit_cv_PQ$tottime, "\n",
+    "NR:", fit_cv_NR$tottime, "\n")
 
-fit_cv_BL$tottime <- exetime_cv_BL
-fit_cv_PG$tottime <- exetime_cv_PG
-fit_cv_PQ$tottime <- exetime_cv_PQ
-fit_cv_NR$tottime <- exetime_cv_NR
-fit_cv_list <- list(BL=fit_cv_BL, PG=fit_cv_PG, 
-                    PQ=fit_cv_PQ, NR=fit_cv_NR)
+fit_cv_list <- list("BL"=fit_cv_BL, 
+                    "PG"=fit_cv_PG, 
+                    "PQ"=fit_cv_PQ, 
+                    "NR"=fit_cv_NR)
 
 df_cv_extended <- rbind(cbind(method="BL", fit_cv_BL$cv), 
                         cbind(method="PG", fit_cv_PG$cv), 
@@ -532,7 +495,7 @@ df_cv_extended <- rbind(cbind(method="BL", fit_cv_BL$cv),
 print(df_cv_extended)
 
 if (SAVE) {
-  filename <- "portland_lasso_cv_extended.csv"
+  filename <- paste0("portland_lasso_cv_alpha", lalpha, "_extended.csv")
   filepath <- paste(CSVPATH, filename, sep="/")
   write.csv2(df_cv_extended, file=filepath, row.names=FALSE)
 }
@@ -547,14 +510,14 @@ df_cv_summary <- data.frame(
 print(df_cv_summary)
 
 if (SAVE) {
-  filename <- "portland_lasso_cv_summary.csv"
+  filename <- paste0("portland_lasso_cv_alpha", lalpha, "_summary.csv")
   filepath <- paste(CSVPATH, filename, sep="/")
   write.csv2(df_cv_summary, file=filepath, row.names=FALSE)
 }
 
 
 if (SAVE) {
-  filename <- "portland_lasso_cv_timegain.pdf"
+  filename <- paste0("portland_lasso_cv_alpha", lalpha, "_timegain.pdf")
   filepath <- paste(IMGPATH, filename, sep="/")
   height <- 4; width <- 6; zoom <- 2
   pdf(file=filepath, height=zoom*height, width=zoom*width)
@@ -575,7 +538,7 @@ if (SAVE) {
 ### CV solution path ----
 
 if (SAVE) {
-  filename <- "portland_lasso_cv_loglik.pdf"
+  filename <- paste0("portland_lasso_cv_alpha", lalpha, "_loglik.pdf")
   filepath <- paste(IMGPATH, filename, sep="/")
   height <- 9; width <- 10; zoom <- 1
   pdf(file=filepath, height=zoom*height, width=zoom*width)
@@ -603,7 +566,7 @@ if (SAVE) {
 ### Spatial maps ----
 
 if (SAVE) {
-  filename <- "portland_lasso_cv_map_pr.pdf"
+  filename <- paste0("portland_lasso_cv_alpha", lalpha, "_map_pr.pdf")
   filepath <- paste(IMGPATH, filename, sep="/")
   height <- 9; width <- 10; zoom <- 1
   pdf(file=filepath, height=zoom*height, width=zoom*width)
@@ -624,3 +587,31 @@ if (SAVE) {
   })
   dev.off()
 }
+
+## FINAL SUMMARY ----
+
+if (FALSE) {
+  df_all_path_summary <- data.frame()
+  for (alpha in alphas) {
+    lalpha <- as.character(100*alpha)
+    lalpha <- ifelse(100*alpha>10, lalpha, paste0("0", lalpha))
+    filename <- paste0("portland_lasso_path_alpha", lalpha, "_summary.CSV")
+    filepath <- paste(CSVPATH, filename, sep="/")
+    df_tmp <- read.csv2(file=filepath)
+    df_all_path_summary <- rbind(df_all_path_summary, df_tmp)
+  }
+  
+  df_all_path_aggregated <- df_all_path_summary %>% 
+    filter(method != "NR") %>% group_by(method) %>% 
+    summarise(niter=29*sum(niter), exetime=sum(exetime)) %>% 
+    as.data.frame()
+  
+  df_all_path_aggregated$timegain <- with(df_all_path_aggregated, {
+    100*(1-exetime[method=="PQ"]/exetime)
+  })
+  
+  print(df_all_path_aggregated)
+}
+
+
+## END OF FILE ----

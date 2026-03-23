@@ -8,13 +8,16 @@ library(sparseinv)
 
 ## GLOBAL VARIABLES ----
 
-SHOW <- FALSE
-SAVE <- FALSE
+SHOW <- TRUE
+SAVE <- TRUE
 DATAPATH <- "data/Portland"
 SAVEPATH <- "tutorial/results/Portland"
 RDSPATH <- paste(SAVEPATH, "rds", sep="/")
 CSVPATH <- paste(SAVEPATH, "csv", sep="/")
-IMGPATH <- paste(SAVEPATH, "img/portland_MFVB", sep="/")
+IMGPATH <- paste(SAVEPATH, "img/portland_adj_MFVB", sep="/")
+
+COLORS <- c(2:4,7)
+MARKERS <- c(15:18)
 
 ## PORTLAND DATA ----
 
@@ -98,7 +101,7 @@ X <- psi
 D <- (1/sqrt(colSums(mass))) * stiff
 P <- Matrix::crossprod(D)
 normD <- sqrt(sum(D^2)/p) # tr(Dt*D) / p
-lambda <- 0.00001
+lambda <- 0.00005 # 0.00001
 eps <- 1e-8
 intercept <- FALSE
 abstol <- 1e-7 # 1e-10
@@ -113,27 +116,10 @@ hpar <- list(A=1.0, B=0.04*normD^2, nu=3.0)
 beta0 <- rnorm(p, mean=0, sd=sqrt(1/p))
 beta0 <- NULL
 
-qgamma(.99, shape=1.0, rate=0.04) # ~ 100
-curve(dgamma(x, shape=1, rate=0.04), xlim=c(0,150))
-
-
-1/(1e+4*p/n)
-1/(0.04*normD^2)
-
-
 ### ---- BL-VB ----
 {
   time_init <- proc.time()
-  fit_BL <- fit_logit_mfvb(y=y, X=X, D=D, type="BL", beta_start=beta0, 
-                           lambda=lambda, eps=eps, intercept=intercept, 
-                           solver="sparse", maxiter=maxiter, abstol=abstol, 
-                           reltol=reltol, verbose=verbose, freq=freq)
-  fit_BL$exetime <- (proc.time() - time_init)[3]
-}
-
-{
-  time_init <- proc.time()
-  fit_BL <- fit_logit_blvb_adj(y=y, X=X, D=D, beta_start=beta0, 
+  fit_BL <- fit_logit_mfvb_adj(y=y, X=X, D=D, type="BL", beta_start=beta0, 
                                lambda=lambda, eps=eps, hpar=hpar, intercept=intercept, 
                                solver="sparse", maxiter=maxiter, abstol=abstol, 
                                reltol=reltol, verbose=verbose, freq=freq)
@@ -143,53 +129,47 @@ curve(dgamma(x, shape=1, rate=0.04), xlim=c(0,150))
 ### ---- PG-VB ----
 {
   time_init <- proc.time()
-  fit_PG <- fit_logit_mfvb(y=y, X=X, D=D, type="PG", beta_start=beta0, 
-                           lambda=lambda, eps=eps, intercept=intercept, 
-                           solver="sparse", maxiter=maxiter, abstol=abstol, 
-                           reltol=reltol, verbose=verbose, freq=freq)
+  fit_PG <- fit_logit_mfvb_adj(y=y, X=X, D=D, type="PG", beta_start=beta0, 
+                               lambda=lambda, eps=eps, hpar=hpar, intercept=intercept, 
+                               solver="sparse", maxiter=maxiter, abstol=abstol, 
+                               reltol=reltol, verbose=verbose, freq=freq)
   fit_PG$exetime <- (proc.time() - time_init)[3]
 }
 
 ### ---- PQ-VB ----
 {
   time_init <- proc.time()
-  fit_PQ <- fit_logit_mfvb(y=y, X=X, D=D, type="PQ", beta_start=beta0, 
-                           lambda=lambda, eps=eps, intercept=intercept, 
-                           solver="sparse", maxiter=maxiter, abstol=abstol, 
-                           reltol=reltol, verbose=verbose, freq=freq)
+  fit_PQ <- fit_logit_mfvb_adj(y=y, X=X, D=D, type="PQ", beta_start=beta0, 
+                               lambda=lambda, eps=eps, hpar=hpar, intercept=intercept, 
+                               solver="sparse", maxiter=maxiter, abstol=abstol, 
+                               reltol=reltol, verbose=verbose, freq=freq)
   fit_PQ$exetime <- (proc.time() - time_init)[3]
 }
 
 ### ---- MCMC ----
 {
   time_init <- proc.time()
-  fit_MC <- fit_logit_mcmc(y=y, X=X, D=D, solver="sparse", beta_start=NULL,
-                           lambda=lambda, eps=eps, intercept=intercept,
-                           maxiter=5000L, verbose=verbose, freq=100L)
+  fit_MC <- fit_logit_mcmc_adj(y=y, X=X, D=D, solver="sparse",
+                               lambda=lambda, eps=eps, hpar=hpar, 
+                               intercept=intercept, scaling=TRUE, nscaling=3,
+                               maxiter=20000L, verbose=verbose, freq=200L)
   fit_MC$exetime <- (proc.time() - time_init)[3]
 }
 
 ## RESULTS ----
 
 if (SAVE) {
-  filename <- "portland_mfvb_fit.RData"
+  filename <- "portland_mfvb_adj_fit.RData"
   filepath <- paste(RDSPATH, filename, sep="/")
   save(fit_BL, fit_PG, fit_PQ, fit_MC, file=filepath)
-}
-
-if (SAVE) {
-  filename <- "portland_mcmc_fit.RData"
-  filepath <- paste(RDSPATH, filename, sep="/")
-  save(fit_MC, exetime_MC, 
-       file=filepath)
 }
 
 ### Summary measures ----
 
 # Number of iterations
-niter_BL <- fit_BL$summary$niter
-niter_PG <- fit_PG$summary$niter 
-niter_PQ <- fit_PQ$summary$niter 
+niter_BL <- fit_BL$state$niter
+niter_PG <- fit_PG$state$niter 
+niter_PQ <- fit_PQ$state$niter 
 niter_MC <- 20000L
 
 # Execution times
@@ -199,9 +179,9 @@ exetime_PQ <- fit_PQ$exetime
 exetime_MC <- fit_MC$exetime
 
 # ELBO
-elbo_BL <- fit_BL$summary$elbo
-elbo_PG <- fit_PG$summary$elbo 
-elbo_PQ <- fit_PQ$summary$elbo 
+elbo_BL <- fit_BL$state$elbo
+elbo_PG <- fit_PG$state$elbo 
+elbo_PQ <- fit_PQ$state$elbo 
 elbo_MC <- NaN
 
 # Posterior means
@@ -216,12 +196,6 @@ var_PG <- diag(fit_PG$summary$beta$var$var)
 var_PQ <- diag(fit_PQ$summary$beta$var$var)
 var_MC <- fit_MC$summary$beta$var
 
-# Posterior covariance matrices
-# cov_BL <- as.matrix(Matrix::solve(fit_BL$summary$beta$var$cholQ))
-# cov_PG <- as.matrix(Matrix::solve(fit_PG$summary$beta$var$cholQ))
-# cov_PQ <- as.matrix(Matrix::solve(fit_PQ$summary$beta$var$cholQ))
-# cov_MC <- cov(fit_MC$beta[seq(from=2501L, to=5000L, by=5),])
-
 # Posterior linear predictor means
 eta_BL <- fit_BL$summary$eta$mean
 eta_PG <- fit_PG$summary$eta$mean
@@ -233,12 +207,6 @@ var_eta_BL <- fit_BL$summary$eta$var
 var_eta_PG <- fit_PG$summary$eta$var
 var_eta_PQ <- fit_PQ$summary$eta$var
 var_eta_MC <- fit_MC$summary$eta$var
-
-# Posterior linear predictor covariance
-# cov_eta_BL <- X %*% tcrossprod(cov_BL, X)
-# cov_eta_PG <- X %*% tcrossprod(cov_PG, X)
-# cov_eta_PQ <- X %*% tcrossprod(cov_PQ, X)
-# cov_eta_MC <- X %*% tcrossprod(cov_MC, X)
 
 # Posterior linear predictor means
 pr_BL <- 1 / (1 + exp(-eta_BL))
@@ -294,29 +262,28 @@ mae_var_eta   <- rowMeans(rbind(err_var_eta_BL, err_var_eta_PG, err_var_eta_PQ, 
 summary <- data.frame(
   method = c("BL", "PG", "PQ", "MC"),
   niter = c(niter_BL, niter_PG, niter_PQ, niter_MC),
-  exetime = c(exetime_BL, exetime_PG, exetime_PQ, exetime_MC),
-  elbo = c(elbo_BL, elbo_PG, elbo_PQ, elbo_MC),
+  exetime = round(c(exetime_BL, exetime_PG, exetime_PQ, exetime_MC), 3),
+  timegain = round(1-exetime_PQ/c(exetime_BL, exetime_PG, exetime_PQ, exetime_MC), 4),
+  elbo = round(c(elbo_BL, elbo_PG, elbo_PQ, elbo_MC), 3),
   tv_dist_beta = round(tvd_pdf_beta, 3),
   mae_mean_beta = round(mae_mean_beta, 3),
   mae_var_beta = round(mae_var_beta, 3),
   tv_dist_eta = round(tvd_pdf_eta, 3),
   mae_mean_eta = round(mae_mean_eta, 3),
   mae_var_eta = round(mae_var_eta, 3),
-  row.names = 1:4
+  row.names = c(1:4)
 )
 
 print(summary)
 
 if (SAVE) {
-  filename <- "portland_mfvb_summary.csv"
+  filename <- "portland_mfvb_adj_summary.csv"
   filepath <- paste(SAVEPATH, filename, sep="/")
   write.csv2(summary, file=filepath, row.names=FALSE)
 }
 
 ### summary plots ----
 
-pch <- c(15:18)
-col <- c(2:4,7)
 
 if (SAVE) {
   filename <- "portland_mfvb_elbo.pdf"
@@ -325,28 +292,29 @@ if (SAVE) {
   pdf(file=filepath, height=zoom*height, width=zoom*width)
   layout(matrix(1:3, nrow = 1), widths = c(2, 1, 1))
   # ELBO
-  xlim <- c(0, max(niter_BL, niter_PG, niter_PQ))
+  xlim <- c(0, min(50, max(niter_BL, niter_PG, niter_PQ)))
   ylim <- range(c(fit_BL$trace$objval, fit_PG$trace$objval, fit_PQ$trace$objval))/n
   plot(0, 0, pch=19, col=3, xlim=xlim, ylim=ylim, type="o", xlab="", ylab="")
-  points(fit_BL$trace$iter, fit_BL$trace$objval/n, pch=pch[1], col=col[1], type="o")
-  points(fit_PG$trace$iter, fit_PG$trace$objval/n, pch=pch[2], col=col[2], type="o")
-  points(fit_PQ$trace$iter, fit_PQ$trace$objval/n, pch=pch[3], col=col[3], type="o")
+  points(fit_BL$trace$iter, fit_BL$trace$objval/n, pch=MARKERS[1], col=COLORS[1], type="o")
+  points(fit_PG$trace$iter, fit_PG$trace$objval/n, pch=MARKERS[2], col=COLORS[2], type="o")
+  points(fit_PQ$trace$iter, fit_PQ$trace$objval/n, pch=MARKERS[3], col=COLORS[3], type="o")
   title(xlab="Iterations", ylab="ELBO", main="Evidence lower bound")
   legend("bottomright", pch=c(15,19,17), col=2:4, legend=c("BL-VB", "PG-VB", "PQ-VB"))
   # n-iter
   with(summary[1:3,], {
-    barplt <- barplot(niter, names.arg=method, col=col, border="white", xlab="", ylab="")
+    barplt <- barplot(niter, names.arg=method, col=COLORS, border="white", xlab="", ylab="")
     text(barplt, niter-0.05*max(niter), niter)
     title(ylab="Iteration", main="Number of Iterations")
   })
   # exe-time
   with(summary[1:3,], {
-    barplt <- barplot(exetime, names.arg=method, col=col, border="white", xlab="", ylab="")
+    barplt <- barplot(exetime, names.arg=method, col=COLORS, border="white", xlab="", ylab="")
     text(barplt, exetime-0.05*max(exetime), round(exetime, 2))
     title(ylab="Time (s)", main="Execution Time")
   })
   dev.off()
 }
+
 
 if (SAVE) {
   filename <- "portland_mfvb_error_beta.pdf"
@@ -425,7 +393,7 @@ if (SAVE) {
   })
   dev.off()
 }
-  
+
 if (SAVE) {
   filename <- "portland_mfvb_map_eta.pdf"
   filepath <- paste(IMGPATH, filename, sep="/")

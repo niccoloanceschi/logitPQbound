@@ -10,8 +10,12 @@ library(osmdata)
 
 SHOW <- TRUE
 SAVE <- FALSE
+
 DATAPATH <- "data/Portland"
-IMGPATH <- "img/portland_DATA"
+SAVEPATH <- "tutorial/results/Portland"
+RDSPATH <- paste(SAVEPATH, "rds", sep="/")
+CSVPATH <- paste(SAVEPATH, "csv", sep="/")
+IMGPATH <- paste(SAVEPATH, "img/portland_DATA", sep="/")
 
 ## PORTLAND DATA ----
 
@@ -320,19 +324,23 @@ mesh <- fdaPDE::refine.mesh.2D(mesh, maximum_area=0.0000125, delaunay=TRUE)
 
 if (SAVE) {
   filename <- "portland_data_mesh.pdf"
-  height <- 3; width <- 6; zoom <- 2.5
+  height <- 2.5; width <- 6; zoom <- 2
   pdf(file=paste(IMGPATH, filename, sep="/"), height=zoom*height, width=zoom*width)
-  par(mfrow=c(1,2))
+  par_old = par()
+  par(mfrow=c(1,2), mar=c(.05,.05,2.5,.05))
   plot(portland_districts["geometry"], border="grey60", reset=FALSE)
   points(locs, col="grey99", pch=19, cex=0.8)
   points(locs, col="grey15", pch=ifelse(obs==1, 19, 1), cex=0.8)
-  title("Portland thefts data")
+  title("Motor-vehicle theft data")
   plot(portland_districts["geometry"], reset=FALSE)
-  plot_mesh(mesh, border, incol="grey70", bndcol="grey50", add=TRUE)
-  title("Triangular mesh")
+  plot_mesh(mesh, border, incol="grey50", bndcol="grey50", add=TRUE)
+  title("Portland map discretization")
   par(mfrow=c(1,1))  
+  par(par_old)
   dev.off()
 }
+
+
 
 
 ### FEM basis ----
@@ -358,5 +366,33 @@ if (SAVE) {
        segments, mesh, basis, mass, stiff, psi,
        file=paste(DATAPATH, filename, sep="/"))
 }
+
+## FINAL PLOT ----
+
+if (SAVE) {
+  filename <- "portland_data_mesh_mat.pdf"
+  height <- 2.5; width <- 6; zoom <- 2
+  pdf(file=paste(IMGPATH, filename, sep="/"), height=zoom*height, width=zoom*width)
+  par_old = par()
+  par(mfrow=c(1,3), mar=c(.05,.05,2.5,.05), xaxt="n", yaxt="n", bty="n")
+  # Data
+  plot(portland_districts["geometry"], border="grey60", reset=FALSE)
+  points(locs, col="grey99", pch=19, cex=0.8)
+  points(locs, col="grey15", pch=ifelse(obs==1, 19, 1), cex=0.8)
+  title("Motor-vehicle theft data")
+  # Mesh
+  plot(portland_districts["geometry"], reset=FALSE)
+  plot_mesh(mesh, border, incol="grey50", bndcol="grey50", add=TRUE)
+  title("Portland map discretization")
+  # Stiffness
+  Matrix::image(stiff, xlab="", ylab="", sub="", useRaster=FALSE, asp=1,
+        useAbs=FALSE, axes=FALSE, frame.plot=FALSE, colorkey=FALSE)
+  title("Stiffness matrix")
+  box()
+  par(mfrow=c(1,1))  
+  par(par_old)
+  dev.off()
+}
+
 
 ## END OF FILE ----

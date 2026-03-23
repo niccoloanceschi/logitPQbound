@@ -18,12 +18,12 @@ update_ridge_PQ <- function(y, X, eta, w, nu, s, pL2, beta, phi, XPXt=NULL,
                              objtol=ctr$objtol, reltol=ctr$reltol, abstol=ctr$abstol, 
                              maxiter=ctr$maxiter, history=FALSE)$beta
   }
-  # ... Cholesky solver
+  # ... Cholesky solver (semi-smooth / inexact primal-dual algorithm)
   if (solver=="chol") {
     cholQ <- chol(crossprod(X, w*X) + diag(pL2,p,p))
     beta <- chol_solve(cholQ, XtWy)
   }
-  # ... Sherman-Morrison-Woodbury solver
+  # ... Sherman-Morrison-Woodbury solver (semi-smooth / inexact primal-dual algorithm)
   if (solver=="smw") {
     cholQ <- chol(XPXt + diag(1/w,n,n))
     beta <- smw_chol_solve(cholQ, X, pL2, XtWy)

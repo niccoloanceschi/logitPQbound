@@ -51,10 +51,10 @@ init_genlasso_beta = function(y, X, D, pL1, pL2, spthr=0.9){
 
 #' @title Update beta via PQ bound optimization for generalized-lasso logistic regression
 #' @keywords internal
-update_genlasso_PQ = function(beta, z, u, eta, stable, y, X, w, nu, D, lambda, alpha, eps, ctr){
+update_genlasso_PQ = function(beta, z, u, s, eta, y, X, w, nu, D, lambda, alpha, eps, phi, approx, ctr){
   # stable <- FALSE
   # z <- NULL
-  if (!stable) {
+  if (!approx) {
     # If sign(eta) did not stabilize yet, run the augmented ADMM algorithm
     r <- (y - 0.5) / w
     beta <- solve_admm_genenet_PQ(
@@ -66,21 +66,31 @@ update_genlasso_PQ = function(beta, z, u, eta, stable, y, X, w, nu, D, lambda, a
   } else {
     # If sign(eta) is stable, run the reduced ADMM algorithm
     n <- length(y)
-    r <- (y - 0.5 - nu * sign(eta)) / w
-    if (length(z)>nrow(D)) {
-      z0 <- z[1:n]
-      u0 <- u[1:n]
-      z <- z[-(1:n)]
-      u <- u[-(1:n)]
-    } 
+    # r <- (y - 0.5 - nu * sign(eta)) / w
+    thr <- 1e-2
+    s <- (1-phi)*s + phi*(sign(eta)*(abs(eta)>thr))
+    r <- (y - 0.5 - nu*s) / w
+    # if (length(z)>nrow(D)) {
+    #   z0 <- z[1:n]
+    #   u0 <- u[1:n]
+    #   z <- z[-(1:n)]
+    #   u <- u[-(1:n)]
+    # } 
     beta <- solve_admm_genenet_WLS(
       X=X, y=r, w=w, D=D, beta0=beta, z0=z, u0=u, lambda=lambda, alpha=alpha, 
       eps=eps, rho=ctr$rho, tau=ctr$tau, gamma=ctr$gamma, intercept=ctr$intercept, 
       spthr=ctr$spthr, smw=ctr$smw, precondition=ctr$precondition, 
       objtol=ctr$objtol, reltol=ctr$reltol, abstol=ctr$abstol, 
       maxiter=ctr$maxiter, verbose=ctr$verbose, freq=ctr$freq)
-    beta$z <- c(z0, beta$z)
-    beta$u <- c(u0, beta$u)
+    # 
+    # beta$z <- c(z0, beta$z)
+    # beta$u <- c(u0, beta$u)
+    # Rename the primal and dual residuals
+    beta$r_pri  <- beta$r
+    beta$r_dual <- beta$s
+    # Store the pseudo-data and smoothed signs
+    beta$r <- r
+    beta$s <- s
   }
   return(beta)
 }

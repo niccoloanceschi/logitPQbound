@@ -45,15 +45,17 @@ RESCALE <- TRUE
 
 # Which lambda ("Custom", "Scales", or "CV")
 LAMBDA <- "Scaled"
-NREP <- 10L
+NREP <- 1L
+ALPHA <- 0.8
+LALPHA <- as.character(100*ALPHA)
+LALPHA <- ifelse(100*ALPHA>10, LALPHA, paste0("0", LALPHA))
 
 # Plot settings
-MARKERS <- c(15:19)
-COLORS <- c(2:4,7,6)
-METHODS <- c("BL", "PG", "PQ", "PQ_ADMM", "NR")
+MARKERS <- c(15:18,1,2,5,6)
+COLORS <- c(2:4,7,6,5)
+METHODS <- c("BL", "PG", "PQ", "PQ-ADMM", "PQ-prox", "NR")
 
 options(digits=5)
-
 
 ## UTILITY FUNCTIONS ----
 
@@ -70,7 +72,7 @@ p <- ncol(X)
 
 y <- as.vector(y)
 X <- as.matrix(X)
-D <- diag(p)
+D <- diag(p)[-1,]
 
 if (RESCALE) {
   X[,-1] <- scale(X[,-1])
@@ -79,7 +81,8 @@ if (RESCALE) {
 ## MODEL SET-UP ----
 
 # Penalty parameters
-lambdas <- 10^seq(-4, +3, by=0.25) # for solution path
+# lambdas <- 10^seq(-3, +2, by=0.25) # for solution path
+lambdas <- 10^seq(-3,+2, by=.25) # for solution path
 lambda <- .1 # for single fit
 
 # Cross-validation Seed and n of folds
@@ -100,7 +103,7 @@ phi <- 0.9
 objtol <- 1e-7
 reltol <- 1e-2
 abstol <- 1e-3
-etatol <- 1.
+etatol <- 1. * sqrt(p) * mean(sqrt(rowSums(X^2)))
 maxiter <- 5000L
 
 # Progress output
@@ -110,64 +113,53 @@ freq <- 100
 # Initial values
 beta_start <- c(qlogis(mean(y)), rep(0, times=p-1))
 
-# ctr <- set_ctr_admm(
-#   rho=sqrt(p/n), #sqrt(p/n)*lambda, # Augmented Lagrangian penalty parameter
-#   gamma=0.01, # Proximal penalty parameter
-#   smw=FALSE, # Sherman-Morrison-Woodbury update
-#   precondition=FALSE, # Preconditioned ADMM
-#   objtol=.1*objtol, # Tolerance for the objective function
-#   reltol=.1, # Tolerance for the relative change of the primal-dual residuals
-#   abstol=.1, # Tolerance for the absolute change of the primal-dual residuals
-#   maxiter=200) # Maximum number of inner ADMM iterations
-
-
 ## SINGLE FIT ----
 
 ### BL fit ----
 {
-  cat(" BL...")
+  cat("BL...\n") 
   time_init <- proc.time()
-  fit_1run_BL <- fit_logit_ridge(y, X, type='BL', beta_start=beta_start, 
-                                 lambda=lambda, eps=eps, intercept=intercept, 
-                                 phi=phi, maxiter=maxiter, abstol=objtol, 
-                                 reltol=reltol, etatol=etatol,
-                                 verbose=verbose, freq=freq)
+  fit_1run_BL <- fit_logit_enet_coord(y, X, type='BL', beta_start=beta_start, 
+                                      lambda=lambda, alpha=ALPHA, eps=eps, phi=phi, 
+                                      intercept=intercept, maxiter=maxiter, 
+                                      abstol=objtol, reltol=reltol, etatol=etatol,
+                                      verbose=TRUE, freq=freq)
   fit_1run_BL$exetime <- (proc.time() - time_init)[3]
 }
 
 ### PG fit ----
 {
-  cat(" PG...")
+  cat("PG...\n") 
   time_init <- proc.time()
-  fit_1run_PG <- fit_logit_ridge(y, X, type='PG', beta_start=beta_start, 
-                                 lambda=lambda, eps=eps, intercept=intercept, 
-                                 phi=phi, maxiter=maxiter, abstol=objtol, 
-                                 reltol=reltol, etatol=etatol, 
-                                 verbose=verbose, freq=freq)
+  fit_1run_PG <- fit_logit_enet_coord(y, X, type='PG', beta_start=beta_start, 
+                                      lambda=lambda, alpha=ALPHA, eps=eps, phi=phi, 
+                                      intercept=intercept, maxiter=maxiter, 
+                                      abstol=objtol, reltol=reltol, etatol=etatol, 
+                                      verbose=TRUE, freq=freq)
   fit_1run_PG$exetime <- (proc.time() - time_init)[3]
 }
 
 ### PQ fit ----
 {
-  cat(" PQ...")
+  cat("PQ...\n") 
   time_init <- proc.time()
-  fit_1run_PQ <- fit_logit_ridge(y, X, type='PQ', beta_start=beta_start, 
-                                 lambda=lambda, eps=eps, intercept=intercept, 
-                                 phi=phi, maxiter=maxiter, abstol=objtol, 
-                                 reltol=reltol, etatol=etatol, 
-                                 verbose=verbose, freq=freq)
+  fit_1run_PQ <- fit_logit_enet_coord(y, X, type='PQ', beta_start=beta_start, 
+                                      lambda=lambda, alpha=ALPHA, eps=eps, phi=phi, 
+                                      intercept=intercept, maxiter=maxiter, 
+                                      abstol=objtol, reltol=reltol, etatol=etatol, 
+                                      verbose=TRUE, freq=freq)
   fit_1run_PQ$exetime <- (proc.time() - time_init)[3]
 }
 
 ### NR fit ----
 {
-  cat(" NR...")
+  cat("NR...\n") 
   time_init <- proc.time()
-  fit_1run_NR <- fit_logit_ridge(y, X, type='NR', beta_start=beta_start, 
-                                 lambda=lambda, eps=eps, intercept=intercept, 
-                                 phi=phi, maxiter=maxiter, abstol=objtol, 
-                                 reltol=reltol, etatol=etatol, 
-                                 verbose=verbose, freq=freq)
+  fit_1run_NR <- fit_logit_enet_coord(y, X, type='NR', beta_start=beta_start, 
+                                      lambda=lambda, alpha=ALPHA, eps=eps, phi=phi, 
+                                      intercept=intercept, maxiter=maxiter, 
+                                      abstol=objtol, reltol=reltol, etatol=etatol, 
+                                      verbose=TRUE, freq=freq)
   fit_1run_NR$exetime <- (proc.time() - time_init)[3]
 }
 
@@ -184,10 +176,10 @@ cat("BL:", fit_1run_BL$exetime, "\n",
 
 fit_1run_list <- list("BL"=fit_1run_BL, 
                       "PG"=fit_1run_PG, 
-                      "PQ"=fit_1run_PQ)
-
+                      "PQ"=fit_1run_PQ)      
 
 df_1run_summary <- data.frame(
+  alpha = rep(ALPHA, length(fit_1run_list)),
   method = names(fit_1run_list),
   niter = sapply(fit_1run_list, \(.) .$niter),
   exetime = sapply(fit_1run_list, \(.) .$exetime),
@@ -198,19 +190,19 @@ df_1run_summary <- data.frame(
 print(df_1run_summary)
 
 if (SAVE) {
-  filename <- paste(DATALAB, "_ridge_1run_summary.csv", sep="")
+  filename <- paste(DATALAB, "_lasso_1run_alpha", LALPHA,"_summary.csv", sep="")
   filepath <- paste(CSVPATH, filename, sep="/")
   write.csv2(df_1run_summary, file=filepath, row.names=FALSE)
 }
 
 if (SAVE) {
-  filename <- paste(DATALAB, "_ridge_1run_fit.RDS", sep="")
+  filename <- paste(DATALAB, "_lasso_1run_alpha", LALPHA,"_fit.RDS", sep="")
   filepath <- paste(RDSPATH, filename, sep="/")
   saveRDS(fit_1run_list, file=filepath)
 }
 
 if (SAVE) {
-  filename <- paste(DATALAB, "_ridge_1run_loglik.pdf", sep="")
+  filename <- paste(DATALAB, "_lasso_1run_alpha", LALPHA,"_loglik.pdf", sep="")
   filepath <- paste(IMGPATH, filename, sep="/")
   height <- 4; width <- 10; zoom <- 1
   pdf(file=filepath, height=zoom*height, width=zoom*width)
@@ -227,21 +219,22 @@ if (SAVE) {
   legend("bottomright", col=COLORS, pch=MARKERS, legend=colnames(objval))
   # Iterations
   with(df_1run_summary, {
-    barplt <- barplot(niter, names.arg=method, col=COLORS, border=COLORS, las=1, xlab="", ylab="")
+    barplt <- barplot(niter, names.arg=method, col=COLORS, border=COLORS, las=2, xlab="", ylab="")
     text(barplt, niter-0.05*max(niter), niter)
     title(ylab="Iterations", main="Number of Iterations")
   })
   # Exetime
   with(df_1run_summary, {
-    barplt <- barplot(exetime, names.arg=method, col=COLORS, border=COLORS, las=1, xlab="", ylab="")
+    barplt <- barplot(exetime, names.arg=method, col=COLORS, border=COLORS, las=2, xlab="", ylab="")
     text(barplt, exetime-0.05*max(exetime), round(exetime, 2))
     title(ylab="Time (s)", main="Execution Time")
   })
   dev.off()
 }
 
+
 if (SAVE) {
-  filename <- paste(DATALAB, "_ridge_1run_pairs.pdf", sep="")
+  filename <- paste(DATALAB, "_lasso_1run_alpha", LALPHA,"_pairs.pdf", sep="")
   filepath <- paste(IMGPATH, filename, sep="/")
   height <- 7; width <- 9; zoom <- 1
   pdf(file=filepath, height=zoom*height, width=zoom*width)
@@ -250,56 +243,56 @@ if (SAVE) {
   dev.off()
 }
 
-
 ## SOLUTION PATH ----
 
 ### BL fit ----
 {
-  cat(" BL...")
+  cat("BL...\n")
   time_init <- proc.time()
-  fit_path_BL <- fit_logit_ridge_path(y, X, type='BL', beta_start=beta_start, 
-                                      lambda=lambdas, eps=eps, intercept=intercept, 
-                                      phi=phi, maxiter=maxiter, abstol=objtol, 
-                                      reltol=reltol, etatol=etatol,
-                                      verbose=verbose, freq=freq)
+  fit_path_BL <- fit_logit_enet_path(y, X, type='BL', beta_start=NULL, 
+                                     lambda=lambdas, alpha=ALPHA, eps=eps, 
+                                     phi=phi, intercept=intercept, maxiter=maxiter, 
+                                     abstol=objtol, reltol=reltol, etatol=etatol,
+                                     verbose=verbose, freq=freq)
   fit_path_BL$tottime <- (proc.time() - time_init)[3]
 }
 
 ### PG fit ----
 {
-  cat(" PG...")
+  cat("PG...\n")
   time_init <- proc.time()
-  fit_path_PG <- fit_logit_ridge_path(y, X, type='PG', beta_start=beta_start, 
-                                      lambda=lambdas, eps=eps, intercept=intercept, 
-                                      phi=phi, maxiter=maxiter, abstol=objtol, 
-                                      reltol=reltol, etatol=etatol, 
-                                      verbose=verbose, freq=freq)
+  fit_path_PG <- fit_logit_enet_path(y, X, type='PG', beta_start=NULL, 
+                                     lambda=lambdas, alpha=ALPHA, eps=eps, 
+                                     phi=phi, intercept=intercept, maxiter=maxiter, 
+                                     abstol=objtol, reltol=reltol, etatol=etatol, 
+                                     verbose=verbose, freq=freq)
   fit_path_PG$tottime <- (proc.time() - time_init)[3]
 }
 
 ### PQ fit ----
 {
-  cat(" PQ...")
+  cat("PQ...\n") 
   time_init <- proc.time()
-  fit_path_PQ <- fit_logit_ridge_path(y, X, type='PQ', beta_start=beta_start, 
-                                      lambda=lambdas, eps=eps, intercept=intercept, 
-                                      phi=phi, maxiter=maxiter, abstol=objtol, 
-                                      reltol=reltol, etatol=etatol, 
-                                      verbose=verbose, freq=freq)
+  fit_path_PQ <- fit_logit_enet_path(y, X, type='PQ', beta_start=NULL, 
+                                     lambda=lambdas, alpha=ALPHA, eps=eps, 
+                                     phi=phi, intercept=intercept, maxiter=maxiter, 
+                                     abstol=objtol, reltol=reltol, etatol=etatol, 
+                                     verbose=verbose, freq=freq)
   fit_path_PQ$tottime <- (proc.time() - time_init)[3]
 }
 
 ### NR fit ----
 {
-  cat(" NR...")
+  cat("NR...\n")
   time_init <- proc.time()
-  fit_path_NR <- fit_logit_ridge_path(y, X, type='NR', beta_start=beta_start, 
-                                      lambda=lambdas, eps=eps, intercept=intercept, 
-                                      phi=phi, maxiter=maxiter, abstol=objtol, 
-                                      reltol=reltol, etatol=etatol, 
-                                      verbose=verbose, freq=freq)
+  fit_path_NR <- fit_logit_enet_path(y, X, type='NR', beta_start=NULL, 
+                                     lambda=lambdas, alpha=ALPHA, eps=eps, 
+                                     phi=phi, intercept=intercept, maxiter=maxiter, 
+                                     abstol=objtol, reltol=reltol, etatol=etatol, 
+                                     verbose=verbose, freq=freq)
   fit_path_NR$tottime <- (proc.time() - time_init)[3]
 }
+
 
 ### Summary ----
 
@@ -317,15 +310,15 @@ fit_path_list <- list("BL"=fit_path_BL,
                       "PG"=fit_path_PG, 
                       "PQ"=fit_path_PQ)
 
+
 if (SAVE) {
-  filename <- paste(DATALAB, "_ridge_path_fit.RDS", sep="")
+  filename <- paste(DATALAB, "_lasso_path_alpha", LALPHA,"_fit.RDS", sep="")
   filepath <- paste(RDSPATH, filename, sep="/")
   saveRDS(fit_path_list, file=filepath)
 }
 
-
 df_path_summary <- data.frame(
-  alpha = rep(.0, length(fit_path_list)),
+  alpha = rep(ALPHA, length(fit_path_list)),
   method = names(fit_path_list),
   niter = sapply(fit_path_list, \(.) sum(.$niter)),
   exetime = sapply(fit_path_list, \(.) .$tottime),
@@ -337,7 +330,7 @@ print(df_path_summary)
 
 
 if (SAVE) {
-  filename <- paste(DATALAB, "_ridge_path_summary.csv", sep="")
+  filename <- paste0(DATALAB, "_lasso_path_alpha", LALPHA, "_summary.csv")
   filepath <- paste(CSVPATH, filename, sep="/")
   write.csv2(df_path_summary, file=filepath, row.names=FALSE)
 }
@@ -345,7 +338,7 @@ if (SAVE) {
 
 df_path_extended <- data.frame(
   method = rep(names(fit_path_list), each=length(lambdas)),
-  alpha = rep(.0, times=length(fit_path_list)*length(lambdas)),
+  alpha = rep(ALPHA, times=length(fit_path_list)*length(lambdas)),
   lambda = c(sapply(fit_path_list, \(.) .$lambda)),
   niter = c(sapply(fit_path_list, \(.) .$niter)),
   exetime = c(sapply(fit_path_list, \(.) .$exetime)),
@@ -355,22 +348,22 @@ df_path_extended <- data.frame(
 print(df_path_extended)
 
 if (SAVE) {
-  filename <- paste0(DATALAB, "_ridge_path_extended.csv")
+  filename <- paste0(DATALAB, "_lasso_path_alpha", LALPHA, "_extended.csv")
   filepath <- paste(CSVPATH, filename, sep="/")
   write.csv2(df_path_extended, file=filepath, row.names=FALSE)
 }
 
 
 if (SAVE) {
-  filename <- paste0(DATALAB, "_ridge_path_timegain.pdf")
+  filename <- paste0(DATALAB, "_lasso_path_alpha", LALPHA, "_timegain.pdf")
   filepath <- paste(IMGPATH, filename, sep="/")
   height <- 4; width <- 8; zoom <- 1
   pdf(file=filepath, height=zoom*height, width=zoom*width)
   with(df_path_summary, {
     par(mfrow=c(1,3))
     # Total number of iterations
-    barplt <- barplot(29*niter, names.arg=method, col=COLORS, border=COLORS, xlab="", ylab="")
-    text(barplt, 29*niter-0.05*max(29*niter), round(29*niter, 2))
+    barplt <- barplot(niter, names.arg=method, col=COLORS, border=COLORS, xlab="", ylab="")
+    text(barplt, niter-0.05*max(niter), round(niter, 2))
     title(ylab="Iterations", main="Total number of iterations")
     # Total execution time
     barplt <- barplot(exetime, names.arg=method, col=COLORS, border=COLORS, xlab="", ylab="")
@@ -390,7 +383,7 @@ if (SAVE) {
 ### Solution path ----
 
 if (SAVE) {
-  filename <- paste(DATALAB, "_ridge_path_exetime.pdf", sep="")
+  filename <- paste(DATALAB, "_lasso_path_alpha", LALPHA, "_exetime.pdf", sep="")
   filepath <- paste(IMGPATH, filename, sep="/")
   height <- 4; width <- 6; zoom <- 2
   pdf(file=filepath, height=zoom*height, width=zoom*width)
@@ -398,9 +391,13 @@ if (SAVE) {
   plot_fit_path(fit_path_list, field="niter", main="Number of Iterations", position="topright", pch=MARKERS, col=COLORS, lty=1)
   plot_fit_path(fit_path_list, field="exetime", main="Execution Time", position="topright", pch=MARKERS, col=COLORS, lty=1)
   plot_fit_path(fit_path_list, field="loglik", main="Penalized Log-Likelihood", position="topright", pch=MARKERS, col=COLORS, lty=1)
-  plot_fit_path(fit_path_list, field="norm", main="Coefficient Norm", position="topright", pch=MARKERS, col=COLORS, lty=1)
+  plot_fit_path(fit_path_list, field="pnorm", main="Coefficient Norm", position="topright", pch=MARKERS, col=COLORS, lty=1)
   par(mfrow=c(1,1))
   dev.off()
 }
 
 ## END OF FILE ----
+
+
+
+

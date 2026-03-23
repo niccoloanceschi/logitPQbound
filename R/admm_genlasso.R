@@ -786,6 +786,7 @@ solve_admm_spenet_WLS <- function(X, y, w, D=diag(ncol(X)), d=numeric(nrow(D)),
                                   beta0=NULL, z0=NULL, u0=NULL, lambda=1.0, alpha=0.99, 
                                   eps=1e-8, rho=1.0, tau=0.0, gamma=0.0, intercept=TRUE, 
                                   spthr=0.9, smw=FALSE, precondition=FALSE,
+                                  objtol=1e-5, reltol=1e-2, abstol=1e-4, 
                                   maxiter=1000, verbose=FALSE, freq=10) {
   
   # Model dimensions

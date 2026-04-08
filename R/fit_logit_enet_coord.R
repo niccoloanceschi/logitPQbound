@@ -162,7 +162,6 @@ fit_logit_enet_coord <- function(y, X, type=c('NR','BL','PG', 'PQ'),
       w <- rep(0.25, n)
     } else if (type=='NR'){
       w <- exp(-eta)/(1+exp(-eta))^2
-      # w <- exp(-eta-2*Rmpfr::log1pexp(eta))
       w[(w==0) | is.na(w) | is.infinite(w)] <- 0.25
     }
     

@@ -154,14 +154,16 @@ fit_logit_enet_coord <- function(y, X, type=c('NR','BL','PG', 'PQ'),
       w  <- c(coeff_pq[,1])
       nu <- c(coeff_pq[,2])
       s  <- (1-phi)*s + phi*sign_eta
-      s  <- ifelse(sign_eta>thr, sign_eta, s)
-      phi <- phi0 * (1 + phi0*iter/10)^-.75
+      # s  <- ifelse(sign_eta>thr, sign_eta, s)
+      # phi <- phi0 * (1 + phi0*iter/10)^-.75
     } else if (type=='PG'){ 
       w <- c(coeff_PG(eta))
     } else if (type=='BL'){
       w <- rep(0.25, n)
     } else if (type=='NR'){
       w <- exp(-eta)/(1+exp(-eta))^2
+      # w <- exp(-eta-2*Rmpfr::log1pexp(eta))
+      w[(w==0) | is.na(w) | is.infinite(w)] <- 0.25
     }
     
     # Store the current state

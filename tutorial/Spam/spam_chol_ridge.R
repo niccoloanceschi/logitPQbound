@@ -33,7 +33,7 @@ SAVE <- TRUE
 
 # Global paths
 DATAPATH <- "data/Spam"
-SAVEPATH <- "tutorial/results/Spam"
+SAVEPATH <- "tutorial/Spam"
 RDSPATH <- paste(SAVEPATH, "rds", sep="/")
 CSVPATH <- paste(SAVEPATH, "csv", sep="/")
 IMGPATH <- paste(SAVEPATH, "img", sep="/")
@@ -46,11 +46,11 @@ RESCALE <- TRUE
 # Which lambda ("Custom", "Scales", or "CV")
 LAMBDA <- "Scaled"
 NREP <- 10L
+ALPHA <- 0
 
 # Plot settings
 MARKERS <- c(15:19)
 COLORS <- c(2:4,7,6)
-METHODS <- c("BL", "PG", "PQ", "NR")
 
 options(digits=5)
 
@@ -91,7 +91,7 @@ gc()
 ## MODEL SET-UP ----
 
 # Penalty parameters
-lambdas <- 10^seq(-4, +5, by=0.25) # for solution path
+lambdas <- 10^seq(-3, +2, by=0.25) # for solution path
 lambda <- .1 # for single fit
 
 # Cross-validation Seed and n of folds
@@ -160,28 +160,10 @@ beta_start <- c(qlogis(mean(y)), rep(0, times=p-1))
   fit_1run_PQ$exetime <- (proc.time() - time_init)[3]
 }
 
-### NR fit ----
-{
-  cat(" NR...")
-  time_init <- proc.time()
-  fit_1run_NR <- fit_logit_ridge(y, X, type='NR', beta_start=beta_start, 
-                                 lambda=lambda, eps=eps, intercept=intercept, 
-                                 phi=phi, maxiter=maxiter, abstol=objtol, 
-                                 reltol=reltol, etatol=etatol, 
-                                 verbose=verbose, freq=freq)
-  fit_1run_NR$exetime <- (proc.time() - time_init)[3]
-}
-
 ### Summary ----
 cat("BL:", fit_1run_BL$exetime, "\n",
     "PG:", fit_1run_PG$exetime, "\n",
-    "PQ:", fit_1run_PQ$exetime, "\n",
-    "NR:", fit_1run_NR$exetime, "\n")
-
-# fit_1run_list <- list("BL"=fit_1run_BL, 
-#                       "PG"=fit_1run_PG, 
-#                       "PQ"=fit_1run_PQ, 
-#                       "NR"=fit_1run_NR)
+    "PQ:", fit_1run_PQ$exetime, "\n")
 
 fit_1run_list <- list("BL"=fit_1run_BL, 
                       "PG"=fit_1run_PG, 
@@ -215,29 +197,7 @@ if (SAVE) {
   filepath <- paste(IMGPATH, filename, sep="/")
   height <- 4; width <- 10; zoom <- 1
   pdf(file=filepath, height=zoom*height, width=zoom*width)
-  layout(matrix(1:3, nrow = 1), widths = c(2, 1, 1))
-  # Log-likelihood
-  niter <- max(sapply(fit_1run_list, \(.) .$niter))
-  objval <- matrix(NA, nrow=niter, ncol=length(fit_1run_list))
-  colnames(objval) <- names(fit_1run_list)
-  for (k in 1:length(fit_1run_list)) {
-    objval[1:fit_1run_list[[k]]$niter, k] <- fit_1run_list[[k]]$trace$objval
-  }
-  matplot(objval[2:min(50, niter),], type="b", lty=1, col=COLORS, pch=MARKERS, xlab="", ylab="")
-  title(xlab="Iteration", ylab="Log-Likelihood", main="Penalized Log-Likelihood")
-  legend("bottomright", col=COLORS, pch=MARKERS, legend=colnames(objval))
-  # Iterations
-  with(df_1run_summary, {
-    barplt <- barplot(niter, names.arg=method, col=COLORS, border=COLORS, las=1, xlab="", ylab="")
-    text(barplt, niter-0.05*max(niter), niter)
-    title(ylab="Iterations", main="Number of Iterations")
-  })
-  # Exetime
-  with(df_1run_summary, {
-    barplt <- barplot(exetime, names.arg=method, col=COLORS, border=COLORS, las=1, xlab="", ylab="")
-    text(barplt, exetime-0.05*max(exetime), round(exetime, 2))
-    title(ylab="Time (s)", main="Execution Time")
-  })
+  plot_1run_loglik(fit_1run_list, df_1run_summary, COLORS, MARKERS)
   dev.off()
 }
 
@@ -246,8 +206,7 @@ if (SAVE) {
   filepath <- paste(IMGPATH, filename, sep="/")
   height <- 7; width <- 9; zoom <- 1
   pdf(file=filepath, height=zoom*height, width=zoom*width)
-  betas <- sapply(fit_1run_list, \(.) .$beta)
-  pairs(betas[-1,], lower.panel=panel_cor, upper.panel=panel_linear)
+  plot_1run_pairs(fit_1run_list)
   dev.off()
 }
 
@@ -290,29 +249,11 @@ if (SAVE) {
   fit_path_PQ$tottime <- (proc.time() - time_init)[3]
 }
 
-### NR fit ----
-{
-  cat(" NR...")
-  time_init <- proc.time()
-  fit_path_NR <- fit_logit_ridge_path(y, X, type='NR', beta_start=beta_start, 
-                                      lambda=lambdas, eps=eps, intercept=intercept, 
-                                      phi=phi, maxiter=maxiter, abstol=objtol, 
-                                      reltol=reltol, etatol=etatol, 
-                                      verbose=verbose, freq=freq)
-  fit_path_NR$tottime <- (proc.time() - time_init)[3]
-}
-
 ### Summary ----
 
 cat("BL:", fit_path_BL$tottime, "\n",
     "PG:", fit_path_PG$tottime, "\n",
-    "PQ:", fit_path_PQ$tottime, "\n",
-    "NR:", fit_path_NR$tottime, "\n")
-
-# fit_path_list <- list("BL"=fit_path_BL, 
-#                       "PG"=fit_path_PG, 
-#                       "PQ"=fit_path_PQ, 
-#                       "NR"=fit_path_NR)
+    "PQ:", fit_path_PQ$tottime, "\n")
 
 fit_path_list <- list("BL"=fit_path_BL, 
                       "PG"=fit_path_PG, 
@@ -326,7 +267,7 @@ if (SAVE) {
 
 
 df_path_summary <- data.frame(
-  alpha = rep(.0, length(fit_path_list)),
+  alpha = rep(ALPHA, length(fit_path_list)),
   method = names(fit_path_list),
   niter = sapply(fit_path_list, \(.) sum(.$niter)),
   exetime = sapply(fit_path_list, \(.) .$tottime),
@@ -367,23 +308,7 @@ if (SAVE) {
   filepath <- paste(IMGPATH, filename, sep="/")
   height <- 4; width <- 8; zoom <- 1
   pdf(file=filepath, height=zoom*height, width=zoom*width)
-  with(df_path_summary, {
-    par(mfrow=c(1,3))
-    # Total number of iterations
-    barplt <- barplot(niter, names.arg=method, col=COLORS, border=COLORS, xlab="", ylab="")
-    text(barplt, niter-0.05*max(niter), round(niter, 2))
-    title(ylab="Iterations", main="Total number of iterations")
-    # Total execution time
-    barplt <- barplot(exetime, names.arg=method, col=COLORS, border=COLORS, xlab="", ylab="")
-    text(barplt, exetime-0.05*max(exetime), round(exetime, 2))
-    title(ylab="Time (s)", main="Total execution Time")
-    # Relative time gain
-    reltime <- 100*(1-exetime[3]/exetime)
-    barplt <- barplot(reltime, names.arg=method, col=COLORS, border=COLORS, xlab="", ylab="")
-    text(barplt, reltime-0.1*sign(reltime)*max(reltime), paste(floor(reltime), "%"))
-    title(ylab="Time Gain", main="Time Gain")
-    par(mfrow=c(1,1))
-  })
+  plot_path_timegain(df_path_summary, COLORS, MARKERS)
   dev.off()
 }
 

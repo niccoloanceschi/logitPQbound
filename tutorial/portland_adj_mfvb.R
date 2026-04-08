@@ -10,6 +10,7 @@ library(sparseinv)
 
 SHOW <- TRUE
 SAVE <- TRUE
+
 DATAPATH <- "data/Portland"
 SAVEPATH <- "tutorial/results/Portland"
 RDSPATH <- paste(SAVEPATH, "rds", sep="/")
@@ -25,70 +26,7 @@ load(paste(DATAPATH, "PortlandData.RData", sep="/"))
 
 ## UTILITY FUNCTIONS ----
 
-plot_mesh <- function(mesh, incol="grey70", bndcol="grey30", ...) {
-  # Set the x-y limits
-  xrng <- range(mesh$nodes[, 1])
-  yrng <- range(mesh$nodes[, 2])
-  
-  # Plot the mesh nodes
-  plot(mesh$nodes, cex = 0.001, col=col, xlim=xrng, ylim=yrng, 
-       xlab="", ylab="", xaxt="n", yaxt="n", bty="n", ...)
-  
-  # Plot the mesh internal segments
-  x_in_start <- mesh$nodes[mesh$edges[, 1], 1]
-  y_in_start <- mesh$nodes[mesh$edges[, 2], 1]
-  x_in_end <- mesh$nodes[mesh$edges[, 1], 2]
-  y_in_end <- mesh$nodes[mesh$edges[, 2], 2]
-  segments(x_in_start, x_in_end, y_in_start, y_in_end, col=incol)
-  
-  # Plot the mesh boundary segments
-  x_bnd_start <- mesh$nodes[mesh$segments[, 1], 1]
-  y_bnd_start <- mesh$nodes[mesh$segments[, 2], 1]
-  x_bnd_end <- mesh$nodes[mesh$segments[, 1], 2]
-  y_bnd_end <- mesh$nodes[mesh$segments[, 2], 2]
-  segments(x_bnd_start, x_bnd_end, y_bnd_start, y_bnd_end, col=bndcol, lwd=1.5)
-}
-
-plot_field <- function(coefs, basis, ngrid, ...) {
-  # Set the x-y limits
-  xrng <- range(basis$mesh$nodes[,1])
-  yrng <- range(basis$mesh$nodes[,2])
-  
-  # Set the x-y grid
-  xs <- seq(from=xrng[1], to=xrng[2], length=ngrid)
-  ys <- seq(from=yrng[1], to=yrng[2], length=ngrid)
-  
-  # Set the x-y lattice
-  xx <- rep(xs, ngrid)
-  yy <- rep(ys, rep(ngrid, ngrid))
-  
-  # Set the FEM object
-  fem <- fdaPDE::FEM(coefs, basis)
-  
-  # Compute the FEM surface
-  field <- fdaPDE::eval.FEM(fem, cbind(xx, yy))
-  field <- matrix(field, nrow=ngrid, ncol=ngrid)
-  
-  # Plot the field
-  plot3D::image2D(x=xs, y=ys, z=field, colvar=field, xlab="", ylab="", ...)
-}
-
-accuracy <- function(sim, mu, sigma2) {
-  n <- length(sim)
-  K <- 201
-  idx <- seq(from=floor(n/2), to=n, by=5)
-  kde <- density(sim[idx])
-  lower <- min(kde$x)
-  upper <- max(kde$x)
-  x <- seq(from=lower, to=upper, length=K)
-  f1 <- approxfun(kde$x, kde$y, rule=2)(x)
-  f2 <- dnorm(x, mean=mu, sd=sqrt(sigma2))
-  dx <- diff(x)
-  df <- abs(f1 - f2)
-  err <- 0.5*sum((df[-1]+df[-K])*dx)
-  acc <- 1 - 0.5*err
-  return(acc)
-}
+source("tutorial/tutorial_utils.R")
 
 ## VB-PDE FIT ----
 
@@ -101,7 +39,7 @@ X <- psi
 D <- (1/sqrt(colSums(mass))) * stiff
 P <- Matrix::crossprod(D)
 normD <- sqrt(sum(D^2)/p) # tr(Dt*D) / p
-lambda <- 0.00005 # 0.00001
+lambda <- 0.00004 # 0.00001
 eps <- 1e-8
 intercept <- FALSE
 abstol <- 1e-7 # 1e-10
@@ -110,10 +48,11 @@ maxiter <- 1000L
 verbose <- TRUE
 freq <- 10L
 
-hpar <- list(A=1.0, B=1e+4*p/n, nu=3.0)
+# hpar <- list(A=1.0, B=1e+4*p/n, nu=3.0)
 hpar <- list(A=1.0, B=0.04*normD^2, nu=3.0)
+hpar <- list(A=1.0, B=1e+05, nu=3.0)
 
-beta0 <- rnorm(p, mean=0, sd=sqrt(1/p))
+# beta0 <- rnorm(p, mean=0, sd=sqrt(1/p))
 beta0 <- NULL
 
 ### ---- BL-VB ----
@@ -170,7 +109,7 @@ if (SAVE) {
 niter_BL <- fit_BL$state$niter
 niter_PG <- fit_PG$state$niter 
 niter_PQ <- fit_PQ$state$niter 
-niter_MC <- 20000L
+niter_MC <- fit_MC$call$maxiter
 
 # Execution times
 exetime_BL <- fit_BL$exetime
@@ -191,9 +130,9 @@ mu_PQ <- fit_PQ$summary$beta$mean
 mu_MC <- fit_MC$summary$beta$mean
 
 # Posterior variances
-var_BL <- diag(fit_BL$summary$beta$var$var)
-var_PG <- diag(fit_PG$summary$beta$var$var)
-var_PQ <- diag(fit_PQ$summary$beta$var$var)
+var_BL <- diag(fit_BL$summary$beta$var)
+var_PG <- diag(fit_PG$summary$beta$var)
+var_PQ <- diag(fit_PQ$summary$beta$var)
 var_MC <- fit_MC$summary$beta$var
 
 # Posterior linear predictor means
@@ -201,6 +140,8 @@ eta_BL <- fit_BL$summary$eta$mean
 eta_PG <- fit_PG$summary$eta$mean
 eta_PQ <- fit_PQ$summary$eta$mean
 eta_MC <- fit_MC$summary$eta$mean
+
+trace_eta_MC <- as.matrix(tcrossprod(fit_MC$trace$beta, X))
 
 # Posterior linear predictor variances
 var_eta_BL <- fit_BL$summary$eta$var
@@ -221,9 +162,9 @@ acc_beta_PQ <- sapply(1:p, function(j) {accuracy(fit_MC$trace$beta[,j], mu_PQ[j]
 acc_beta_MC <- rep(1.0, times=p)
 
 # Accuracy scores (linear predictor)
-acc_eta_BL <- sapply(1:n, function(i) {accuracy(c(fit_MC$trace$beta %*% X[i,]), eta_BL[i], var_eta_BL[i])})
-acc_eta_PG <- sapply(1:n, function(i) {accuracy(c(fit_MC$trace$beta %*% X[i,]), eta_PG[i], var_eta_PG[i])})
-acc_eta_PQ <- sapply(1:n, function(i) {accuracy(c(fit_MC$trace$beta %*% X[i,]), eta_PQ[i], var_eta_PQ[i])})
+acc_eta_BL <- sapply(1:n, function(i) {accuracy(c(trace_eta_MC[,i]), eta_BL[i], var_eta_BL[i])})
+acc_eta_PG <- sapply(1:n, function(i) {accuracy(c(trace_eta_MC[,i]), eta_PG[i], var_eta_PG[i])})
+acc_eta_PQ <- sapply(1:n, function(i) {accuracy(c(trace_eta_MC[,i]), eta_PQ[i], var_eta_PQ[i])})
 acc_eta_MC <- rep(1.0, times=n)
 
 # Posterior mean error (basis parameters)
@@ -263,7 +204,7 @@ summary <- data.frame(
   method = c("BL", "PG", "PQ", "MC"),
   niter = c(niter_BL, niter_PG, niter_PQ, niter_MC),
   exetime = round(c(exetime_BL, exetime_PG, exetime_PQ, exetime_MC), 3),
-  timegain = round(1-exetime_PQ/c(exetime_BL, exetime_PG, exetime_PQ, exetime_MC), 4),
+  timegain = round(1-c(exetime_BL, exetime_PG, exetime_PQ, exetime_MC)/exetime_MC, 4),
   elbo = round(c(elbo_BL, elbo_PG, elbo_PQ, elbo_MC), 3),
   tv_dist_beta = round(tvd_pdf_beta, 3),
   mae_mean_beta = round(mae_mean_beta, 3),
@@ -592,64 +533,6 @@ if (SAVE) {
 }
 
 ## PAPER PLOT ----
-
-ggplot_field_grid <- function(coefs, basis, ngrid, locs=NULL, 
-                              fun=NULL, palette="viridis", ...) {
-  H <- ncol(coefs)
-  
-  # Set the x-y limits
-  xrng <- range(basis$mesh$nodes[,1])
-  yrng <- range(basis$mesh$nodes[,2])
-  
-  # Set the x-y grid
-  xs <- seq(from=xrng[1], to=xrng[2], length=ngrid)
-  ys <- seq(from=yrng[1], to=yrng[2], length=ngrid)
-  
-  # Set the x-y lattice
-  xx <- rep(xs, ngrid)
-  yy <- rep(ys, rep(ngrid, ngrid))
-  
-  # Compute the FEM surface
-  field <- matrix(NA, nrow=ngrid^2, ncol=ncol(coefs))
-  for(h in 1:H){
-    fem <- fdaPDE::FEM(coefs[,h], basis)
-    field[,h] <- as.vector(fdaPDE::eval.FEM(fem, cbind(xx, yy)))
-  }
-  
-  # Set the data-frames
-  df_fems <- data.frame(
-    g = rep(colnames(coefs), each=ngrid^2),
-    x = rep(xx, times=H),
-    y = rep(yy, times=H),
-    z = as.vector(field))
-  
-  df_txt <- data.frame(
-    g = colnames(coefs),
-    x = rep(xrng[2]-.225*diff(xrng), H),
-    y = rep(yrng[2]-.025*diff(yrng), H),
-    t = paste0("TV = ", round(colMeans(field, na.rm=TRUE), 4)))
-  
-  df_locs <- as.data.frame(locs)
-  df_locs$z <- factor(df_locs$z, labels=c("safe","risky"))
-  
-  # Set the scaling transofrmation
-  if (is.null(fun)) fun <- function(t) t
-  df_fems$z <- with(df_fems, fun(z)*max(z, na.rm=TRUE)/max(fun(z), na.rm=TRUE))
-  
-  # Create the data-frame
-  plt <- ggplot() + theme_bw() +
-    geom_raster(data=df_fems, map=aes(x=x, y=y, fill=z)) + 
-    geom_label(data=df_txt, map=aes(x=x, y=y, label=t), size=6) + 
-    facet_grid(cols=vars(g)) +
-    scale_shape_manual(values=c(1,19)) +
-    scale_fill_viridis_c(option=palette, limits=c(0,max(field)), na.value="transparent") +
-    labs(x="Longitude", y="Latitude", shape="Response", fill=expression(TV(q[VB],p[MC])))
-  
-  # trans=fun, 
-  
-  # Plot the field
-  return(plt)
-}
 
 if (SAVE) {
   palette <- "inferno"

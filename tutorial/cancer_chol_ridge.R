@@ -50,7 +50,7 @@ NREP <- 10L
 # Plot settings
 MARKERS <- c(15:19)
 COLORS <- c(2:4,7,6)
-METHODS <- c("BL", "PG", "PQ", "PQ_ADMM", "NR")
+METHODS <- c("BL", "PG", "PQ", "NR")
 
 options(digits=5)
 

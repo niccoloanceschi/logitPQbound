@@ -23,6 +23,10 @@ src/*.dll
 .DS_Store
 **/.DS_Store
 
+# Old filter
+old/
+old/**
+
 # Image folder
 img/
 img/**

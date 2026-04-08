@@ -63,7 +63,7 @@ source("tutorial/tutorial_utils.R")
 
 ## DATA LOAD ----
 
-load(paste(DATAPATH, "spam_train.RData", sep="/"))
+load(paste(DATAPATH, "Spam.RData", sep="/"))
 
 ## PREPROCESSING ----
 

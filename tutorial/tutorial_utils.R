@@ -16,6 +16,59 @@ panel_linear <- function(x, y, ...) {
   abline(a=0, b=1, col=2)
 }
 
+plot_1run_loglik <- function(fit_list, fit_summary, COLORS, MARKERS){
+  
+  layout(matrix(1:3, nrow = 1), widths = c(2, 1, 1))
+  # Log-likelihood
+  niter <- max(sapply(fit_list, \(.) .$niter))
+  objval <- matrix(NA, nrow=niter, ncol=length(fit_list))
+  colnames(objval) <- names(fit_list)
+  for (k in 1:length(fit_list)) {
+    objval[1:fit_list[[k]]$niter, k] <- fit_list[[k]]$trace$objval
+  }
+  matplot(objval[2:min(50, niter),], type="b", lty=1, col=COLORS, pch=MARKERS, xlab="", ylab="")
+  title(xlab="Iteration", ylab="Log-Likelihood", main="Penalized Log-Likelihood")
+  legend("bottomright", col=COLORS, pch=MARKERS, legend=colnames(objval))
+  # Iterations
+  with(df_1run_summary, {
+    barplt <- barplot(niter, names.arg=method, col=COLORS, border=COLORS, xlab="", ylab="")
+    text(barplt, niter-0.05*max(niter), niter)
+    title(ylab="Iterations", main="Number of Iterations")
+  })
+  # Exetime
+  with(df_1run_summary, {
+    barplt <- barplot(exetime, names.arg=method, col=COLORS, border=COLORS, xlab="", ylab="")
+    text(barplt, exetime-0.05*max(exetime), round(exetime, 2))
+    title(ylab="Time (s)", main="Execution Time")
+  })
+}
+
+plot_1run_pairs <- function(fit_list){
+  betas <- sapply(fit_list, \(.) .$beta)
+  pairs(betas[-1,], lower.panel=panel_cor, upper.panel=panel_linear)
+}
+
+plot_path_timegain <- function(path_summary, COLORS, MARKERS){
+  with(path_summary, {
+    par(mfrow=c(1,3))
+    # Total number of iterations
+    barplt <- barplot(niter, names.arg=method, col=COLORS, border=COLORS, xlab="", ylab="")
+    text(barplt, niter-0.05*max(niter), round(niter, 2))
+    title(ylab="Iterations", main="Total number of iterations")
+    # Total execution time
+    barplt <- barplot(exetime, names.arg=method, col=COLORS, border=COLORS, xlab="", ylab="")
+    text(barplt, exetime-0.05*max(exetime), round(exetime, 2))
+    title(ylab="Time (s)", main="Total execution Time")
+    # Relative time gain
+    reltime <- 100*(1-exetime[3]/exetime)
+    barplt <- barplot(reltime, names.arg=method, col=COLORS, border=COLORS, xlab="", ylab="")
+    text(barplt, reltime-0.1*sign(reltime)*max(reltime), paste(floor(reltime), "%"))
+    title(ylab="Time Gain", main="Time Gain")
+    par(mfrow=c(1,1))
+  })
+}
+
+
 plot_fit_path <- function (fit_list, field, D=NULL, log=FALSE, main="", position="bottomright", ...) {
   
   # Check the input field

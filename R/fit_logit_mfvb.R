@@ -169,6 +169,19 @@ fit_logit_pqvb <- function(y, X, D=diag(ncol(X)), beta_start=NULL,
   diff_rel_eta <- NaN
   diff_rel_xi <- NaN
   
+  # Set the optimization control parameters
+  setting <- list(
+    type = "PQ", lambda = lambda, eps = eps, 
+    intercept = intercept, solver = solver, 
+    maxiter = maxiter, abstol = abstol, reltol = reltol)
+  
+  # Set the optimization summary
+  summary <- list(beta=list(), eta=list())
+  
+  # Set the optimization state
+  state <- list(success=FALSE, niter=NULL, elbo=NULL, xi=NULL,
+                w_PQ=NULL, v_PQ=NULL, h_PQ=NULL, h_VB=NULL)
+  
   # Set the optimization trace
   trace <- as.data.frame(matrix(NA, nrow=maxiter, ncol=7))
   colnames(trace) <- c("iter", "objval", "diff_abs_obj", "diff_rel_obj", 
@@ -313,7 +326,7 @@ fit_logit_pqvb <- function(y, X, D=diag(ncol(X)), beta_start=NULL,
   omega = switch(solver,
                  "chol" = tcrossprod(invR),
                  "smw" = smw_chol_solve(R, X, pL2, diag(p)),
-                 "sparse" = list(var=sparseinv::Takahashi_Davis(Q), cholQ=R))
+                 "sparse" = sparseinv::Takahashi_Davis(Q))
   
   # Print the final optimization state
   if(verbose){
@@ -331,8 +344,27 @@ fit_logit_pqvb <- function(y, X, D=diag(ncol(X)), beta_start=NULL,
   if (iter==maxiter)
     warning("PQVB-LOGIT: the algorithm has not reached convergence", call.=FALSE, immediate.=TRUE)
   
-  return(list(mu=mu, omega=omega, eta=mq_eta, veta=sq_eta^2, 
-              xi=xi, elbo=objval, niter=iter, trace=trace[1:iter,]))
+  # Set the final output
+  summary$beta$mean <- mu
+  summary$beta$var <- omega
+  summary$beta$chol <- R
+  summary$beta$sqtr <- Eq_sq_beta
+  summary$beta$logdet <- Vq_logdet
+  
+  summary$eta$mean <- mq_eta
+  summary$eta$var <- sq_eta^2
+  
+  state$success <- iter<maxiter
+  state$niter <- iter
+  state$elbo <- objval
+  state$xi <- xi
+  
+  state$w_PQ <- w_PQ
+  state$v_PQ <- v_PQ
+  state$h_PQ <- h_PQ
+  state$h_VB <- h_VB
+  
+  return(list(summary=summary, state=state, trace=trace[1:iter,], call=setting))
 }
 
 #' @rdname fit_logit_mfvb
@@ -450,6 +482,19 @@ fit_logit_pgvb <- function(y, X, D=diag(ncol(X)), beta_start=NULL,
   diff_rel_mu <- NaN
   diff_rel_eta <- NaN
   diff_rel_xi <- NaN
+  
+  # Set the optimization control parameters
+  setting <- list(
+    type = "PG", lambda = lambda, eps = eps, 
+    intercept = intercept, solver = solver, 
+    maxiter = maxiter, abstol = abstol, reltol = reltol)
+  
+  # Set the optimization summary
+  summary <- list(beta=list(), eta=list())
+  
+  # Set the optimization state
+  state <- list(success=FALSE, niter=NULL, elbo=NULL, xi=NULL,
+                w_PG=NULL, h_PG=NULL, h_VB=NULL)
   
   # Set the optimization trace
   trace <- as.data.frame(matrix(NA, nrow=maxiter, ncol=7))
@@ -577,7 +622,7 @@ fit_logit_pgvb <- function(y, X, D=diag(ncol(X)), beta_start=NULL,
   omega = switch(solver,
                  "chol" = tcrossprod(invR),
                  "smw" = smw_chol_solve(R, X, pL2, diag(p)),
-                 "sparse" = list(var=sparseinv::Takahashi_Davis(Q), cholQ=R))
+                 "sparse" = sparseinv::Takahashi_Davis(Q))
   
   # Print the final optimization state
   if(verbose){
@@ -595,8 +640,26 @@ fit_logit_pgvb <- function(y, X, D=diag(ncol(X)), beta_start=NULL,
   if (iter==maxiter)
     warning("PGVB-LOGIT: the algorithm has not reached convergence", call.=FALSE, immediate.=TRUE)
   
-  return(list(mu=mu, omega=omega, eta=mq_eta, veta=Vq_eta, 
-              xi=xi, elbo=objval, niter=iter, trace=trace[1:iter,]))
+  # Set the final output
+  summary$beta$mean <- mu
+  summary$beta$var <- omega
+  summary$beta$chol <- R
+  summary$beta$sqtr <- Eq_sq_beta
+  summary$beta$logdet <- Vq_logdet
+  
+  summary$eta$mean <- mq_eta
+  summary$eta$var <- Vq_eta
+  
+  state$success <- iter<maxiter
+  state$niter <- iter
+  state$elbo <- objval
+  state$xi <- xi
+  
+  state$w_PG <- w_PG
+  state$h_PG <- h_PG
+  state$h_VB <- h_VB
+  
+  return(list(summary=summary, state=state, trace=trace[1:iter,], call=setting))
 }
 
 #' @rdname fit_logit_mfvb
@@ -715,6 +778,19 @@ fit_logit_blvb <- function(y, X, D=diag(ncol(X)), beta_start=NULL,
   diff_rel_mu <- NaN
   diff_rel_eta <- NaN
   diff_rel_xi <- NaN
+  
+  # Set the optimization control parameters
+  setting <- list(
+    type = "BL", lambda = lambda, eps = eps, 
+    intercept = intercept, solver = solver, 
+    maxiter = maxiter, abstol = abstol, reltol = reltol)
+  
+  # Set the optimization summary
+  summary <- list(beta=list(), eta=list())
+  
+  # Set the optimization state
+  state <- list(success=FALSE, niter=NULL, elbo=NULL, xi=NULL,
+                w_BL=NULL, g_BL=NULL, h_BL=NULL, h_VB=NULL)
   
   # Set the optimization trace
   trace <- as.data.frame(matrix(NA, nrow=maxiter, ncol=7))
@@ -837,7 +913,7 @@ fit_logit_blvb <- function(y, X, D=diag(ncol(X)), beta_start=NULL,
   omega = switch(solver,
                  "chol" = tcrossprod(invR),
                  "smw" = smw_chol_solve(R, X, pL2, diag(p)),
-                 "sparse" = list(var=sparseinv::Takahashi_Davis(Q), cholQ=R))
+                 "sparse" = sparseinv::Takahashi_Davis(Q))
   
   # Print the final optimization state
   if(verbose){
@@ -855,8 +931,27 @@ fit_logit_blvb <- function(y, X, D=diag(ncol(X)), beta_start=NULL,
   if (iter==maxiter)
     warning("BLVB-LOGIT: the algorithm has not reached convergence", call.=FALSE, immediate.=TRUE)
   
-  return(list(mu=mu, omega=omega, eta=mq_eta, veta=Vq_eta, 
-              xi=xi, elbo=objval, niter=iter, trace=trace[1:iter,]))
+  # Set the final output
+  summary$beta$mean <- mu
+  summary$beta$var <- omega
+  summary$beta$chol <- R
+  summary$beta$sqtr <- Eq_sq_beta
+  summary$beta$logdet <- Vq_logdet
+  
+  summary$eta$mean <- mq_eta
+  summary$eta$var <- Vq_eta
+  
+  state$success <- iter<maxiter
+  state$niter <- iter
+  state$elbo <- objval
+  state$xi <- xi
+  
+  state$w_BL <- 0.25
+  state$g_BL <- g_BL
+  state$h_BL <- h_BL
+  state$h_VB <- h_VB
+  
+  return(list(summary=summary, state=state, trace=trace[1:iter,], call=setting))
 }
 
 #' @title Ridge logistic regression via PG Gibbs sampling
@@ -915,14 +1010,24 @@ fit_logit_mcmc <- function(y, X, D=diag(ncol(X)), beta_start=NULL,
   
   # Memory allocation
   trace <- list(
-    mbeta = rep(NA, times=p),
-    vbeta = rep(NA, times=p),
-    meta = rep(NA, times=n),
-    veta = rep(NA, times=n),
     beta = matrix(NA, nrow=maxiter, ncol=p),
     loglik = rep(NA, times=maxiter),
     logprior = rep(NA, times=maxiter),
     logpost = rep(NA, times=maxiter))
+  
+  summary <- list(
+    beta = list(mean=rep(NA, p), var=rep(NA, p)),
+    eta = list(mean=rep(NA, n), var=rep(NA, n)))
+  
+  setting = list(
+    lambda = lambda,
+    eps = eps, 
+    intercept = intercept,
+    solver = solver,
+    maxiter = maxiter,
+    burn = burn,
+    thin = thin
+  )
   
   # Parameter initialization
   iter <- 1
@@ -1017,11 +1122,12 @@ fit_logit_mcmc <- function(y, X, D=diag(ncol(X)), beta_start=NULL,
   
   # Posterior summaries
   idx <- seq(from=burn+1, to=maxiter, by=thin)
-  trace$mbeta[] <- as.vector(apply(trace$beta[idx,], 2, mean))
-  trace$vbeta[] <- as.vector(apply(trace$beta[idx,], 2, var))
-  trace$meta[] <- as.vector(apply(X %*% t(trace$beta[idx,]), 1, mean))
-  trace$veta[] <- as.vector(apply(X %*% t(trace$beta[idx,]), 1, var))
+  
+  summary$beta$mean <- as.vector(apply(trace$beta[idx,], 2, mean))
+  summary$beta$var  <- as.vector(apply(trace$beta[idx,], 2, var))
+  summary$eta$mean <- as.vector(apply(X %*% t(trace$beta[idx,]), 1, mean))
+  summary$eta$var  <- as.vector(apply(X %*% t(trace$beta[idx,]), 1, var))
   
   # Output
-  return(trace)
+  return(list(trace=trace, summary=summary, call=setting))
 }

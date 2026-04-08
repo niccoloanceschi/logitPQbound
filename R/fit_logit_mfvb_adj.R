@@ -453,8 +453,11 @@ fit_logit_pqvb_adj <- function(y, X, D=diag(ncol(X)), beta_start=NULL,
     maxiter = maxiter, abstol = abstol, reltol = reltol)
   
   # Set the optimization summary
-  summary <- list(beta=list(), eta=list(), lambda=list(), xi=NULL, elbo=NULL)
-  state <- list(xi=NULL, w_PQ=NULL, v_PQ=NULL, h_PQ=NULL, h_VB=NULL, elbo=NULL, niter=NULL)
+  summary <- list(beta=list(), eta=list(), lambda=list())
+  
+  # Set the optimization state
+  state <- list(success=FALSE, niter=NULL, elbo=NULL, xi=NULL,
+                w_PQ=NULL, v_PQ=NULL, h_PQ=NULL, h_VB=NULL)
   
   # Set the optimization trace
   trace <- as.data.frame(matrix(NA, nrow=maxiter, ncol=8))
@@ -615,7 +618,7 @@ fit_logit_pqvb_adj <- function(y, X, D=diag(ncol(X)), beta_start=NULL,
   omega = switch(solver,
                  "chol" = tcrossprod(invR),
                  "smw" = smw_chol_solve(R, X, pL2, diag(p)),
-                 "sparse" = list(var=sparseinv::Takahashi_Davis(Q), cholQ=R))
+                 "sparse" = sparseinv::Takahashi_Davis(Q))
   
   # Print the final optimization state
   if(verbose){
@@ -649,13 +652,14 @@ fit_logit_pqvb_adj <- function(y, X, D=diag(ncol(X)), beta_start=NULL,
   summary$lambda$inv <- Eq_inv_lambda
   summary$lambda$log <- Eq_log_lambda
   
+  state$success <- iter<maxiter
+  state$niter <- iter
+  state$elbo <- objval
   state$xi <- xi
   state$w_PQ <- w_PQ
   state$v_PQ <- v_PQ
   state$h_PQ <- h_PQ
   state$h_VB <- h_VB
-  state$elbo <- objval
-  state$niter <- iter
   
   return(list(summary=summary, state=state, trace=trace[1:iter,], call=setting))
 }
@@ -949,7 +953,7 @@ fit_logit_pgvb_adj <- function(y, X, D=diag(ncol(X)), beta_start=NULL,
   omega = switch(solver,
                  "chol" = tcrossprod(invR),
                  "smw" = smw_chol_solve(R, X, pL2, diag(p)),
-                 "sparse" = list(var=sparseinv::Takahashi_Davis(Q), cholQ=R))
+                 "sparse" = sparseinv::Takahashi_Davis(Q))
   
   # Print the final optimization state
   if(verbose){
@@ -1277,7 +1281,7 @@ fit_logit_blvb_adj <- function(y, X, D=diag(ncol(X)), beta_start=NULL,
   omega = switch(solver,
                  "chol" = tcrossprod(invR),
                  "smw" = smw_chol_solve(R, X, pL2, diag(p)),
-                 "sparse" = list(var=sparseinv::Takahashi_Davis(Q), cholQ=R))
+                 "sparse" = sparseinv::Takahashi_Davis(Q))
   
   # Print the final optimization state
   if(verbose){

@@ -38,3 +38,6 @@ test/**
 # Sandbox folder
 sandbox/
 sandbox/**
+
+# Backup files
+**/*.RDS

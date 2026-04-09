@@ -29,10 +29,6 @@ old/**
 **/_old/
 **/_old/**
 
-# Image folder
-img/
-img/**
-
 # Test folder
 test/
 test/**

@@ -159,14 +159,18 @@ plot_mesh <- function (mesh, incol="grey70", bndcol="grey30", ...) {
   segments(x_bnd_start, x_bnd_end, y_bnd_start, y_bnd_end, col=bndcol, lwd=1.5)
 }
 
-plot_field <- function(lon, lat, field, ...) {
+plot_field <- function(lon, lat, field, border, ...) {
+  loc <- expand.grid(x=lon, y=lat)
+  out <- sp::point.in.polygon(loc[,1], loc[,2], border[,1], border[,2])
+  field[out == 0] <- NA
   plot3D::image2D(x=lon, y=lat, z=field, colvar=field, 
-                  col=viridis::inferno(100), xlab="", ylab="", ...)
+                  # col=viridis::inferno(100), 
+                  xlab="", ylab="", ...)
 }
 
 
 ggplot_field <- function(lon, lat, field, ngrid, locs=NULL, 
-                              fun=NULL, palette="viridis", ...) {
+                         fun=NULL, palette="viridis", ...) {
   H <- ncol(field)
   
   # Set the x-y limits

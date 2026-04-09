@@ -105,6 +105,6 @@ In particular, `Portland/portland_mfvb.R` typically takes a lot of time due to t
 
 - Niccolò Anceschi, Cristian Castiglione, Tommaso Rigon, Giacomo Zanella, Daniele Durante.  
   *Optimal and computationally tractable lower bounds for logistic log-likelihoods*  
-  arXiv preprint: [arXiv:2410.10309](arXiv:2410.10309)
+  arXiv preprint: [arXiv:2410.10309](https://arxiv.org/abs/2410.10309)
 
 

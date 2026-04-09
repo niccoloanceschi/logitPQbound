@@ -1,6 +1,6 @@
 # Reproducibility material for: *Optimal and computationally tractable lower bounds for logistic log-likelihoods*
 
-This repository contains the code required to reproduce the numerical experiments presented in [Anceschi, et al. (2025)](https://arxiv.org/abs/2410.10309), with particular focus on Section 5 of the main paper and Section F of the Supplementary Material.
+This repository contains the code required to reproduce the numerical experiments presented in [Anceschi, et al. (2025)](https://arxiv.org/abs/2410.10309), with particular focus on Section 5 of the main paper and Section F of the supplementary material.
 
 ---
 
@@ -91,7 +91,7 @@ In particular, `Portland/portland_mfvb.R` typically takes a lot of time due to t
 
 # Methodology 
 
-- The implementation closely follows the methodology described in Section 5 of the paper and Sections D, E, and F of the Supplementary Material.
+- The implementation closely follows the methodology described in Section 5 of the paper and Sections D, E, and F of the supplementary material.
 - The PQ method consistently reduces the number of iterations and often improves total runtime, especially in high-dimensional or non-smooth settings.
 
 ---

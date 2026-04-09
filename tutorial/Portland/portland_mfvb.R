@@ -331,10 +331,10 @@ if (SAVE) {
   pdf(file=filepath, height=zoom*height, width=zoom*width)
   par(mfrow = c(2,2))
   xlim <- range(nodes[,1]); ylim <- range(nodes[,2]); clim <- c(0,1)
-  plot_field(lon_new, lat_new, plogis(matrix(psi_new %*% mu_BL, ngrid, ngrid)), clim=c(0,1), main="BL-VB")
-  plot_field(lon_new, lat_new, plogis(matrix(psi_new %*% mu_PG, ngrid, ngrid)), clim=c(0,1), main="PG-VB")
-  plot_field(lon_new, lat_new, plogis(matrix(psi_new %*% mu_PQ, ngrid, ngrid)), clim=c(0,1), main="PQ-VB")
-  plot_field(lon_new, lat_new, plogis(matrix(psi_new %*% mu_MC, ngrid, ngrid)), clim=c(0,1), main="MCMC")
+  plot_field(lon_new, lat_new, plogis(matrix(psi_new %*% mu_BL, ngrid, ngrid)), border, clim=c(0,1), main="BL-VB")
+  plot_field(lon_new, lat_new, plogis(matrix(psi_new %*% mu_PG, ngrid, ngrid)), border, clim=c(0,1), main="PG-VB")
+  plot_field(lon_new, lat_new, plogis(matrix(psi_new %*% mu_PQ, ngrid, ngrid)), border, clim=c(0,1), main="PQ-VB")
+  plot_field(lon_new, lat_new, plogis(matrix(psi_new %*% mu_MC, ngrid, ngrid)), border, clim=c(0,1), main="MCMC")
   par(mfrow=c(1,1))
   ## with(as.data.frame(locs), {
   ##   par(mfrow = c(2,2))
@@ -359,19 +359,10 @@ if (SAVE) {
   field_tvd_BL <- matrix(psi_new %*% (1-acc_beta_BL), ngrid, ngrid)
   field_tvd_PG <- matrix(psi_new %*% (1-acc_beta_PG), ngrid, ngrid)
   field_tvd_PQ <- matrix(psi_new %*% (1-acc_beta_PQ), ngrid, ngrid)
-  plot_field(lon_new, lat_new, field_tvd_BL, clim=clim, main="BL-VB")
-  plot_field(lon_new, lat_new, field_tvd_PG, clim=clim, main="PG-VB")
-  plot_field(lon_new, lat_new, field_tvd_PQ, clim=clim, main="PQ-VB")
+  plot_field(lon_new, lat_new, field_tvd_BL, border, clim=clim, main="BL-VB")
+  plot_field(lon_new, lat_new, field_tvd_PG, border, clim=clim, main="PG-VB")
+  plot_field(lon_new, lat_new, field_tvd_PQ, border, clim=clim, main="PQ-VB")
   par(mfrow=c(1,1))
-  ## with(as.data.frame(locs), {
-  ##   par(mfrow = c(1,3))
-  ##   xlim <- range(nodes[,1]); ylim <- range(nodes[,2])
-  ##   clim <- range(cbind(1-acc_beta_BL, 1-acc_beta_PG, 1-acc_beta_PQ, 1-acc_beta_MC))
-  ##   plot_field(1-acc_beta_BL, basis, 200, clim=clim, main="BL-VB")
-  ##   plot_field(1-acc_beta_PG, basis, 200, clim=clim, main="PG-VB")
-  ##   plot_field(1-acc_beta_PQ, basis, 200, clim=clim, main="PQ-VB")
-  ##   par(mfrow=c(1,1))
-  ## })
   dev.off()
 }
 
@@ -382,18 +373,13 @@ if (SAVE) {
   filename <- paste0("portland_mfvb_field_tvd_", palette, ".pdf")
   filepath <- paste(IMGPATH, filename, sep="/")
   height <- 3; width <- 10; zoom <- 1.25
-  ## tvd <- 1-cbind("BL"=acc_beta_BL, "PG"=acc_beta_PG, "PQ"=acc_beta_PQ)
-  ## dat <- data.frame(x=locs[,1], y=locs[,2], z=obs)
-  ## fun <- scales::trans_new(
-  ##   name = "two_third_pow",
-  ##   transform = function(t) t^(2/3),
-  ##   inverse = function(t) t^(3/2))
-  ## plt <- ggplot_field_grid(coefs=tvd, basis=basis, ngrid=200, 
-  ##                          locs=dat, fun=NULL, palette=palette)
-  
+
+  loc <- expand.grid(x=lon_new, y=lat_new)
+  out <- sp::point.in.polygon(loc[,1], loc[,2], border[,1], border[,2])
+  dat <- data.frame(x=locs[,1], y=locs[,2], z=obs)
   tvd <- 1-cbind("BL"=acc_beta_BL, "PG"=acc_beta_PG, "PQ"=acc_beta_PQ)
   tvd <- as.matrix(psi_new %*% tvd)
-  dat <- data.frame(x=locs[,1], y=locs[,2], z=obs)
+  tvd[out == 0, ] <- NA
 
   plt <- ggplot_field(lon_new, lat_new, tvd, ngrid=ngrid, 
                       locs=dat, fun=NULL, palette=palette)

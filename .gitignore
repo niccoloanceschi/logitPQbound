@@ -43,3 +43,6 @@ sandbox/**
 
 # Backup files
 **/*.RDS
+
+# Documentation html files
+*.html

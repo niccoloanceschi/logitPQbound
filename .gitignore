@@ -26,6 +26,8 @@ src/*.dll
 # Old filter
 old/
 old/**
+**/_old/
+**/_old/**
 
 # Image folder
 img/

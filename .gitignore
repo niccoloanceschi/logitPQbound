@@ -43,5 +43,5 @@ sandbox/**
 # Documentation html files
 *.html
 
-# 
+# Extended report of the results
 *_extended.csv

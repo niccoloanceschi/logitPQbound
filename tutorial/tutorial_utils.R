@@ -1,4 +1,20 @@
 
+accuracy <- function(sim, mu, sigma2) {
+  n <- length(sim)
+  K <- 201
+  idx <- seq(from=floor(n/2), to=n, by=5)
+  kde <- density(sim[idx])
+  lower <- min(kde$x)
+  upper <- max(kde$x)
+  x <- seq(from=lower, to=upper, length=K)
+  f1 <- approxfun(kde$x, kde$y, rule=2)(x)
+  f2 <- dnorm(x, mean=mu, sd=sqrt(sigma2))
+  dx <- diff(x)
+  df <- abs(f1 - f2)
+  err <- 0.5*sum((df[-1]+df[-K])*dx)
+  acc <- 1 - 0.5*err
+  return(acc)
+}
 
 panel_cor <- function(x, y, ...){
   par(usr = c(0, 1, 0, 1))
@@ -143,63 +159,37 @@ plot_mesh <- function (mesh, incol="grey70", bndcol="grey30", ...) {
   segments(x_bnd_start, x_bnd_end, y_bnd_start, y_bnd_end, col=bndcol, lwd=1.5)
 }
 
-plot_field <- function(coefs, basis, ngrid, ...) {
-  # Set the x-y limits
-  xrng <- range(basis$mesh$nodes[,1])
-  yrng <- range(basis$mesh$nodes[,2])
-  
-  # Set the x-y grid
-  xs <- seq(from=xrng[1], to=xrng[2], length=ngrid)
-  ys <- seq(from=yrng[1], to=yrng[2], length=ngrid)
-  
-  # Set the x-y lattice
-  xx <- rep(xs, ngrid)
-  yy <- rep(ys, rep(ngrid, ngrid))
-  
-  # Set the FEM object
-  fem <- fdaPDE::FEM(coefs, basis)
-  
-  # Compute the FEM surface
-  field <- fdaPDE::eval.FEM(fem, cbind(xx, yy))
-  field <- matrix(field, nrow=ngrid, ncol=ngrid)
-  
-  # Plot the field
-  plot3D::image2D(x=xs, y=ys, z=field, colvar=field, xlab="", ylab="", ...)
+plot_field <- function(lon, lat, field, ...) {
+  plot3D::image2D(x=lon, y=lat, z=field, colvar=field, 
+                  col=viridis::inferno(100), xlab="", ylab="", ...)
 }
 
 
-ggplot_field_grid <- function(coefs, basis, ngrid, locs=NULL, 
+ggplot_field <- function(lon, lat, field, ngrid, locs=NULL, 
                               fun=NULL, palette="viridis", ...) {
-  H <- ncol(coefs)
+  H <- ncol(field)
   
   # Set the x-y limits
-  xrng <- range(basis$mesh$nodes[,1])
-  yrng <- range(basis$mesh$nodes[,2])
+  xrng <- range(lon)
+  yrng <- range(lat)
   
   # Set the x-y grid
-  xs <- seq(from=xrng[1], to=xrng[2], length=ngrid)
-  ys <- seq(from=yrng[1], to=yrng[2], length=ngrid)
+  xs <- lon
+  ys <- lat
   
   # Set the x-y lattice
   xx <- rep(xs, ngrid)
   yy <- rep(ys, rep(ngrid, ngrid))
   
-  # Compute the FEM surface
-  field <- matrix(NA, nrow=ngrid^2, ncol=ncol(coefs))
-  for(h in 1:H){
-    fem <- fdaPDE::FEM(coefs[,h], basis)
-    field[,h] <- as.vector(fdaPDE::eval.FEM(fem, cbind(xx, yy)))
-  }
-  
   # Set the data-frames
   df_fems <- data.frame(
-    g = rep(colnames(coefs), each=ngrid^2),
+    g = rep(colnames(field), each=ngrid^2),
     x = rep(xx, times=H),
     y = rep(yy, times=H),
     z = as.vector(field))
   
   df_txt <- data.frame(
-    g = colnames(coefs),
+    g = colnames(field),
     x = rep(xrng[2]-.225*diff(xrng), H),
     y = rep(yrng[2]-.025*diff(yrng), H),
     t = paste0("TV = ", round(colMeans(field, na.rm=TRUE), 4)))
@@ -220,27 +210,11 @@ ggplot_field_grid <- function(coefs, basis, ngrid, locs=NULL,
     scale_fill_viridis_c(option=palette, limits=c(0,max(field)), na.value="transparent") +
     labs(x="Longitude", y="Latitude", shape="Response", fill=expression(TV(q[VB],p[MC])))
   
-  # trans=fun, 
-  
   # Plot the field
   return(plt)
 }
 
 
-accuracy <- function(sim, mu, sigma2) {
-  n <- length(sim)
-  K <- 201
-  idx <- seq(from=floor(n/2), to=n, by=5)
-  kde <- density(sim[idx])
-  lower <- min(kde$x)
-  upper <- max(kde$x)
-  x <- seq(from=lower, to=upper, length=K)
-  f1 <- approxfun(kde$x, kde$y, rule=2)(x)
-  f2 <- dnorm(x, mean=mu, sd=sqrt(sigma2))
-  dx <- diff(x)
-  df <- abs(f1 - f2)
-  err <- 0.5*sum((df[-1]+df[-K])*dx)
-  acc <- 1 - 0.5*err
-  return(acc)
-}
+
+
 

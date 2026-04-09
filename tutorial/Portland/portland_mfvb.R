@@ -14,7 +14,7 @@ SAVE <- TRUE
 DATAPATH <- "data/Portland"
 SAVEPATH <- "tutorial/Portland"
 RDSPATH <- paste(SAVEPATH, "rds", sep="/")
-CSVPATH <- paste(SAVEPATH, "csv", sep="/")
+CSVPATH <- paste(SAVEPATH, "csv/portland_MFVB", sep="/")
 IMGPATH <- paste(SAVEPATH, "img/portland_MFVB", sep="/")
 
 DATALAB <- "portland"
@@ -217,7 +217,7 @@ summary <- data.frame(
 print(summary)
 
 if (SAVE) {
-  filename <- "portland_mfvb_adj_summary.csv"
+  filename <- "portland_mfvb_summary.csv"
   filepath <- paste(SAVEPATH, filename, sep="/")
   write.csv2(summary, file=filepath, row.names=FALSE)
 }

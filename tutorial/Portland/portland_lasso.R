@@ -14,7 +14,7 @@ SAVE <- TRUE
 DATAPATH <- "data/Portland"
 SAVEPATH <- "tutorial/Portland"
 RDSPATH <- paste(SAVEPATH, "rds", sep="/")
-CSVPATH <- paste(SAVEPATH, "csv", sep="/")
+CSVPATH <- paste(SAVEPATH, "csv/portland_LASSO", sep="/")
 IMGPATH <- paste(SAVEPATH, "img/portland_LASSO", sep="/")
 
 DATALAB <- "portland"

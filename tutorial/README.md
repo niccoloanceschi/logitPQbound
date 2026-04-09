@@ -1,16 +1,12 @@
 # Reproducibility material for: *Optimal and computationally tractable lower bounds for logistic log-likelihoods*
 
-This repository contains the code used to reproduce the numerical experiments presented in the article [Anceschi, et al. (2025)](https://arxiv.org/abs/2410.10309) and, more specifically, in Section 5 and Appendix F
-
-In particular:
-- Penalized likelihood experiments (Table 1 in the paper and supplement)
-- Variational Bayes experiments (Figure 3 in the paper)
+This repository contains the code required to reproduce the numerical experiments presented in [Anceschi, et al. (2025)](https://arxiv.org/abs/2410.10309), with particular focus on Section 5 of the main paper and Section F of the Supplementary Material.
 
 ---
 
 ## Repository structure
 
-Each subfolder corresponds to a specific application discussed in the paper and supplement.
+The repository is organized in sub-folders, each corresponding to a specific application discussed in the paper and supplement:
 
 ```
 tutorial/
@@ -20,10 +16,9 @@ tutorial/
 └── tutorial_utils.R
 ```
 
-The R script `tutorial_utils.R` contains shared utility functions used across all experiments, including plotting functions and the computation of accuracy metrics, such as the total variation distance between univariate distributions.
+The R script `tutorial_utils.R` provides shared utility functions used across all experiments, including data preprocessing, plotting routines, and accuracy metrics (e.g., total variation distance).
 
-
-In particular, each application folder is organized as follows:
+Each application folder is organized as follows:
 
 ```
 tutorial/
@@ -38,7 +33,8 @@ tutorial/
 ├── ...
 ```
 
-Each R script in the folder reproduces a specific part of the analysis discussed in the article for the corresponding application. Moreover, each R script is self-contained and ready-to-use. Specifically, they implement the follwing experiments:
+Inside each application folder, all the R scripts are self-contained and can be executed independently to reproduce specific parts of the analysis discussed in the article.
+Specifically, each script implements one of the following experiments settings:
 
 - `<application>_ridge.R`  
   → Penalized likelihood with **ridge penalty**  
@@ -52,19 +48,19 @@ Each R script in the folder reproduces a specific part of the analysis discussed
 All the experiments listed above follow the same structure:
 
 1. Load the required packages and the utility functions
-2. Load the data `data/` folder from and standardize the predictors
-3. Set all the optimization control parameters to default values
+2. Load the data from the `data/` folder and standardize the predictors
+3. Set the optimization control parameters (default values are used in all experiments)
 4. Run penalized likelihood optimization or variational inference under different bounds:
    - **BL** (Böhning–Lindsay)
    - **PG** (Polya-Gamma)
    - **PQ** (proposed method)
-5. Save the outputs and results reported in the article or in the supplementary material:
+5. Save the outputs required to reproduce the results reported in the paper and supplementary material:
    - `csv/` → numerical summaries (iterations, runtime, log-likelihood, etc.)
    - `img/` → optional diagnostic plots 
    - `rds/` → fitted models and intermediate results
 
-The results reported in the article and supplementary material require the execution of all the R scripts under each of the application folders.
-The following table provide a schematic representation of the main results in the paper and the scripts that can be used to reproduce them.
+Reproducing the full set of results requires running all scripts across the three application folders.
+The following table provides a schematic representation of the main results in the paper and the scripts that can be used to reproduce them.
 
 | Paper element | Location in repo |
 |--------------|----------------|
@@ -89,14 +85,13 @@ As detailed in the article and supplementary material, the numerical experiments
 - number of regression parameters
 - number of tuning parameters
 
-In particular, `Portland/portland_mfvb.R` typically takes a lot of time due to the expensive Gibb sampling procedure used to obtain a state-of-the-art estimate of the posterior distribution.
+In particular, `Portland/portland_mfvb.R` typically takes a lot of time due to the expensive Gibbs sampling procedure used to obtain a state-of-the-art estimate of the posterior distribution.
 
 ---
 
 # Methodology 
 
 - The implementation closely follows the methodology described in Section 5 of the paper and Sections D, E, and F of the Supplementary Material.
-- All methods share the same optimization backbone, differing only in the choice of lower bound.
 - The PQ method consistently reduces the number of iterations and often improves total runtime, especially in high-dimensional or non-smooth settings.
 
 ---

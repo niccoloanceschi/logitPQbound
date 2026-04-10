@@ -3,7 +3,7 @@
 
 The repository includes the R functions to implement the novel piece-wise qaudratic bound for logistic log-likelihoods from the paper
 
-* Anceschi, N. Castiglione, C. and Rigon, T. and Zanella, G. and Durante, D. (2025), [Optimal lower bounds for logistic log-likelihoods](https://arxiv.org/abs/2410.10309), ArXiv. 
+* Anceschi, N. Castiglione, C. and Rigon, T. and Zanella, G. and Durante, D. (2025), [Optimal and computationally tractable lower bounds for logistic log-likelihoods](https://arxiv.org/abs/2410.10309), ArXiv. 
 
 The `logitPQbound` package can be installed by running the following R commands
 

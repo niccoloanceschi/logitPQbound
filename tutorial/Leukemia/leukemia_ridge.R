@@ -3,8 +3,7 @@
 
 suppressWarnings({
   # PQ-bound
-  devtools::load_all()
-  # library(logitPQbound)
+  library(logitPQbound)
   
   # Coordinate ascent for GLMs 
   library(glmnet)

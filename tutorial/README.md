@@ -16,23 +16,16 @@ Additionally, the `tutorial/` folder contains the R script `tutorial_utils.R`, w
 
 Each application sub-folder is organized as follows:
 
-- `img/`
-- `csv/`
-- `rds/`
-- `*_enet.R`
-- `*_lasso.R`
-- `*_ridge.R`
-- `*_mfvb.R`
-
-The above R scripts are self-contained and can be executed independently to reproduce specific parts of the analysis discussed in the article.
-Specifically, each script implements one of the following experiments settings:
-
+- `img/` → optional diagnostic plots
+- `csv/` → numerical summaries (iterations, runtime, log-likelihood, etc.)
+- `rds/` → fitted models and intermediate results
 - `*_ridge.R` → Penalized likelihood with **ridge penalty**  
 - `*_lasso.R` → Penalized likelihood with **lasso penalty**  
 - `*_enet.R` → Penalized likelihood with **elastic-net penalty**
 - `*_mfvb.R` → Bayesian inference via **variational Bayes** (only for Portland data)
 
-All these experiments follow the same structure:
+The above R scripts are self-contained and can be executed independently to reproduce specific parts of the analysis discussed in the article.
+All the application-specific experiments implemented in such R scripts follow the same structure:
 
 1. Load the required packages and utility functions
 2. Load the data from the `data/` folder and preprocess the predictors
@@ -41,10 +34,7 @@ All these experiments follow the same structure:
    - **BL** (Böhning–Lindsay)
    - **PG** (Polya-Gamma)
    - **PQ** (piecewise quadratic, proposed method)
-5. Save the outputs and the results reported in the paper and supplementary material:
-   - `img/` → optional diagnostic plots 
-   - `csv/` → numerical summaries (iterations, runtime, log-likelihood, etc.)
-   - `rds/` → fitted models and intermediate results
+5. Save the diagnostic information and final results in the output folders `img/`, `csv/`, `rds/`
 
 Reproducing the full set of results requires running all scripts across the three application folders (`Portland/`, `Alzheimer/`, and `Spam/`).
 The following table provides a schematic representation of the main results in the paper and the scripts that can be used to reproduce them.
@@ -83,6 +73,7 @@ As detailed in the article and supplementary material, the numerical experiments
 
 # References
 
-* Anceschi, N. Castiglione, C. and Rigon, T. and Zanella, G. and Durante, D. (2025), [Optimal and computationally tractable lower bounds for logistic log-likelihoods](https://arxiv.org/abs/2410.10309), ArXiv. 
+* Anceschi, N. Castiglione, C. and Rigon, T. and Zanella, G. and Durante, D. (2025)  
+  [Optimal and computationally tractable lower bounds for logistic log-likelihoods](https://arxiv.org/abs/2410.10309), ArXiv. 
 
 

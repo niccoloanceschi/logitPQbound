@@ -1,6 +1,6 @@
 # Reproducibility material for: *Optimal and computationally tractable lower bounds for logistic log-likelihoods*
 
-This repository contains the code required to reproduce the numerical experiments presented in [Anceschi, et al. (2025)](https://arxiv.org/abs/2410.10309), with particular focus on Section 5 of the main paper and Section F of the supplementary material.
+This repository contains the code required to reproduce the numerical experiments presented in the paper Anceschi, N. and Castiglione, C. and Rigon, T. and Zanella, G. and Durante, D. (2025), [Optimal lower bounds for logistic log-likelihoods](https://arxiv.org/abs/2410.10309), with particular focus on Section 5 of the main paper and Section F of the supplementary material.
 
 ---
 
@@ -98,8 +98,6 @@ In particular, `Portland/portland_mfvb.R` typically takes a lot of time due to t
 
 # References
 
-- Niccolò Anceschi, Cristian Castiglione, Tommaso Rigon, Giacomo Zanella, Daniele Durante.  
-  *Optimal and computationally tractable lower bounds for logistic log-likelihoods*  
-  arXiv preprint: [arXiv:2410.10309](https://arxiv.org/abs/2410.10309)
+* Anceschi, N. Castiglione, C. and Rigon, T. and Zanella, G. and Durante, D. (2025), [Optimal lower bounds for logistic log-likelihoods](https://arxiv.org/abs/2410.10309), ArXiv. 
 
 

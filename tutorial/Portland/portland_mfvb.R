@@ -1,6 +1,7 @@
 
 ## PACKAGE IMPORT ----
 
+library(logitPQbound)
 library(dplyr)
 library(ggplot2)
 library(Matrix)
@@ -25,14 +26,13 @@ MARKERS <- c(15:18)
 ## PORTLAND DATA ----
 
 load(paste(DATAPATH, "PortlandData.RData", sep="/"))
+load(paste(DATAPATH, "PortlandPred.RData", sep="/"))
 
 ## UTILITY FUNCTIONS ----
 
 source("tutorial/tutorial_utils.R")
 
 ## VB-PDE FIT ----
-
-devtools::load_all()
 
 n <- nrow(psi)
 p <- ncol(psi)
@@ -322,8 +322,6 @@ if (SAVE) {
 
 ### Spatial fields ----
 
-load(paste(DATAPATH, "PortlandPred.RData", sep="/"))
-
 if (SAVE) {
   filename <- "portland_mfvb_field_pr.pdf"
   filepath <- paste(IMGPATH, filename, sep="/")
@@ -336,15 +334,6 @@ if (SAVE) {
   plot_field(lon_new, lat_new, plogis(matrix(psi_new %*% mu_PQ, ngrid, ngrid)), border, clim=c(0,1), main="PQ-VB")
   plot_field(lon_new, lat_new, plogis(matrix(psi_new %*% mu_MC, ngrid, ngrid)), border, clim=c(0,1), main="MCMC")
   par(mfrow=c(1,1))
-  ## with(as.data.frame(locs), {
-  ##   par(mfrow = c(2,2))
-  ##   xlim <- range(nodes[,1]); ylim <- range(nodes[,2]); clim <- c(0,1)
-  ##   plot_field(c(plogis(mu_BL)), basis, 200, clim=c(0,1), main="BL-VB")
-  ##   plot_field(c(plogis(mu_PG)), basis, 200, clim=c(0,1), main="PG-VB")
-  ##   plot_field(c(plogis(mu_PQ)), basis, 200, clim=c(0,1), main="PQ-VB")
-  ##   plot_field(c(plogis(mu_MC)), basis, 200, clim=c(0,1), main="MCMC")
-  ##   par(mfrow=c(1,1))
-  ## })
   dev.off()
 }
 

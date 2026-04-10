@@ -1,6 +1,7 @@
 
 ## PACKAGE IMPORT ----
 
+library(logitPQbound)
 library(dplyr)
 library(ggplot2)
 library(Matrix)
@@ -31,8 +32,6 @@ load(paste(DATAPATH, "PortlandData.RData", sep="/"))
 source("tutorial/tutorial_utils.R")
 
 ## OPTIM SET-UP ----
-
-devtools::load_all()
 
 # Data dimensions
 n <- nrow(psi)

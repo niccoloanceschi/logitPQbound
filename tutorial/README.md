@@ -6,60 +6,47 @@ This repository contains the code required to reproduce the numerical experiment
 
 ## Repository structure
 
-The repository is organized in sub-folders, each corresponding to a specific application discussed in the paper and supplement:
+The `tutorial/` folder is organized in sub-folders, each corresponding to a specific application discussed in the paper and supplementary material:
 
-```
-tutorial/
-├── Alzheimer/
-├── Portland/
-├── Spam/
-└── tutorial_utils.R
-```
+- `Portland/` → Spatial risk modelling of motor-vehicle theft events in Portland (Oregon).
+- `Alzheimer/` → Early-stage Alzheimer’s disease classification based on demographic and biological covariates.
+- `Spam/` → Binary email classification (spam vs. non-spam) based on textual features.
 
-The R script `tutorial_utils.R` provides shared utility functions used across all experiments, including data preprocessing, plotting routines, and accuracy metrics (e.g., total variation distance).
+Additionally, the `tutorial/` folder contains the R script `tutorial_utils.R`, which provides shared utility functions used across all experiments, including data preprocessing, plotting routines, and accuracy metrics (e.g., total variation distance).
 
-Each application folder is organized as follows:
+Each application sub-folder is organized as follows:
 
-```
-tutorial/
-├── <Application>/
-│ ├── csv/
-│ ├── img/
-│ ├── rds/
-│ ├── <application>_enet.R
-│ ├── <application>_lasso.R
-│ ├── <application>_ridge.R
-│ └── <application>_mfvb.R
-├── ...
-```
+- `img/`
+- `csv/`
+- `rds/`
+- `*_enet.R`
+- `*_lasso.R`
+- `*_ridge.R`
+- `*_mfvb.R`
 
-Inside each application folder, all the R scripts are self-contained and can be executed independently to reproduce specific parts of the analysis discussed in the article.
+The above R scripts are self-contained and can be executed independently to reproduce specific parts of the analysis discussed in the article.
 Specifically, each script implements one of the following experiments settings:
 
-- `<application>_ridge.R`  
-  → Penalized likelihood with **ridge penalty**  
-- `<application>_lasso.R`  
-  → Penalized likelihood with **lasso penalty**  
-- `<application>_enet.R`  
-  → Penalized likelihood with **elastic-net penalty**
-- `<application>_mfvb.R`  
-  → Bayesian inference via **variational Bayes** (only for Portland data)
+- `*_ridge.R` → Penalized likelihood with **ridge penalty**  
+- `*_lasso.R` → Penalized likelihood with **lasso penalty**  
+- `*_enet.R` → Penalized likelihood with **elastic-net penalty**
+- `*_mfvb.R` → Bayesian inference via **variational Bayes** (only for Portland data)
 
-All the experiments listed above follow the same structure:
+All these experiments follow the same structure:
 
-1. Load the required packages and the utility functions
-2. Load the data from the `data/` folder and standardize the predictors
+1. Load the required packages and utility functions
+2. Load the data from the `data/` folder and preprocess the predictors
 3. Set the optimization control parameters (default values are used in all experiments)
-4. Run penalized likelihood optimization or variational inference under different bounds:
+4. Run penalized likelihood optimization or variational inference under different MM bounds:
    - **BL** (Böhning–Lindsay)
    - **PG** (Polya-Gamma)
-   - **PQ** (proposed method)
-5. Save the outputs required to reproduce the results reported in the paper and supplementary material:
-   - `csv/` → numerical summaries (iterations, runtime, log-likelihood, etc.)
+   - **PQ** (piecewise quadratic, proposed method)
+5. Save the outputs and the results reported in the paper and supplementary material:
    - `img/` → optional diagnostic plots 
+   - `csv/` → numerical summaries (iterations, runtime, log-likelihood, etc.)
    - `rds/` → fitted models and intermediate results
 
-Reproducing the full set of results requires running all scripts across the three application folders.
+Reproducing the full set of results requires running all scripts across the three application folders (`Portland/`, `Alzheimer/`, and `Spam/`).
 The following table provides a schematic representation of the main results in the paper and the scripts that can be used to reproduce them.
 
 | Paper element | Location in repo |
@@ -84,8 +71,6 @@ As detailed in the article and supplementary material, the numerical experiments
 - penalty type
 - number of regression parameters
 - number of tuning parameters
-
-In particular, `Portland/portland_mfvb.R` typically takes a lot of time due to the expensive Gibbs sampling procedure used to obtain a state-of-the-art estimate of the posterior distribution.
 
 ---
 

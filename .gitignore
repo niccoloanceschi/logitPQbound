@@ -39,6 +39,8 @@ sandbox/**
 
 # Backup files
 **/*.RDS
+rds/*
+!rds/.gitkeep
 
 # Documentation html files
 *.html

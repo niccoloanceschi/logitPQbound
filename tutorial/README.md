@@ -22,6 +22,7 @@ Each application sub-folder is organized as follows:
 - `*_ridge.R` → Penalized likelihood with **ridge penalty**  
 - `*_lasso.R` → Penalized likelihood with **lasso penalty**  
 - `*_enet.R` → Penalized likelihood with **elastic-net penalty**
+- `*_logit.R` → Un-penalized likelihood (only for Spam data)
 - `*_mfvb.R` → Bayesian inference via **variational Bayes** (only for Portland data)
 
 The above R scripts are self-contained and can be executed independently to reproduce specific parts of the analysis discussed in the article.

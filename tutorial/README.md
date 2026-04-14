@@ -19,11 +19,12 @@ Each application sub-folder is organized as follows:
 - `img/` → optional diagnostic plots
 - `csv/` → numerical summaries (iterations, runtime, log-likelihood, etc.)
 - `rds/` → fitted models and intermediate results
-- `*_ridge.R` → Penalized likelihood with **ridge penalty**  
-- `*_lasso.R` → Penalized likelihood with **lasso penalty**  
-- `*_enet.R` → Penalized likelihood with **elastic-net penalty**
-- `*_logit.R` → Un-penalized likelihood (only for Spam data)
-- `*_mfvb.R` → Bayesian inference via **variational Bayes** (only for Portland data)
+- `*_logit.R` → Un-penalized likelihood (Spam dataset only)
+- `*_ridge.R` → Penalized likelihood with **ridge penalty** over a solution path
+- `*_lasso.R` → Penalized likelihood with **lasso penalty** over a solution path
+- `*_enet.R` → Penalized likelihood with **elastic-net penalty** over a solution path
+- `*_enet2d.R` → Penalized likelihood with **elastic-net penalty** over a two-dimensional tuning grid (Portland dataset only)
+- `*_mfvb.R` → Bayesian inference via **variational Bayes** (Portland dataset only)
 
 The above R scripts are self-contained and can be executed independently to reproduce specific parts of the analysis discussed in the article.
 All the application-specific experiments implemented in such R scripts follow the same structure:
@@ -42,7 +43,7 @@ The following table provides a schematic representation of the main results in t
 
 | Paper element | Location in repo |
 |--------------|----------------|
-| Table 1 (main paper) | `Portland/portland_enet.R` |
+| Table 1 (main paper) | `Portland/portland_enet.R`, `Portland/portland_enet2d.R` |
 | Figure 3 (main paper) | `Portland/portland_mfvb.R` |
 | Table F.1 (supplement) | all `*_ridge.R`, `*_lasso.R`, `*_enet.R` |
 

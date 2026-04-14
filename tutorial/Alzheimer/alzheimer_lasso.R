@@ -98,95 +98,6 @@ freq <- 100
 # Initial values
 beta_start <- c(qlogis(mean(y)), rep(0, times=p-1))
 
-## SINGLE FIT ----
-
-### BL fit ----
-{
-  cat("BL...\n") 
-  time_init <- proc.time()
-  fit_1run_BL <- fit_logit_enet_coord(y, X, type='BL', beta_start=beta_start, 
-                                      lambda=lambda, alpha=ALPHA, eps=eps, phi=phi, 
-                                      intercept=intercept, maxiter=maxiter, 
-                                      abstol=objtol, reltol=reltol, etatol=etatol,
-                                      verbose=TRUE, freq=freq)
-  fit_1run_BL$exetime <- (proc.time() - time_init)[3]
-}
-
-### PG fit ----
-{
-  cat("PG...\n") 
-  time_init <- proc.time()
-  fit_1run_PG <- fit_logit_enet_coord(y, X, type='PG', beta_start=beta_start, 
-                                      lambda=lambda, alpha=ALPHA, eps=eps, phi=phi, 
-                                      intercept=intercept, maxiter=maxiter, 
-                                      abstol=objtol, reltol=reltol, etatol=etatol, 
-                                      verbose=TRUE, freq=freq)
-  fit_1run_PG$exetime <- (proc.time() - time_init)[3]
-}
-
-### PQ fit ----
-{
-  cat("PQ...\n") 
-  time_init <- proc.time()
-  fit_1run_PQ <- fit_logit_enet_coord(y, X, type='PQ', beta_start=beta_start, 
-                                      lambda=lambda, alpha=ALPHA, eps=eps, phi=phi, 
-                                      intercept=intercept, maxiter=maxiter, 
-                                      abstol=objtol, reltol=reltol, etatol=etatol, 
-                                      verbose=TRUE, freq=freq)
-  fit_1run_PQ$exetime <- (proc.time() - time_init)[3]
-}
-
-### Summary ----
-cat("BL:", fit_1run_BL$exetime, "\n",
-    "PG:", fit_1run_PG$exetime, "\n",
-    "PQ:", fit_1run_PQ$exetime, "\n")
-
-fit_1run_list <- list("BL"=fit_1run_BL, 
-                      "PG"=fit_1run_PG, 
-                      "PQ"=fit_1run_PQ)      
-
-df_1run_summary <- data.frame(
-  alpha = rep(ALPHA, length(fit_1run_list)),
-  method = names(fit_1run_list),
-  niter = sapply(fit_1run_list, \(.) .$niter),
-  exetime = sapply(fit_1run_list, \(.) .$exetime),
-  timegain = sapply(fit_1run_list, \(.) {1-fit_1run_PQ$exetime/.$exetime}),
-  loglik = sapply(fit_1run_list, \(.) .$loglik),
-  row.names = seq(length(fit_1run_list)))
-
-print(df_1run_summary)
-
-if (FALSE) {
-  filename <- paste(DATALAB, "_lasso_1run_summary.csv", sep="")
-  filepath <- paste(CSVPATH, filename, sep="/")
-  write.csv2(df_1run_summary, file=filepath, row.names=FALSE)
-}
-
-if (FALSE) {
-  filename <- paste(DATALAB, "_lasso_1run_fit.RDS", sep="")
-  filepath <- paste(RDSPATH, filename, sep="/")
-  saveRDS(fit_1run_list, file=filepath)
-}
-
-if (FALSE) {
-  filename <- paste(DATALAB, "_lasso_1run_loglik.pdf", sep="")
-  filepath <- paste(IMGPATH, filename, sep="/")
-  height <- 4; width <- 10; zoom <- 1
-  pdf(file=filepath, height=zoom*height, width=zoom*width)
-  plot_1run_loglik(fit_1run_list, df_1run_summary, COLORS, MARKERS)
-  dev.off()
-}
-
-
-if (FALSE) {
-  filename <- paste(DATALAB, "_lasso_1run_pairs.pdf", sep="")
-  filepath <- paste(IMGPATH, filename, sep="/")
-  height <- 7; width <- 9; zoom <- 1
-  pdf(file=filepath, height=zoom*height, width=zoom*width)
-  plot_1run_pairs(fit_1run_list)
-  dev.off()
-}
-
 ## SOLUTION PATH ----
 
 ### BL fit ----
@@ -227,20 +138,9 @@ if (FALSE) {
 
 ### Summary ----
 
-cat("BL:", fit_path_BL$tottime, "\n",
-    "PG:", fit_path_PG$tottime, "\n",
-    "PQ:", fit_path_PQ$tottime, "\n")
-
 fit_path_list <- list("BL"=fit_path_BL, 
                       "PG"=fit_path_PG, 
                       "PQ"=fit_path_PQ)
-
-
-if (SAVE) {
-  filename <- paste(DATALAB, "_lasso_path_fit.RDS", sep="")
-  filepath <- paste(RDSPATH, filename, sep="/")
-  saveRDS(fit_path_list, file=filepath)
-}
 
 df_path_summary <- data.frame(
   alpha = rep(ALPHA, length(fit_path_list)),
@@ -260,50 +160,20 @@ if (SAVE) {
   write.csv2(df_path_summary, file=filepath, row.names=FALSE)
 }
 
+fit_path_coeff <- array(NA, dim = c(p, length(lambdas), 3))
+fit_path_coeff[,,1] <- fit_path_BL$beta
+fit_path_coeff[,,2] <- fit_path_PG$beta
+fit_path_coeff[,,3] <- fit_path_PQ$beta
+dimnames(fit_path_coeff) <- list(beta = 1:p,
+                                 lambda = 1:length(lambdas),
+                                 method = c("BL", "PG", "PQ"))
 
-df_path_extended <- data.frame(
-  method = rep(names(fit_path_list), each=length(lambdas)),
-  alpha = rep(ALPHA, times=length(fit_path_list)*length(lambdas)),
-  lambda = c(sapply(fit_path_list, \(.) .$lambda)),
-  niter = c(sapply(fit_path_list, \(.) .$niter)),
-  exetime = c(sapply(fit_path_list, \(.) .$exetime)),
-  timegain = c(sapply(fit_path_list, \(.) {1-fit_path_PQ$exetime/.$exetime})),
-  loglik = c(sapply(fit_path_list, \(.) .$loglik)))
-
-print(df_path_extended)
-
-if (FALSE) {
-  filename <- paste0(DATALAB, "_lasso_path_extended.csv")
-  filepath <- paste(CSVPATH, filename, sep="/")
-  write.csv2(df_path_extended, file=filepath, row.names=FALSE)
+if (SAVE) {
+  filename <- paste(DATALAB, "_lasso_path_coeff.RData", sep="")
+  filepath <- paste(RDSPATH, filename, sep="/")
+  save(alpha, lambdas, fit_path_coeff, file=filepath)
 }
 
-
-if (FALSE) {
-  filename <- paste0(DATALAB, "_lasso_path_timegain.pdf")
-  filepath <- paste(IMGPATH, filename, sep="/")
-  height <- 4; width <- 8; zoom <- 1
-  pdf(file=filepath, height=zoom*height, width=zoom*width)
-  plot_path_timegain(df_path_summary, COLORS, MARKERS)
-  dev.off()
-}
-
-
-### Solution path ----
-
-if (FALSE) {
-  filename <- paste(DATALAB, "_lasso_path_exetime.pdf", sep="")
-  filepath <- paste(IMGPATH, filename, sep="/")
-  height <- 4; width <- 6; zoom <- 2
-  pdf(file=filepath, height=zoom*height, width=zoom*width)
-  par(mfrow=c(2,2))
-  plot_fit_path(fit_path_list, field="niter", main="Number of Iterations", position="topright", pch=MARKERS, col=COLORS, lty=1)
-  plot_fit_path(fit_path_list, field="exetime", main="Execution Time", position="topright", pch=MARKERS, col=COLORS, lty=1)
-  plot_fit_path(fit_path_list, field="loglik", main="Penalized Log-Likelihood", position="topright", pch=MARKERS, col=COLORS, lty=1)
-  plot_fit_path(fit_path_list, field="pnorm", main="Coefficient Norm", position="topright", pch=MARKERS, col=COLORS, lty=1)
-  par(mfrow=c(1,1))
-  dev.off()
-}
 
 ## END OF FILE ----
 

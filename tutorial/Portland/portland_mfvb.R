@@ -15,8 +15,8 @@ SAVE <- TRUE
 DATAPATH <- "data/Portland"
 SAVEPATH <- "tutorial/Portland"
 RDSPATH <- paste(SAVEPATH, "rds", sep="/")
-CSVPATH <- paste(SAVEPATH, "csv/portland_MFVB", sep="/")
-IMGPATH <- paste(SAVEPATH, "img/portland_MFVB", sep="/")
+CSVPATH <- paste(SAVEPATH, "csv/portland", sep="/")
+IMGPATH <- paste(SAVEPATH, "img/portland", sep="/")
 
 DATALAB <- "portland"
 
@@ -256,7 +256,7 @@ if (SAVE) {
 }
 
 
-if (SAVE) {
+if (FALSE) {
   filename <- "portland_mfvb_error_beta.pdf"
   filepath <- paste(IMGPATH, filename, sep="/")
   height <- 4; width <- 10; zoom <- 1
@@ -278,7 +278,7 @@ if (SAVE) {
   dev.off()
 }
 
-if (SAVE) {
+if (FALSE) {
   filename <- "portland_mfvb_error_eta.pdf"
   filepath <- paste(IMGPATH, filename, sep="/")
   height <- 4; width <- 10; zoom <- 1
@@ -302,7 +302,7 @@ if (SAVE) {
 
 ### Spatial maps ----
 
-if (SAVE) {
+if (FALSE) {
   filename <- "portland_mfvb_map_pr.pdf"
   filepath <- paste(IMGPATH, filename, sep="/")
   height <- 9; width <- 10; zoom <- 1
@@ -322,7 +322,7 @@ if (SAVE) {
 
 ### Spatial fields ----
 
-if (SAVE) {
+if (FALSE) {
   filename <- "portland_mfvb_field_pr.pdf"
   filepath <- paste(IMGPATH, filename, sep="/")
   height <- 9; width <- 10; zoom <- 1
@@ -337,7 +337,7 @@ if (SAVE) {
   dev.off()
 }
 
-if (SAVE) {
+if (FALSE) {
   filename <- "portland_mfvb_field_tvd.pdf"
   filepath <- paste(IMGPATH, filename, sep="/")
   height <- 3; width <- 10; zoom <- 1.5

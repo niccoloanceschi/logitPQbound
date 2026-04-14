@@ -15,8 +15,8 @@ SAVE <- TRUE
 DATAPATH <- "data/Portland"
 SAVEPATH <- "tutorial/Portland"
 RDSPATH <- paste(SAVEPATH, "rds", sep="/")
-CSVPATH <- paste(SAVEPATH, "csv/portland_LASSO", sep="/")
-IMGPATH <- paste(SAVEPATH, "img/portland_LASSO", sep="/")
+CSVPATH <- paste(SAVEPATH, "csv/portland", sep="/")
+IMGPATH <- paste(SAVEPATH, "img/portland", sep="/")
 
 DATALAB <- "portland"
 
@@ -148,13 +148,13 @@ df_1run_summary <- data.frame(
 
 print(df_1run_summary)
 
-if (SAVE) {
+if (FALSE) {
   filename <- paste0("portland_lasso_1run_summary.csv")
   filepath <- paste(CSVPATH, filename, sep="/")
   write.csv2(df_1run_summary, file=filepath, row.names=FALSE)
 }
 
-if (SAVE) {
+if (FALSE) {
   filename <- paste0("portland_lasso_1run_loglik.pdf")
   filepath <- paste(IMGPATH, filename, sep="/")
   height <- 4; width <- 10; zoom <- 1
@@ -163,7 +163,7 @@ if (SAVE) {
   dev.off()
 }
 
-if (SAVE) {
+if (FALSE) {
   filename <- paste0("portland_lasso_1run_map_pr.pdf")
   filepath <- paste(IMGPATH, filename, sep="/")
   height <- 4.5; width <- 15; zoom <- 1
@@ -260,7 +260,7 @@ df_path_extended <- data.frame(
 
 print(df_path_extended)
 
-if (SAVE) {
+if (FALSE) {
   filename <- paste("portland_lasso_path_extended.csv", sep="")
   filepath <- paste(CSVPATH, filename, sep="/")
   write.csv2(df_path_extended, file=filepath, row.names=FALSE)
@@ -277,7 +277,7 @@ if (SAVE) {
 
 ### Solution path ----
 
-if (SAVE) {
+if (FALSE) {
   filename <- "portland_lasso_path_exetime.pdf"
   filepath <- paste(IMGPATH, filename, sep="/")
   height <- 4; width <- 6; zoom <- 2
@@ -293,7 +293,7 @@ if (SAVE) {
 
 ### Spatial maps ----
 
-if (SAVE) {
+if (FALSE) {
   filename <- paste0("portland_lasso_path_map_pr.pdf")
   filepath <- paste(IMGPATH, filename, sep="/")
   height <- 4.5; width <- 15; zoom <- 1

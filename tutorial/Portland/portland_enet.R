@@ -234,7 +234,7 @@ fit_path_list <- list("BL"=fit_path_BL,
                       "PQ"=fit_path_PQ)
 
 if (SAVE) {
-  filename <- paste(DATALAB, "_enet", LALPHA,"_path_fit.RDS", sep="")
+  filename <- paste(DATALAB, "_enet", lalpha,"_path_fit.RDS", sep="")
   filepath <- paste(RDSPATH, filename, sep="/")
   saveRDS(fit_path_list, file=filepath)
 }

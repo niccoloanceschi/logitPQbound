@@ -12,7 +12,22 @@ set_ctr_dual = function(tol=1e-4, maxiter=100){
 }
 
 #' @title Set the control parameters of the ADMM algorithm
-#' @keywords internal
+#' 
+#' @param rho Penalty parameter.
+#' @param tau Relaxation parameter.
+#' @param gamma Proximal parameter.
+#' @param intercept Is the intercept included in `X` or not?
+#' @param spthr Percentage of non-zero element in the system matrix to activate sparse solvers.
+#' @param smw Must SMW formula be used? 
+#' @param precondition Must Jacobi preconditioning be used?
+#' @param objtol Convergence threshold for the absolute change in the log-likelihood.
+#' @param reltol Convergence threshold for the relative change in the primal and dual variables.
+#' @param abstol Convergence threshold for the absolute change in the the primal and dual variables.
+#' @param maxiter Maximum number of iterations. If reached.
+#' @param verbose Print the intermediate state of the optimization.
+#' @param freq How often print the optimization state.
+#' 
+#' @export
 set_ctr_admm = function(rho=1.0, tau=0.0, gamma=0.0, intercept=FALSE, 
                         spthr=0.9, smw=FALSE, precondition=FALSE,
                         objtol=1e-3, reltol=1e-3, abstol=1e-4, 

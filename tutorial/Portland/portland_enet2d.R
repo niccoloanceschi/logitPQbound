@@ -190,21 +190,6 @@ if (SAVE) {
   write.csv2(df_path_summary, file=filepath, row.names=FALSE)
 }
 
-print(df_path_extended)
 
-if (SAVE) {
-  filename <- paste("portland_enet2d_path_extended.csv", sep="")
-  filepath <- paste(CSVPATH, filename, sep="/")
-  write.csv2(df_path_extended, file=filepath, row.names=FALSE)
-}
-
-if (FALSE) {
-  filename <- paste("portland_enet2d_path_timegain.pdf", sep="")
-  filepath <- paste(IMGPATH, filename, sep="/")
-  height <- 4; width <- 10; zoom <- 1
-  pdf(file=filepath, height=zoom*height, width=zoom*width)
-  plot_path_timegain(df_path_summary, COLORS, MARKERS)
-  dev.off()
-}
 
 ## END OF FILE ----

@@ -97,9 +97,15 @@ beta0 <- NULL
 ## RESULTS ----
 
 if (SAVE) {
+  fit_MC_tr <- fit_MC$trace$beta
+  fit_MC$trace$beta <- sqrt(rowMeans(fit_MC_tr^2))
+  
   filename <- "portland_mfvb_fit.RData"
   filepath <- paste(RDSPATH, filename, sep="/")
   save(fit_BL, fit_PG, fit_PQ, fit_MC, file=filepath)
+  
+  fit_MC$trace$beta <- fit_MC_tr
+  rm(fit_MC_tr)
 }
 
 ### Summary measures ----
@@ -166,6 +172,19 @@ acc_eta_PG <- sapply(1:n, function(i) {accuracy(c(trace_eta_MC[,i]), eta_PG[i], 
 acc_eta_PQ <- sapply(1:n, function(i) {accuracy(c(trace_eta_MC[,i]), eta_PQ[i], var_eta_PQ[i])})
 acc_eta_MC <- rep(1.0, times=n)
 
+# Accuracy scores (predicted field)
+loc <- expand.grid(x=lon_new, y=lat_new)
+out <- sp::point.in.polygon(loc[,1], loc[,2], border[,1], border[,2])
+
+acc_field_BL <- as.vector(as.matrix(psi_new %*% acc_beta_BL))
+acc_field_PG <- as.vector(as.matrix(psi_new %*% acc_beta_PG))
+acc_field_PQ <- as.vector(as.matrix(psi_new %*% acc_beta_PQ))
+acc_field_MC <- NA
+
+acc_field_BL[out == 0] <- NA
+acc_field_PG[out == 0] <- NA
+acc_field_PQ[out == 0] <- NA
+
 # Posterior mean error (basis parameters)
 err_mean_beta_BL <- abs(mu_BL - mu_MC)
 err_mean_beta_PG <- abs(mu_PG - mu_MC)
@@ -193,6 +212,7 @@ err_var_eta_MC <- rep(0.0, times=n)
 # Average accuracy/error scores
 tvd_pdf_beta  <- rowMeans(rbind(1-acc_beta_BL, 1-acc_beta_PG, 1-acc_beta_PQ, 1-acc_beta_MC))
 tvd_pdf_eta   <- rowMeans(rbind(1-acc_eta_BL, 1-acc_eta_PG, 1-acc_eta_PQ, 1-acc_eta_MC))
+tvd_pdf_field <- rowMeans(rbind(1-acc_field_BL, 1-acc_field_PG, 1-acc_field_PQ, 1-acc_field_MC), na.rm=TRUE)
 mae_mean_beta <- rowMeans(rbind(err_mean_beta_BL, err_mean_beta_PG, err_mean_beta_PQ, err_mean_beta_MC))
 mae_var_beta  <- rowMeans(rbind(err_var_beta_BL, err_var_beta_PG, err_var_beta_PQ, err_var_beta_MC))
 mae_mean_eta  <- rowMeans(rbind(err_mean_eta_BL, err_mean_eta_PG, err_mean_eta_PQ, err_mean_eta_MC))
@@ -205,12 +225,13 @@ summary <- data.frame(
   exetime = round(c(exetime_BL, exetime_PG, exetime_PQ, exetime_MC), 3),
   timegain = round(1-c(exetime_BL, exetime_PG, exetime_PQ, exetime_MC)/exetime_MC, 4),
   elbo = round(c(elbo_BL, elbo_PG, elbo_PQ, elbo_MC), 3),
-  tv_dist_beta = round(tvd_pdf_beta, 3),
-  mae_mean_beta = round(mae_mean_beta, 3),
-  mae_var_beta = round(mae_var_beta, 3),
-  tv_dist_eta = round(tvd_pdf_eta, 3),
-  mae_mean_eta = round(mae_mean_eta, 3),
-  mae_var_eta = round(mae_var_eta, 3),
+  tv_dist_field = round(tvd_pdf_field, 4),
+  tv_dist_beta = round(tvd_pdf_beta, 4),
+  mae_mean_beta = round(mae_mean_beta, 4),
+  mae_var_beta = round(mae_var_beta, 4),
+  tv_dist_eta = round(tvd_pdf_eta, 4),
+  mae_mean_eta = round(mae_mean_eta, 4),
+  mae_var_eta = round(mae_var_eta, 4),
   row.names = c(1:4)
 )
 

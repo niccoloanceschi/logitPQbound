@@ -5,22 +5,9 @@ suppressWarnings({
   # PQ-bound
   library(logitPQbound)
   
-  # Coordinate ascent for GLMs 
-  library(glmnet)
-  
   # Tidyverse
   library(dplyr)
   library(ggplot2)
-  
-  # Viridis colours
-  library(viridis)
-  
-  # Sparse linear algebra
-  library(Matrix)
-  library(sparseinv)
-  
-  # Benchmarking
-  library(microbenchmark)
 })
 
 

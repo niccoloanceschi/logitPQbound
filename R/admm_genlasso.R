@@ -16,7 +16,7 @@
 #' 
 #' @return A list containing the estimated coefficients and the optimization history.
 #' 
-#' @export
+#' @keywords internal
 solve_admm_ridge_PQ <- function(X, y, w, nu, pL2, beta0=NULL, 
                                 rho=1.0, precondition=FALSE, 
                                 objtol=1e-5, reltol=1e-2, abstol=1e-4, 
@@ -84,7 +84,7 @@ solve_admm_ridge_PQ <- function(X, y, w, nu, pL2, beta0=NULL,
 #'   \item \code{trace}: data-frame collecting the optimization history
 #' }
 #' 
-#' @export
+#' @keywords internal
 solve_admm_genenet_PQ <- function(X, y, w, nu, D=diag(ncol(X)), d=numeric(nrow(D)),
                                   beta0=NULL, z0=NULL, u0=NULL, lambda=1.0, alpha=0.99, 
                                   eps=1e-8, rho=1.0, tau=0.0, gamma=0.0, intercept=TRUE, 
@@ -321,7 +321,7 @@ solve_admm_genenet_PQ <- function(X, y, w, nu, D=diag(ncol(X)), d=numeric(nrow(D
 }
 
 #' @rdname solve_admm_genenet_PQ
-#' @export
+#' @keywords internal
 solve_admm_genenet_WLS <- function(X, y, w, D=diag(ncol(X)), d=numeric(nrow(D)),
                                    beta0=NULL, z0=NULL, u0=NULL, lambda=1.0, alpha=0.99, 
                                    eps=1e-8, rho=1.0, tau=0.0, gamma=0.0, intercept=TRUE, 
@@ -594,7 +594,7 @@ solve_admm_genenet_WLS <- function(X, y, w, D=diag(ncol(X)), d=numeric(nrow(D)),
 #'   \item \code{trace}: data-frame collecting the optimization history
 #' }
 #' 
-#' @export
+#' @keywords internal
 solve_admm_spenet_PQ <- function(X, y, w, nu, D=diag(ncol(X)), d=numeric(nrow(D)),
                                  beta0=NULL, z0=NULL, u0=NULL, lambda=1.0, alpha=0.99, 
                                  eps=1e-8, rho=1.0, tau=0.0, gamma=0.0, intercept=TRUE, 
@@ -781,7 +781,7 @@ solve_admm_spenet_PQ <- function(X, y, w, nu, D=diag(ncol(X)), d=numeric(nrow(D)
 }
 
 #' @rdname solve_admm_spenet_PQ
-#' @export
+#' @keywords internal
 solve_admm_spenet_WLS <- function(X, y, w, D=diag(ncol(X)), d=numeric(nrow(D)),
                                   beta0=NULL, z0=NULL, u0=NULL, lambda=1.0, alpha=0.99, 
                                   eps=1e-8, rho=1.0, tau=0.0, gamma=0.0, intercept=TRUE, 

@@ -51,3 +51,4 @@ A list containing the estimated coefficients and the optimization history.
 \description{
 ADMM optimizer for the PQ generalized lasso problem
 }
+\keyword{internal}

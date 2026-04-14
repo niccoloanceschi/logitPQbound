@@ -14,6 +14,8 @@ fit_logit_genlasso_path(
   alpha = 0.99,
   eps = 1e-10,
   gamma = 1,
+  phi = 0.9,
+  approx = TRUE,
   intercept = FALSE,
   maxiter = 1000L,
   abstol = 1e-04,

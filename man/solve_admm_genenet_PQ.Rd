@@ -123,3 +123,4 @@ solve_admm_genenet_WLS(
 \description{
 Compute the generalized elastic-net solution using the ADMM algorithm
 }
+\keyword{internal}

@@ -20,7 +20,33 @@ set_ctr_admm(
   freq = 10
 )
 }
+\arguments{
+\item{rho}{Penalty parameter.}
+
+\item{tau}{Relaxation parameter.}
+
+\item{gamma}{Proximal parameter.}
+
+\item{intercept}{Is the intercept included in \code{X} or not?}
+
+\item{spthr}{Percentage of non-zero element in the system matrix to activate sparse solvers.}
+
+\item{smw}{Must SMW formula be used?}
+
+\item{precondition}{Must Jacobi preconditioning be used?}
+
+\item{objtol}{Convergence threshold for the absolute change in the log-likelihood.}
+
+\item{reltol}{Convergence threshold for the relative change in the primal and dual variables.}
+
+\item{abstol}{Convergence threshold for the absolute change in the the primal and dual variables.}
+
+\item{maxiter}{Maximum number of iterations. If reached.}
+
+\item{verbose}{Print the intermediate state of the optimization.}
+
+\item{freq}{How often print the optimization state.}
+}
 \description{
 Set the control parameters of the ADMM algorithm
 }
-\keyword{internal}

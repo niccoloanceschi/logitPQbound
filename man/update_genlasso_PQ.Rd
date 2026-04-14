@@ -8,8 +8,8 @@ update_genlasso_PQ(
   beta,
   z,
   u,
+  s,
   eta,
-  stable,
   y,
   X,
   w,
@@ -18,6 +18,8 @@ update_genlasso_PQ(
   lambda,
   alpha,
   eps,
+  phi,
+  approx,
   ctr
 )
 }

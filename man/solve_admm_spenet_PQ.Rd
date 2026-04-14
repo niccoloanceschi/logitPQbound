@@ -52,6 +52,9 @@ solve_admm_spenet_WLS(
   spthr = 0.9,
   smw = FALSE,
   precondition = FALSE,
+  objtol = 1e-05,
+  reltol = 0.01,
+  abstol = 1e-04,
   maxiter = 1000,
   verbose = FALSE,
   freq = 10
@@ -120,3 +123,4 @@ solve_admm_spenet_WLS(
 \description{
 Compute the generalized elastic-net solution using the sparse ADMM algorithm
 }
+\keyword{internal}

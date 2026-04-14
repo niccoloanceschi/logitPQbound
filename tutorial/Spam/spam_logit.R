@@ -179,19 +179,19 @@ df_1run_summary <- data.frame(
 print(df_1run_summary)
 
 if (SAVE) {
-  filename <- paste(DATALAB, "_ridge_1run_fit.RDS", sep="")
+  filename <- paste(DATALAB, "_logit_1run_fit.RDS", sep="")
   filepath <- paste(RDSPATH, filename, sep="/")
   saveRDS(fit_1run_list, file=filepath)
 }
 
 if (SAVE) {
-  filename <- paste(DATALAB, "_ridge_1run_summary.csv", sep="")
+  filename <- paste(DATALAB, "_logit_1run_summary.csv", sep="")
   filepath <- paste(CSVPATH, filename, sep="/")
   write.csv2(df_1run_summary, file=filepath, row.names=FALSE)
 }
 
 if (SAVE) {
-  filename <- paste(DATALAB, "_ridge_1run_loglik.pdf", sep="")
+  filename <- paste(DATALAB, "_logit_1run_loglik.pdf", sep="")
   filepath <- paste(IMGPATH, filename, sep="/")
   height <- 4; width <- 10; zoom <- 1
   pdf(file=filepath, height=zoom*height, width=zoom*width)
@@ -200,7 +200,7 @@ if (SAVE) {
 }
 
 if (SAVE) {
-  filename <- paste(DATALAB, "_ridge_1run_pairs.pdf", sep="")
+  filename <- paste(DATALAB, "_logit_1run_pairs.pdf", sep="")
   filepath <- paste(IMGPATH, filename, sep="/")
   height <- 7; width <- 9; zoom <- 1
   pdf(file=filepath, height=zoom*height, width=zoom*width)

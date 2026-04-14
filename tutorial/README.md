@@ -75,6 +75,7 @@ As discussed in the article and supplementary material, the computational time r
 
 - The implementation closely follows the methodology described in Section 5 of the paper and Sections D, E, and F of the supplementary material.
 - The PQ method consistently reduces the number of iterations and almost always improves total runtime, especially in high-dimensional or non-smooth settings.
+- While the number of iterations to convergence is reproducible across systems, the execution time depends on the specific hardware. In particular, the results reported in the paper were obtained on a Dell XPS 15 laptop equipped with a 4.7 GHz processor and 32 GB of RAM.
 
 ---
 

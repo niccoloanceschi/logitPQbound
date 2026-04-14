@@ -158,6 +158,18 @@ for (k in 1:length(alphas)) {
 }
 
 
+if (SAVE) {
+  fit_path_list <- list("BL" = fit_path_BL, 
+                        "PG" = fit_path_PG, 
+                        "PQ" = fit_path_PQ)
+  
+  filename <- paste(DATALAB, "_enet2d_path_fit.RDS", sep="")
+  filepath <- paste(RDSPATH, filename, sep="/")
+  saveRDS(fit_path_list, file=filepath)
+  
+  rm(fit_path_list); gc()
+}
+
 ### Summary ----
 
 df_path_summary <- df_path_extended %>% 

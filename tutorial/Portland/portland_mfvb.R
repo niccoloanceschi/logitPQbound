@@ -380,7 +380,7 @@ if (FALSE) {
 
 if (SAVE) {
   palette <- "inferno"
-  filename <- paste0("portland_mfvb_field_tvd_", palette, ".pdf")
+  filename <- paste0("portland_mfvb_field_tvd.pdf")
   filepath <- paste(IMGPATH, filename, sep="/")
   height <- 3; width <- 10; zoom <- 1.25
 

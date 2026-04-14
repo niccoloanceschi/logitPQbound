@@ -272,7 +272,7 @@ if (FALSE) {
   write.csv2(df_path_extended, file=filepath, row.names=FALSE)
 }
 
-if (SAVE) {
+if (FALSE) {
   filename <- paste0("portland_lasso_path_timegain.pdf")
   filepath <- paste(IMGPATH, filename, sep="/")
   height <- 4; width <- 10; zoom <- 1

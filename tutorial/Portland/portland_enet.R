@@ -272,7 +272,7 @@ if (FALSE) {
   write.csv2(df_path_extended, file=filepath, row.names=FALSE)
 }
 
-if (SAVE) {
+if (FALSE) {
   filename <- paste("portland_enet", lalpha, "_path_timegain.pdf", sep="")
   filepath <- paste(IMGPATH, filename, sep="/")
   height <- 4; width <- 10; zoom <- 1

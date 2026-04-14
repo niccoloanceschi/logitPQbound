@@ -250,7 +250,7 @@ if (FALSE) {
   write.csv2(df_path_extended, file=filepath, row.names=FALSE)
 }
 
-if (SAVE) {
+if (FALSE) {
   filename <- "portland_ridge_path_timegain.pdf"
   filepath <- paste(IMGPATH, filename, sep="/")
   height <- 4; width <- 8; zoom <- 1

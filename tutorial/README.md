@@ -51,7 +51,6 @@ The following table provides a schematic representation of the main results in t
 # How to reproduce results
 
 To run all experiments, it is necessary to set the working directory to the root folder of the package, i.e., the directory containing the `logitPQbound.Rproj` file.  
-
 Alternatively, RStudio users can simply open the `logitPQbound.Rproj` file, which will automatically set the working directory.  
 
 R users can run each script independently using, for example:
@@ -75,7 +74,7 @@ As discussed in the article and supplementary material, the computational time r
 # Methodology 
 
 - The implementation closely follows the methodology described in Section 5 of the paper and Sections D, E, and F of the supplementary material.
-- The PQ method consistently reduces the number of iterations and often improves total runtime, especially in high-dimensional or non-smooth settings.
+- The PQ method consistently reduces the number of iterations and almost always improves total runtime, especially in high-dimensional or non-smooth settings.
 
 ---
 

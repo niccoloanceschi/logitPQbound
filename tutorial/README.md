@@ -50,18 +50,25 @@ The following table provides a schematic representation of the main results in t
 
 # How to reproduce results
 
-R users can easily run each script independently using the following example code:
+To run all experiments, it is necessary to set the working directory to the root folder of the package, i.e., the directory containing the `logitPQbound.Rproj` file.  
+
+Alternatively, RStudio users can simply open the `logitPQbound.Rproj` file, which will automatically set the working directory.  
+
+R users can run each script independently using, for example:
 
 ```r
+# Set the working directory using the path to the package on your system
+# setwd("~/logitPQbound/") 
+
 source("tutorial/Portland/portland_enet.R")
 ```
 
-As detailed in the article and supplementary material, the numerical experiments may take from minutes to hours depending on:
+As discussed in the article and supplementary material, the computational time required for the numerical experiments may range from a few minutes to several hours, depending on:
 
-- dataset size
-- penalty type
-- number of regression parameters
-- number of tuning parameters
+- the size of the dataset
+- the type of penalty
+- the number of regression parameters
+- the number of tuning parameters
 
 ---
 

@@ -233,6 +233,12 @@ fit_path_list <- list("BL"=fit_path_BL,
                       "PG"=fit_path_PG, 
                       "PQ"=fit_path_PQ)
 
+if (SAVE) {
+  filename <- paste(DATALAB, "_lasso_path_fit.RDS", sep="")
+  filepath <- paste(RDSPATH, filename, sep="/")
+  saveRDS(fit_path_list, file=filepath)
+}
+
 df_path_summary <- data.frame(
   method = names(fit_path_list),
   niter = sapply(fit_path_list, \(.) sum(.$niter)),

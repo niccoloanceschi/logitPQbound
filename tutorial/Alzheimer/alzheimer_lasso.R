@@ -156,19 +156,19 @@ df_1run_summary <- data.frame(
 
 print(df_1run_summary)
 
-if (SAVE) {
+if (FALSE) {
   filename <- paste(DATALAB, "_lasso_1run_summary.csv", sep="")
   filepath <- paste(CSVPATH, filename, sep="/")
   write.csv2(df_1run_summary, file=filepath, row.names=FALSE)
 }
 
-if (SAVE) {
+if (FALSE) {
   filename <- paste(DATALAB, "_lasso_1run_fit.RDS", sep="")
   filepath <- paste(RDSPATH, filename, sep="/")
   saveRDS(fit_1run_list, file=filepath)
 }
 
-if (SAVE) {
+if (FALSE) {
   filename <- paste(DATALAB, "_lasso_1run_loglik.pdf", sep="")
   filepath <- paste(IMGPATH, filename, sep="/")
   height <- 4; width <- 10; zoom <- 1
@@ -178,7 +178,7 @@ if (SAVE) {
 }
 
 
-if (SAVE) {
+if (FALSE) {
   filename <- paste(DATALAB, "_lasso_1run_pairs.pdf", sep="")
   filepath <- paste(IMGPATH, filename, sep="/")
   height <- 7; width <- 9; zoom <- 1
@@ -272,7 +272,7 @@ df_path_extended <- data.frame(
 
 print(df_path_extended)
 
-if (SAVE) {
+if (FALSE) {
   filename <- paste0(DATALAB, "_lasso_path_extended.csv")
   filepath <- paste(CSVPATH, filename, sep="/")
   write.csv2(df_path_extended, file=filepath, row.names=FALSE)
@@ -291,7 +291,7 @@ if (SAVE) {
 
 ### Solution path ----
 
-if (SAVE) {
+if (FALSE) {
   filename <- paste(DATALAB, "_lasso_path_exetime.pdf", sep="")
   filepath <- paste(IMGPATH, filename, sep="/")
   height <- 4; width <- 6; zoom <- 2

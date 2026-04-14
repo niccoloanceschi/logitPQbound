@@ -146,8 +146,8 @@ for (k in 1:length(alphas)) {
     alpha = sapply(fit_path_tmp, \(.) .$alpha),
     niter = sapply(fit_path_tmp, \(.) sum(.$niter)),
     exetime = sapply(fit_path_tmp, \(.) .$tottime),
-    timegain = sapply(fit_path_tmp, \(.) {1-fit_tmp_PQ$tottime/.$tottime}),
-    loglik = sapply(fit_path_tmp, \(.) mean(.$loglik)))
+    timegain = sapply(fit_path_tmp, \(.) {1-fit_tmp_PQ$tottime/.$tottime}))
+    # loglik = sapply(fit_path_tmp, \(.) mean(.$loglik)))
   
   ### Store the results
   df_path_extended <- rbind(df_path_extended, df_path_tmp)
@@ -157,28 +157,15 @@ for (k in 1:length(alphas)) {
   gc()
 }
 
-
-if (SAVE) {
-  fit_path_list <- list("BL" = fit_path_BL, 
-                        "PG" = fit_path_PG, 
-                        "PQ" = fit_path_PQ)
-  
-  filename <- paste(DATALAB, "_enet2d_path_fit.RDS", sep="")
-  filepath <- paste(RDSPATH, filename, sep="/")
-  saveRDS(fit_path_list, file=filepath)
-  
-  rm(fit_path_list); gc()
-}
-
 ### Summary ----
 
 df_path_summary <- df_path_extended %>% 
   group_by(method) %>% 
-  summarise(niter = sum(niter), 
-            exetime = sum(exetime),
+  summarise(niter = round(sum(niter), 4), 
+            exetime = round(sum(exetime), 4),
             .groups = "drop") %>%
   mutate(time_PQ = exetime[method == "PQ"],
-         timegain = 1 - time_PQ/exetime) %>% 
+         timegain = round(1 - time_PQ/exetime, 4)) %>% 
   select(-time_PQ) %>% 
   as.data.frame()
 

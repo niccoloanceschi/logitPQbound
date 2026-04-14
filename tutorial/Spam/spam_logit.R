@@ -177,7 +177,7 @@ if (SAVE) {
   write.csv2(df_1run_summary, file=filepath, row.names=FALSE)
 }
 
-if (SAVE) {
+if (FALSE) {
   filename <- paste(DATALAB, "_logit_1run_loglik.pdf", sep="")
   filepath <- paste(IMGPATH, filename, sep="/")
   height <- 4; width <- 10; zoom <- 1
@@ -186,7 +186,7 @@ if (SAVE) {
   dev.off()
 }
 
-if (SAVE) {
+if (FALSE) {
   filename <- paste(DATALAB, "_logit_1run_pairs.pdf", sep="")
   filepath <- paste(IMGPATH, filename, sep="/")
   height <- 7; width <- 9; zoom <- 1

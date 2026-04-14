@@ -300,7 +300,7 @@ if (SAVE) {
   pdf(file=filepath, height=zoom*height, width=zoom*width)
   with(as.data.frame(locs), {
     par(mfrow=c(1,3))
-    fit_path_list_tmp <- list(BL=fit_path_BL, PG=fit_path_PG, PQ=fit_path_PQ, NR=fit_path_NR)
+    fit_path_list_tmp <- list(BL=fit_path_BL, PG=fit_path_PG, PQ=fit_path_PQ)
     
     k <- sapply(fit_path_list_tmp, \(.) which.max(.$reml))
     pred_path_BL <- c(plogis(as.vector(X %*% fit_path_BL$beta[,k["BL"]])))

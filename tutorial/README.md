@@ -19,7 +19,6 @@ Each application sub-folder is organized as follows:
 - `img/` → optional diagnostic plots
 - `csv/` → numerical summaries (iterations, runtime, log-likelihood, etc.)
 - `rds/` → fitted models and intermediate results
-
 - `*_logit.R` → Un-penalized likelihood (Spam dataset only)
 - `*_ridge.R` → Penalized likelihood with **ridge penalty** over a solution path
 - `*_lasso.R` → Penalized likelihood with **lasso penalty** over a solution path

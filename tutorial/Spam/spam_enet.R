@@ -1,15 +1,9 @@
 
 ## PACKAGE IMPORT ----
 
-suppressWarnings({
-  # PQ-bound
-  library(logitPQbound)
-  
-  # Tidyverse
-  library(dplyr)
-  library(ggplot2)
-})
-
+library(logitPQbound)
+library(dplyr)
+library(ggplot2)
 
 ## GLOBAL VARIABLES ----
 
@@ -18,27 +12,20 @@ SHOW <- TRUE
 SAVE <- TRUE
 
 # Global paths
+DATALAB <- "spam"
 DATAPATH <- "data/Spam"
 SAVEPATH <- "tutorial/Spam"
 RDSPATH <- paste(SAVEPATH, "rds", sep="/")
 CSVPATH <- paste(SAVEPATH, "csv", sep="/")
 IMGPATH <- paste(SAVEPATH, "img", sep="/")
 
-DATALAB <- "spam"
-
 # Preprocessing settings
 RESCALE <- TRUE
 
-# Which lambda ("Custom", "Scales", or "CV")
-LAMBDA <- "Scaled"
-NREP <- 1L
+# E-net mixing weight
 ALPHA <- 0.8
 LALPHA <- as.character(100*ALPHA)
 LALPHA <- ifelse(100*ALPHA>10, LALPHA, paste0("0", LALPHA))
-
-# Plot settings
-MARKERS <- c(15:18,1,2,5,6)
-COLORS <- c(2:4,7,6,5)
 
 options(digits=5)
 
@@ -77,20 +64,14 @@ gc()
 ## MODEL SET-UP ----
 
 # Penalty parameters
-lambdas <- 10^seq(-3, +2, by=0.25) # for solution path
-# lambdas <- 10^seq(-3,+5, by=.25) # for solution path
-lambda <- .1 # for single fit
+lambdas <- 10^seq(-3, +2, by=0.25)
 
-# Cross-validation Seed and n of folds
+# Random seed (for random scan coordinate ascent)
 seed <- 123456
-nfold <- 5
 
 # Intercept penalty
 eps <- 1e-8
 intercept <- TRUE
-
-# EDF inflation factor (for GCV computation only)
-gamma <- 1.
 
 # PQ update
 phi <- 0.9

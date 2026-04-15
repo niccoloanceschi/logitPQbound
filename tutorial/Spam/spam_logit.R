@@ -1,15 +1,9 @@
 
 ## PACKAGE IMPORT ----
 
-suppressWarnings({
-  # PQ-bound
-  library(logitPQbound)
-  
-  # Tidyverse
-  library(dplyr)
-  library(ggplot2)
-})
-
+library(logitPQbound)
+library(dplyr)
+library(ggplot2)
 
 ## GLOBAL VARIABLES ----
 
@@ -18,25 +12,18 @@ SHOW <- TRUE
 SAVE <- TRUE
 
 # Global paths
+DATALAB <- "spam"
 DATAPATH <- "data/Spam"
 SAVEPATH <- "tutorial/Spam"
 RDSPATH <- paste(SAVEPATH, "rds", sep="/")
 CSVPATH <- paste(SAVEPATH, "csv", sep="/")
 IMGPATH <- paste(SAVEPATH, "img", sep="/")
 
-DATALAB <- "spam"
-
 # Preprocessing settings
 RESCALE <- TRUE
 
-# Which lambda ("Custom", "Scales", or "CV")
-LAMBDA <- "Scaled"
-NREP <- 10L
+# E-net mixing weight
 ALPHA <- 0
-
-# Plot settings
-MARKERS <- c(15:19)
-COLORS <- c(2:4,7,6)
 
 options(digits=5)
 
@@ -79,16 +66,12 @@ gc()
 # Penalty parameters
 lambda <- 1e-16
 
-# Cross-validation Seed and n of folds
+# Random seed (for random scan coordinate ascent)
 seed <- 123456
-nfold <- 5
 
 # Intercept penalty
 eps <- 1e-8
 intercept <- TRUE
-
-# EDF inflation factor (for GCV computation only)
-gamma <- 1.
 
 # PQ update
 phi <- 0.9

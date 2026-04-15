@@ -20,7 +20,8 @@ fit_logit_enet_path(
   reltol = 1e-04,
   etatol = 1e-04,
   verbose = FALSE,
-  freq = 10L
+  freq = 10L,
+  seed = 1234
 )
 }
 \arguments{

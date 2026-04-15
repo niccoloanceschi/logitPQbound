@@ -19,7 +19,8 @@ fit_logit_enet_coord(
   reltol = 1e-04,
   etatol = 0.1,
   verbose = FALSE,
-  freq = 10L
+  freq = 10L,
+  seed = 1234
 )
 }
 \arguments{

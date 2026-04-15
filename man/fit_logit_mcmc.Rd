@@ -17,7 +17,8 @@ fit_logit_mcmc(
   burn = floor(maxiter/2),
   thin = 5L,
   verbose = FALSE,
-  freq = floor(maxiter/20)
+  freq = floor(maxiter/20),
+  seed = 1234
 )
 }
 \arguments{

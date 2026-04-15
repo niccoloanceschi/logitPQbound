@@ -62,7 +62,7 @@ etatol <- 1.
 maxiter <- 1000
 
 # Progress output
-verbose <- TRUE
+verbose <- FALSE
 freq <- 10
 
 # Initial values
@@ -92,9 +92,10 @@ for (k in 1:length(alphas)) {
   ### Set the mixing weight
   alpha <- alphas[k]
   
+  cat("\n alpha =", alpha, "\n")
+  cat(rep("-", 45), "\n", sep="", collapse="")
+  
   ### BL fit ----
-  cat("\n BL | alpha =", alpha, "\n")
-  cat(rep("-", 65), "\n", sep="", collapse="")
   time_init <- proc.time()
   fit_tmp_BL <- fit_logit_splasso_path(y, X, D, type='BL', 
                                        beta_start=beta0, lambda=lambdas, 
@@ -105,8 +106,6 @@ for (k in 1:length(alphas)) {
   fit_path_BL[[k]] <- fit_tmp_BL[-c(7:14)]
   
   ## PG fit ----
-  cat("\n PG | alpha =", alpha, "\n")
-  cat(rep("-", 65), "\n", sep="", collapse="")
   time_init <- proc.time()
   fit_tmp_PG <- fit_logit_splasso_path(y, X, D, type='PG', 
                                        beta_start=beta0, lambda=lambdas, 
@@ -117,8 +116,6 @@ for (k in 1:length(alphas)) {
   fit_path_PG[[k]] <- fit_tmp_PG[-c(7:14)]
   
   ## PQ fit ----
-  cat("\n PQ | alpha =", alpha, "\n")
-  cat(rep("-", 65), "\n", sep="", collapse="")
   time_init <- proc.time()
   fit_tmp_PQ <- fit_logit_splasso_path(y, X, D, type='PQ', 
                                        beta_start=beta0, lambda=lambdas, 
@@ -139,7 +136,7 @@ for (k in 1:length(alphas)) {
     alpha = sapply(fit_path_tmp, \(.) .$alpha),
     niter = sapply(fit_path_tmp, \(.) sum(.$niter)),
     exetime = sapply(fit_path_tmp, \(.) .$tottime),
-    timeratio = sapply(fit_path_tmp, \(.) {.$tottimefit_tmp_PQ$tottime}))
+    timeratio = sapply(fit_path_tmp, \(.) {.$tottime/fit_tmp_PQ$tottime}))
     # loglik = sapply(fit_path_tmp, \(.) mean(.$loglik)))
   
   ### Store the results

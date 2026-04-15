@@ -1,4 +1,59 @@
 
+get_1run_summary <- function(fitlist, alpha){
+  
+  exetime_PQ <- fitlist$PQ$exetime
+  
+  fitsum <- data.frame(
+    alpha = rep(alpha, length(fitlist)),
+    method = names(fitlist),
+    niter = sapply(fitlist, \(.) sum(.$niter)),
+    exetime = sapply(fitlist, \(.) round(.$exetime, 4)),
+    timeratio = sapply(fitlist, \(.) round(.$exetime/exetime_PQ, 4)),
+    loglik = sapply(fitlist, \(.) round(.$loglik, 4)),
+    row.names = seq(length(fitlist)))
+  
+  return(fitsum)
+}
+
+get_1run_coeff <- function(fitlist, lambdas){
+  K <- length(fitlist)
+  fitcoeff <- matrix(NA, nrow=p, ncol=K)
+  for(k in 1:K){
+    fitcoeff[,k] <- as.vector(fitlist[[k]]$beta)
+  }
+  dimnames(fitcoeff) <- list(beta = 1:p, method = names(fitlist))
+  return(fitcoeff)
+}
+
+get_path_summary <- function(fitlist, alpha){
+  
+  exetime_PQ <- fitlist$PQ$tottime
+  
+  fitsum <- data.frame(
+    alpha = rep(alpha, length(fitlist)),
+    method = names(fitlist),
+    niter = sapply(fitlist, \(.) sum(.$niter)),
+    exetime = sapply(fitlist, \(.) round(.$tottime, 4)),
+    timeratio = sapply(fitlist, \(.) round(.$tottime/exetime_PQ, 4)),
+    loglik = sapply(fitlist, \(.) round(mean(.$loglik), 4)),
+    row.names = seq(length(fitlist)))
+  
+  return(fitsum)
+}
+
+get_path_coeff <- function(fitlist, lambdas){
+  L <- length(lambdas)
+  K <- length(fitlist)
+  fitcoeff <- array(NA, dim = c(p, L, K))
+  for(k in 1:K){
+    fitcoeff[,,k] <- fitlist[[k]]$beta
+  }
+  dimnames(fitcoeff) <- list(beta = 1:p,
+                             lambda = 1:L,
+                             method = names(fitlist))
+  return(fitcoeff)
+}
+
 accuracy <- function(sim, mu, sigma2) {
   n <- length(sim)
   K <- 201

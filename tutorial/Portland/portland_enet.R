@@ -53,16 +53,12 @@ alpha <- 0.8 # Mixing weight of L1 and L2 penalties
 lalpha <- as.character(100*alpha)
 lalpha <- ifelse(100*alpha>10, lalpha, paste0("0", lalpha))
 
-# Cross-validation Seed and n of folds
+# Random seed
 seed <- 123456
-nfold <- 5
 
 # Intercept penalty
 eps <- 1e-8
 intercept <- FALSE
-
-# EDF inflation factor (for GCV computation only)
-gamma <- 1.
 
 # PQ approximate update
 phi <- 0.5
@@ -100,7 +96,7 @@ ctr <- set_ctr_admm(
   time_init <- proc.time()
   fit_path_BL <- fit_logit_splasso_path(y, X, D, type='BL', 
                                         beta_start=beta0, lambda=lambdas, 
-                                        alpha=alpha, gamma=gamma, maxiter=maxiter, 
+                                        alpha=alpha, maxiter=maxiter, 
                                         abstol=objtol, reltol=reltol, etatol=etatol, 
                                         verbose=verbose, freq=freq, ctr_admm=ctr)
   fit_path_BL$tottime <- (proc.time() - time_init)[3]
@@ -111,7 +107,7 @@ ctr <- set_ctr_admm(
   time_init <- proc.time()
   fit_path_PG <- fit_logit_splasso_path(y, X, D, type='PG', 
                                         beta_start=beta0, lambda=lambdas, 
-                                        alpha=alpha, gamma=gamma, maxiter=maxiter, 
+                                        alpha=alpha, maxiter=maxiter, 
                                         abstol=objtol, reltol=reltol, etatol=etatol, 
                                         verbose=verbose, freq=freq, ctr_admm=ctr)
   fit_path_PG$tottime <- (proc.time() - time_init)[3]
@@ -122,7 +118,7 @@ ctr <- set_ctr_admm(
   time_init <- proc.time()
   fit_path_PQ <- fit_logit_splasso_path(y, X, D, type='PQ', 
                                         beta_start=beta0, lambda=lambdas, 
-                                        alpha=alpha, gamma=gamma, maxiter=maxiter, 
+                                        alpha=alpha, maxiter=maxiter, 
                                         abstol=objtol, reltol=reltol, etatol=etatol, 
                                         verbose=verbose, freq=freq, ctr_admm=ctr)
   fit_path_PQ$tottime <- (proc.time() - time_init)[3]

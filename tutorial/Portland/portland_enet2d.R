@@ -159,6 +159,7 @@ for (k in 1:length(alphas)) {
 
 ### Summary ----
 
+# Summary statistics
 fit_path_summary <- df_path_extended %>% 
   group_by(method) %>% 
   summarise(niter = round(sum(niter), 4), 
@@ -169,14 +170,7 @@ fit_path_summary <- df_path_extended %>%
   select(-time_PQ) %>% 
   as.data.frame()
 
-print(fit_path_summary)
-
-if (SAVE) {
-  filename <- paste("portland_enet2d_path_summary.csv", sep="")
-  filepath <- paste(CSVPATH, filename, sep="/")
-  write.csv2(fit_path_summary, file=filepath, row.names=FALSE)
-}
-
+# Estimated coefficients' array
 fit_path_coeff <- array(NA, dim = c(p, length(lambdas), length(alphas), 3))
 for (k in 1:length(alphas)) {
   fit_path_coeff[,,k,1] <- fit_path_BL[[k]]$beta
@@ -188,6 +182,19 @@ dimnames(fit_path_coeff) <- list(
   lambda = 1:length(lambdas),
   alpha = 1:length(alphas),
   method = c("BL", "PG", "PQ"))
+
+if (SHOW) {
+  cat("\n Summary \n")
+  cat(rep("-", 50), "\n", sep="", collapse="")
+  print(fit_path_summary)
+  cat(rep("-", 50), "\n", sep="", collapse="")
+}
+
+if (SAVE) {
+  filename <- paste(DATALAB, "_enet2d_path_summary.csv", sep="")
+  filepath <- paste(CSVPATH, filename, sep="/")
+  write.csv2(fit_path_summary, file=filepath, row.names=FALSE)
+}
 
 if (SAVE) {
   filename <- paste(DATALAB, "_enet2d_path_coeff.RData", sep="")

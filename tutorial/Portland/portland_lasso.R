@@ -9,20 +9,20 @@ library(sparseinv)
 
 ## GLOBAL VARIABLES ----
 
+# Saving and showing flags
 SHOW <- TRUE
 SAVE <- TRUE
 
+# Global paths
+DATALAB <- "portland"
 DATAPATH <- "data/Portland"
 SAVEPATH <- "tutorial/Portland"
 RDSPATH <- paste(SAVEPATH, "rds", sep="/")
 CSVPATH <- paste(SAVEPATH, "csv", sep="/")
 IMGPATH <- paste(SAVEPATH, "img", sep="/")
 
-DATALAB <- "portland"
+# E-net mixing weight
 ALPHA <- 1
-
-COLORS  <- c(2:4,7)
-MARKERS <- c(15:18)
 
 ## PORTLAND DATA ----
 
@@ -76,7 +76,7 @@ etatol <- 1.
 maxiter <- 1000
 
 # Progress output
-verbose <- TRUE
+verbose <- FALSE
 freq <- 10
 
 # Initial values
@@ -142,7 +142,7 @@ if (SHOW) {
 }
 
 if (SAVE) {
-  filename <- paste("portland_lasso_path_summary.csv", sep="")
+  filename <- paste(DATALAB, "_lasso_path_summary.csv", sep="")
   filepath <- paste(CSVPATH, filename, sep="/")
   write.csv2(fit_path_summary, file=filepath, row.names=FALSE)
 }

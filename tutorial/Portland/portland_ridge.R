@@ -9,20 +9,20 @@ library(sparseinv)
 
 ## GLOBAL VARIABLES ----
 
+# Saving and showing flags
 SHOW <- TRUE
 SAVE <- TRUE
 
+# Global paths
+DATALAB <- "portland"
 DATAPATH <- "data/Portland"
 SAVEPATH <- "tutorial/Portland"
 RDSPATH <- paste(SAVEPATH, "rds", sep="/")
 CSVPATH <- paste(SAVEPATH, "csv", sep="/")
 IMGPATH <- paste(SAVEPATH, "img", sep="/")
 
-DATALAB <- "portland"
+# E-net mixing weight
 ALPHA <- 0
-
-COLORS  <- c(2:4,7)
-MARKERS <- c(15:18)
 
 ## PORTLAND DATA ----
 
@@ -69,7 +69,7 @@ etatol <- 1.
 maxiter <- 1000
 
 # Progress output
-verbose <- TRUE
+verbose <- FALSE
 freq <- 10
 
 # Set the random seed
@@ -124,7 +124,7 @@ if (SHOW) {
 }
 
 if (SAVE) {
-  filename <- "portland_ridge_path_summary.csv"
+  filename <- paste(DATALAB, "_ridge_path_summary.csv", sep="")
   filepath <- paste(CSVPATH, filename, sep="/")
   write.csv2(fit_path_summary, file=filepath, row.names=FALSE)
 }

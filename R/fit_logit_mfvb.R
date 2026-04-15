@@ -977,13 +977,16 @@ fit_logit_mcmc <- function(y, X, D=diag(ncol(X)), beta_start=NULL,
                            lambda=1.0, eps=1e-10, intercept=FALSE, 
                            solver=c("auto", "chol", "smw", "sparse"),
                            maxiter=5000L, burn=floor(maxiter/2), thin=5L,
-                           verbose=FALSE, freq=floor(maxiter/20)){
+                           verbose=FALSE, freq=floor(maxiter/20), seed=1234){
   
   # Package for PG-RND
   library(BayesLogit)
   
   # Check the solver
   solver <- match.arg(solver)
+  
+  # Set the random seed
+  set.seed(seed)
   
   # Set the model dimensions
   p <- ncol(X)

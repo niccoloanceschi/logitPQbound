@@ -25,10 +25,13 @@ fit_logit_mcmc_adj <- function(y, X, D=diag(ncol(X)), beta_start=NULL,
                                solver=c("auto", "chol", "smw", "sparse"),
                                scaling=TRUE, nscaling=10,
                                maxiter=5000L, burn=floor(maxiter/2), thin=5L,
-                               verbose=FALSE, freq=floor(maxiter/20)){
+                               verbose=FALSE, freq=floor(maxiter/20), seed=1234){
   
   # Package for PG-RND
   library(BayesLogit)
+  
+  # Set the random seed
+  set.seed(seed)
   
   # Check the prior and solver
   prior <- match.arg(prior)

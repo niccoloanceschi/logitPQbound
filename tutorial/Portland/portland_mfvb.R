@@ -181,7 +181,7 @@ fit_vb_summary <- data.frame(
   exetime = round(c(exetime_BL, exetime_PG, exetime_PQ, exetime_MC), 2),
   timeratio = round(c(exetime_BL, exetime_PG, exetime_PQ, exetime_MC)/exetime_PQ, 4),
   elbo = round(c(elbo_BL, elbo_PG, elbo_PQ, elbo_MC), 4),
-  tv = round(tvd_pdf_field, 4),
+  tv = round(tvd_pdf_field, 6),
   row.names = c(1:4)
 )
 

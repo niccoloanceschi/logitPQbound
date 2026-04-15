@@ -83,6 +83,7 @@ beta_start <- c(qlogis(mean(y)), rep(0, times=p-1))
 
 ### BL fit ----
 {
+  cat("BL  ")
   time_init <- proc.time()
   fit_path_BL <- fit_logit_enet_path(y, X, type='BL', beta_start=NULL, 
                                      lambda=lambdas, alpha=ALPHA, eps=eps, 
@@ -94,6 +95,7 @@ beta_start <- c(qlogis(mean(y)), rep(0, times=p-1))
 
 ### PG fit ----
 {
+  cat("PG  ")
   time_init <- proc.time()
   fit_path_PG <- fit_logit_enet_path(y, X, type='PG', beta_start=NULL, 
                                      lambda=lambdas, alpha=ALPHA, eps=eps, 
@@ -105,6 +107,7 @@ beta_start <- c(qlogis(mean(y)), rep(0, times=p-1))
 
 ### PQ fit ----
 {
+  cat("PQ  ")
   time_init <- proc.time()
   fit_path_PQ <- fit_logit_enet_path(y, X, type='PQ', beta_start=NULL, 
                                      lambda=lambdas, alpha=ALPHA, eps=eps, 

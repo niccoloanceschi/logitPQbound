@@ -26,10 +26,13 @@ fit_logit_enet_coord <- function(y, X, type=c('NR','BL','PG', 'PQ'),
                                  beta_start=NULL, lambda=NULL, alpha=.99, eps=1e-10, 
                                  intercept=FALSE, phi=0.9, maxiter=1000L, 
                                  abstol=1e-4, reltol=1e-4, etatol=1e-1, 
-                                 verbose=FALSE, freq=10L){
+                                 verbose=FALSE, freq=10L, seed=1234){
   
   # Check the bound type and QP method
   type = match.arg(type)
+  
+  # Set the random seed
+  set.seed(seed)
   
   # Set the model dimensions
   p <- ncol(X)

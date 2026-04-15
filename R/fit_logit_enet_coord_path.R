@@ -26,7 +26,7 @@ fit_logit_enet_path <- function(y, X, type=c('NR','BL','PG','PQ'),
                                 alpha=0.99, eps=1e-10, phi=0.9,
                                 gamma=1.0, intercept=FALSE, maxiter=1000L, 
                                 abstol=1e-4, reltol=1e-4, etatol=1e-4, 
-                                verbose=FALSE, freq=10L){
+                                verbose=FALSE, freq=10L, seed=1234){
   
   # Check the bound type and QP method
   type <- match.arg(type)
@@ -67,7 +67,7 @@ fit_logit_enet_path <- function(y, X, type=c('NR','BL','PG','PQ'),
   out$bic     <- rep(NA, times=K)
   
   # Progress bar
-  if (!verbose) cat("\n|")
+  if (!verbose) cat("\n", type, "bound |")
   
   # Solution path
   for (k in K:1) {
@@ -80,7 +80,7 @@ fit_logit_enet_path <- function(y, X, type=c('NR','BL','PG','PQ'),
     fitk <- fit_logit_enet_coord(y=y, X=X, type=type, beta_start=beta_start, lambda=lambda[k], 
                                  alpha=alpha, eps=eps, phi=phi, intercept=intercept,
                                  maxiter=maxiter, abstol=abstol, reltol=reltol, etatol=etatol, 
-                                 verbose=verbose, freq=freq)
+                                 verbose=verbose, freq=freq, seed=seed)
     
     
     # Set the next initial estimate
@@ -94,25 +94,6 @@ fit_logit_enet_path <- function(y, X, type=c('NR','BL','PG','PQ'),
     if (intercept) pL2[1] <- eps
     
     # GoF and complexity measures
-    # if (p>n) {
-    #   # cat("SMW")
-    #   XPXt <- X %*% (t(X)/pL2)
-    #   R <- chol(diag(1/w) + XPXt)
-    #   edf <- smw_chol_edf(R, XPXt, wts, pL2)
-    #   logdet <- smw_chol_logdet(R, wts, pL2)
-    # } else {
-    #   XtWX <- crossprod(X, w*X)
-    #   R <- chol(XtWX + diag(pL2))
-    #   edf <- chol_edf(R, XtWX, exact=FALSE, rank=10, nsample=100)
-    #   logdet <- chol_logdet(R) - p*log(lambda[k])
-    # }
-    # 
-    # reml <- fitk$loglik - 0.5*logdet
-    # dev <- mean(binomial()$dev.resid(y, pr, 1), na.rm=TRUE)
-    # gcv <- dev / (1 - gamma*edf/n)
-    # aic <- dev + (edf/n) * 2
-    # bic <- dev + (edf/n) * log(n)
-    
     dev    <- NA
     edf    <- NA
     logdet <- NA

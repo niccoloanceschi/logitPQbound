@@ -155,7 +155,7 @@ if (SAVE) {
 if (SAVE) {
   filename <- paste(DATALAB, "_lasso_path_coeff.RData", sep="")
   filepath <- paste(RDSPATH, filename, sep="/")
-  save(alpha, lambdas, fit_path_coeff, file=filepath)
+  save(ALPHA, lambdas, fit_path_coeff, file=filepath)
 }
 
 ## END OF FILE ----

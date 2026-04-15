@@ -45,5 +45,8 @@ rds/*
 # Documentation html files
 *.html
 
-# Extended report of the results
-*_extended.csv
+# Examples not in the article
+Random/
+Random/**
+Leukemia/
+Leukemia/**

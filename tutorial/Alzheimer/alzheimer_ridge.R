@@ -1,15 +1,9 @@
 
 ## PACKAGE IMPORT ----
 
-suppressWarnings({
-  # PQ-bound
-  library(logitPQbound)
-  
-  # Tidyverse
-  library(dplyr)
-  library(ggplot2)
-})
-
+library(logitPQbound)
+library(dplyr)
+library(ggplot2)
 
 ## GLOBAL VARIABLES ----
 
@@ -18,28 +12,20 @@ SHOW <- TRUE
 SAVE <- TRUE
 
 # Global paths
+DATALAB <- "alzheimer"
 DATAPATH <- "data/Alzheimer"
 SAVEPATH <- "tutorial/Alzheimer"
 RDSPATH <- paste(SAVEPATH, "rds", sep="/")
 CSVPATH <- paste(SAVEPATH, "csv", sep="/")
 IMGPATH <- paste(SAVEPATH, "img", sep="/")
 
-DATALAB <- "alzheimer"
-
 # Preprocessing settings
 RESCALE <- TRUE
 
-# Which lambda ("Custom", "Scales", or "CV")
-LAMBDA <- "Scaled"
-NREP <- 10L
+# E-net mixing weight
 ALPHA <- 0
 
-# Plot settings
-MARKERS <- c(15:19)
-COLORS <- c(2:4,7,6)
-
 options(digits=5)
-
 
 ## UTILITY FUNCTIONS ----
 
@@ -65,19 +51,14 @@ if (RESCALE) {
 ## MODEL SET-UP ----
 
 # Penalty parameters
-lambdas <- 10^seq(-3, +2, by=0.25) # for solution path
-lambda <- .1 # for single fit
+lambdas <- 10^seq(-3, +2, by=0.25)
 
-# Cross-validation Seed and n of folds
+# Random seed (for random scan coordinate ascent)
 seed <- 123456
-nfold <- 5
 
 # Intercept penalty
 eps <- 1e-8
 intercept <- TRUE
-
-# EDF inflation factor (for GCV computation only)
-gamma <- 1.
 
 # PQ update
 phi <- 0.9
@@ -91,7 +72,7 @@ maxiter <- 5000L
 
 # Progress output
 verbose <- FALSE
-freq <- 100
+freq <- 100L
 
 # Initial values
 beta_start <- c(qlogis(mean(y)), rep(0, times=p-1))

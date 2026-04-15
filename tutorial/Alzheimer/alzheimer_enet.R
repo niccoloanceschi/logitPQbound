@@ -1,15 +1,9 @@
 
 ## PACKAGE IMPORT ----
 
-suppressWarnings({
-  # PQ-bound
-  library(logitPQbound)
-  
-  # Tidyverse
-  library(dplyr)
-  library(ggplot2)
-})
-
+library(logitPQbound)
+library(dplyr)
+library(ggplot2)
 
 ## GLOBAL VARIABLES ----
 
@@ -18,27 +12,20 @@ SHOW <- TRUE
 SAVE <- TRUE
 
 # Global paths
+DATALAB <- "alzheimer"
 DATAPATH <- "data/Alzheimer"
 SAVEPATH <- "tutorial/Alzheimer"
 RDSPATH <- paste(SAVEPATH, "rds", sep="/")
 CSVPATH <- paste(SAVEPATH, "csv", sep="/")
 IMGPATH <- paste(SAVEPATH, "img", sep="/")
 
-DATALAB <- "alzheimer"
-
 # Preprocessing settings
 RESCALE <- TRUE
 
-# Which lambda ("Custom", "Scales", or "CV")
-LAMBDA <- "Scaled"
-NREP <- 1L
+# E-net mixing weight
 ALPHA <- 0.8
 LALPHA <- as.character(100*ALPHA)
 LALPHA <- ifelse(100*ALPHA>10, LALPHA, paste0("0", LALPHA))
-
-# Plot settings
-MARKERS <- c(15:18,1,2,5,6)
-COLORS <- c(2:4,7,6,5)
 
 options(digits=5)
 
@@ -66,20 +53,14 @@ if (RESCALE) {
 ## MODEL SET-UP ----
 
 # Penalty parameters
-# lambdas <- 10^seq(-3, +2, by=0.25) # for solution path
-lambdas <- 10^seq(-3,+2, by=.25) # for solution path
-lambda <- .1 # for single fit
+lambdas <- 10^seq(-3,+2, by=.25)
 
-# Cross-validation Seed and n of folds
+# Random seed (for random scan coordinate ascent)
 seed <- 123456
-nfold <- 5
 
 # Intercept penalty
 eps <- 1e-8
 intercept <- TRUE
-
-# EDF inflation factor (for GCV computation only)
-gamma <- 1.
 
 # PQ update
 phi <- 0.9
@@ -88,12 +69,12 @@ phi <- 0.9
 objtol <- 1e-7
 reltol <- 1e-2
 abstol <- 1e-3
-etatol <- 1. * sqrt(p) * mean(sqrt(rowSums(X^2)))
+etatol <- 1.
 maxiter <- 5000L
 
 # Progress output
 verbose <- FALSE
-freq <- 100
+freq <- 100L
 
 # Initial values
 beta_start <- c(qlogis(mean(y)), rep(0, times=p-1))
@@ -147,7 +128,7 @@ if (SHOW) {
 }
 
 if (SAVE) {
-  filename <- paste0(DATALAB, "_enet", LALPHA, "_path_summary.csv")
+  filename <- paste(DATALAB, "_enet", LALPHA, "_path_summary.csv", sep="")
   filepath <- paste(CSVPATH, filename, sep="/")
   write.csv2(fit_path_summary, file=filepath, row.names=FALSE)
 }
@@ -159,7 +140,3 @@ if (SAVE) {
 }
 
 ## END OF FILE ----
-
-
-
-

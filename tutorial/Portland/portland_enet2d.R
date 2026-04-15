@@ -96,6 +96,7 @@ for (k in 1:length(alphas)) {
   cat(rep("-", 45), "\n", sep="", collapse="")
   
   ### BL fit ----
+  cat("BL  ")
   time_init <- proc.time()
   fit_tmp_BL <- fit_logit_splasso_path(y, X, D, type='BL', 
                                        beta_start=beta0, lambda=lambdas, 
@@ -106,6 +107,7 @@ for (k in 1:length(alphas)) {
   fit_path_BL[[k]] <- fit_tmp_BL[-c(7:14)]
   
   ## PG fit ----
+  cat("PG  ")
   time_init <- proc.time()
   fit_tmp_PG <- fit_logit_splasso_path(y, X, D, type='PG', 
                                        beta_start=beta0, lambda=lambdas, 
@@ -116,6 +118,7 @@ for (k in 1:length(alphas)) {
   fit_path_PG[[k]] <- fit_tmp_PG[-c(7:14)]
   
   ## PQ fit ----
+  cat("PQ  ")
   time_init <- proc.time()
   fit_tmp_PQ <- fit_logit_splasso_path(y, X, D, type='PQ', 
                                        beta_start=beta0, lambda=lambdas, 

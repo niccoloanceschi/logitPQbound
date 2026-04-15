@@ -90,6 +90,7 @@ beta0 <- NULL
 
 ### ---- MCMC ----
 {
+  cat("\n MCMC")
   time_init <- proc.time()
   fit_MC <- fit_logit_mcmc_adj(y=y, X=X, D=D, solver="sparse",
                                lambda=lambda, eps=eps, hpar=hpar, 

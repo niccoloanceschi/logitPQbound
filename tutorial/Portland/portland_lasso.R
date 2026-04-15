@@ -92,6 +92,7 @@ ctr <- set_ctr_admm(
 
 ### BL fit ----
 {
+  cat("BL  ")
   time_init <- proc.time()
   fit_path_BL <- fit_logit_splasso_path(y, X, D, type='BL', 
                                         beta_start=beta0, lambda=lambdas, 
@@ -103,6 +104,7 @@ ctr <- set_ctr_admm(
 
 ### PG fit ----
 {
+  cat("PG  ")
   time_init <- proc.time()
   fit_path_PG <- fit_logit_splasso_path(y, X, D, type='PG', 
                                         beta_start=beta0, lambda=lambdas, 
@@ -114,6 +116,7 @@ ctr <- set_ctr_admm(
 
 ### PQ fit ----
 {
+  cat("PQ  ")
   time_init <- proc.time()
   fit_path_PQ <- fit_logit_splasso_path(y, X, D, type='PQ', 
                                         beta_start=beta0, lambda=lambdas, 

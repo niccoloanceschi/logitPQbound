@@ -160,7 +160,7 @@ acc_beta_MC <- rep(1.0, times=p)
 
 # Accuracy scores (predicted field)
 loc <- expand.grid(x=lon_new, y=lat_new)
-out <- sp::point.in.polygon(loc[,1], loc[,2], border[,1], border[,2])
+out <- sp::point.in.polygon(loc[,1], loc[,2], nodes[,1], nodes[,2])
 
 acc_field_BL <- as.vector(as.matrix(psi_new %*% acc_beta_BL))
 acc_field_PG <- as.vector(as.matrix(psi_new %*% acc_beta_PG))
@@ -240,7 +240,7 @@ if (SAVE) {
   height <- 3; width <- 10; zoom <- 1.25
 
   loc <- expand.grid(x=lon_new, y=lat_new)
-  out <- sp::point.in.polygon(loc[,1], loc[,2], border[,1], border[,2])
+  out <- sp::point.in.polygon(loc[,1], loc[,2], nodes[,1], nodes[,2])
   dat <- data.frame(x=locs[,1], y=locs[,2], z=obs)
   tvd <- 1-cbind("BL-VB"=acc_beta_BL, "PG-VB"=acc_beta_PG, "PQ-VB"=acc_beta_PQ)
   tvd <- as.matrix(psi_new %*% tvd)

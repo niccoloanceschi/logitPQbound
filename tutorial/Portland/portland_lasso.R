@@ -60,9 +60,8 @@ seed <- 123456
 eps <- 1e-8
 intercept <- FALSE
 
-# PQ approximate update
+# PQ proximal update
 phi <- 0.5
-approx <- FALSE
 
 # Convergence tolerance 
 objtol <- 1e-7

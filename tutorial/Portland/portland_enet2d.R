@@ -9,19 +9,17 @@ library(sparseinv)
 
 ## GLOBAL VARIABLES ----
 
+# Saving and showing flags
 SHOW <- TRUE
 SAVE <- TRUE
 
+# Global paths
+DATALAB <- "portland"
 DATAPATH <- "data/Portland"
 SAVEPATH <- "tutorial/Portland"
 RDSPATH <- paste(SAVEPATH, "rds", sep="/")
 CSVPATH <- paste(SAVEPATH, "csv", sep="/")
 IMGPATH <- paste(SAVEPATH, "img", sep="/")
-
-DATALAB <- "portland"
-
-COLORS  <- c(2:4,7)
-MARKERS <- c(15:18)
 
 ## PORTLAND DATA ----
 
@@ -46,20 +44,15 @@ D <- (1/sqrt(colSums(mass))) * stiff
 lambdas <- 10^seq(-6, +1, by=0.25) # for solution path
 alphas <- seq(.05, 1, by=0.15) # for solution path
 
-# Cross-validation Seed and n of folds
+# Random seed
 seed <- 123456
-nfold <- 5
 
 # Intercept penalty
 eps <- 1e-8
 intercept <- FALSE
 
-# EDF inflation factor (for GCV computation only)
-gamma <- 1.
-
-# PQ approximate update
+# PQ proximal update
 phi <- 0.5
-approx <- FALSE
 
 # Convergence tolerance 
 objtol <- 1e-7
@@ -105,7 +98,7 @@ for (k in 1:length(alphas)) {
   time_init <- proc.time()
   fit_tmp_BL <- fit_logit_splasso_path(y, X, D, type='BL', 
                                        beta_start=beta0, lambda=lambdas, 
-                                       alpha=alpha, gamma=gamma, maxiter=maxiter, 
+                                       alpha=alpha, maxiter=maxiter, 
                                        abstol=objtol, reltol=reltol, etatol=etatol, 
                                        verbose=verbose, freq=freq, ctr_admm=ctr)
   fit_tmp_BL$tottime <- (proc.time() - time_init)[3]
@@ -117,7 +110,7 @@ for (k in 1:length(alphas)) {
   time_init <- proc.time()
   fit_tmp_PG <- fit_logit_splasso_path(y, X, D, type='PG', 
                                        beta_start=beta0, lambda=lambdas, 
-                                       alpha=alpha, gamma=gamma, maxiter=maxiter, 
+                                       alpha=alpha, maxiter=maxiter, 
                                        abstol=objtol, reltol=reltol, etatol=etatol, 
                                        verbose=verbose, freq=freq, ctr_admm=ctr)
   fit_tmp_PG$tottime <- (proc.time() - time_init)[3]
@@ -129,7 +122,7 @@ for (k in 1:length(alphas)) {
   time_init <- proc.time()
   fit_tmp_PQ <- fit_logit_splasso_path(y, X, D, type='PQ', 
                                        beta_start=beta0, lambda=lambdas, 
-                                       alpha=alpha, gamma=gamma, maxiter=maxiter, 
+                                       alpha=alpha, maxiter=maxiter, 
                                        abstol=objtol, reltol=reltol, etatol=etatol, 
                                        verbose=verbose, freq=freq, ctr_admm=ctr)
   fit_tmp_PQ$tottime <- (proc.time() - time_init)[3]
@@ -146,7 +139,7 @@ for (k in 1:length(alphas)) {
     alpha = sapply(fit_path_tmp, \(.) .$alpha),
     niter = sapply(fit_path_tmp, \(.) sum(.$niter)),
     exetime = sapply(fit_path_tmp, \(.) .$tottime),
-    timegain = sapply(fit_path_tmp, \(.) {1-fit_tmp_PQ$tottime/.$tottime}))
+    timeratio = sapply(fit_path_tmp, \(.) {.$tottimefit_tmp_PQ$tottime}))
     # loglik = sapply(fit_path_tmp, \(.) mean(.$loglik)))
   
   ### Store the results

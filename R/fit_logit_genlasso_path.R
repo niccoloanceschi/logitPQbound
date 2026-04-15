@@ -71,7 +71,7 @@ fit_logit_genlasso_path <- function(y, X, D, type=c('NR','BL','PG','PQ'),
   out$bic     <- rep(NA, times=K)
   
   # Progress bar
-  if (!verbose) cat("\n|")
+  if (!verbose) cat("\n", type, "bound |")
   
   # Solution path
   for (k in K:1) {
@@ -218,7 +218,7 @@ fit_logit_splasso_path <- function(y, X, D, type=c('NR','BL','PG','PQ'),
   out$bic     <- rep(NA, times=K)
   
   # Progress bar
-  if (!verbose) cat("\n|")
+  if (!verbose) cat("\n", type, "bound |")
   
   # Solution path
   for (k in K:1) {

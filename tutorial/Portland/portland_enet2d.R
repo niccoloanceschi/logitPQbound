@@ -159,22 +159,22 @@ for (k in 1:length(alphas)) {
 
 ### Summary ----
 
-df_path_summary <- df_path_extended %>% 
+fit_path_summary <- df_path_extended %>% 
   group_by(method) %>% 
   summarise(niter = round(sum(niter), 4), 
             exetime = round(sum(exetime), 4),
             .groups = "drop") %>%
   mutate(time_PQ = exetime[method == "PQ"],
-         timegain = round(1 - time_PQ/exetime, 4)) %>% 
+         timeratio = round(exetime/time_PQ, 4)) %>% 
   select(-time_PQ) %>% 
   as.data.frame()
 
-print(df_path_summary)
+print(fit_path_summary)
 
 if (SAVE) {
   filename <- paste("portland_enet2d_path_summary.csv", sep="")
   filepath <- paste(CSVPATH, filename, sep="/")
-  write.csv2(df_path_summary, file=filepath, row.names=FALSE)
+  write.csv2(fit_path_summary, file=filepath, row.names=FALSE)
 }
 
 fit_path_coeff <- array(NA, dim = c(p, length(lambdas), length(alphas), 3))
@@ -183,10 +183,11 @@ for (k in 1:length(alphas)) {
   fit_path_coeff[,,k,2] <- fit_path_PG[[k]]$beta
   fit_path_coeff[,,k,3] <- fit_path_PQ[[k]]$beta
 }
-dimnames(fit_path_coeff) <- list(beta = 1:p,
-                                 lambda = 1:length(lambdas),
-                                 alpha = 1:length(alphas),
-                                 method = c("BL", "PG", "PQ"))
+dimnames(fit_path_coeff) <- list(
+  beta = 1:p,
+  lambda = 1:length(lambdas),
+  alpha = 1:length(alphas),
+  method = c("BL", "PG", "PQ"))
 
 if (SAVE) {
   filename <- paste(DATALAB, "_enet2d_path_coeff.RData", sep="")

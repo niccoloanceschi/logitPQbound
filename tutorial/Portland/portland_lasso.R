@@ -19,6 +19,7 @@ CSVPATH <- paste(SAVEPATH, "csv", sep="/")
 IMGPATH <- paste(SAVEPATH, "img", sep="/")
 
 DATALAB <- "portland"
+ALPHA <- 1
 
 COLORS  <- c(2:4,7)
 MARKERS <- c(15:18)
@@ -129,39 +130,27 @@ ctr <- set_ctr_admm(
 
 ### Summary ----
 
-fit_path_list <- list("BL"=fit_path_BL, 
-                      "PG"=fit_path_PG, 
-                      "PQ"=fit_path_PQ)
+fit_path_list <- list("BL"=fit_path_BL, "PG"=fit_path_PG, "PQ"=fit_path_PQ)
+fit_path_summary <- get_path_summary(fit_path_list, ALPHA)
+fit_path_coeff <- get_path_coeff(fit_path_list, lambdas)
 
-df_path_summary <- data.frame(
-  method = names(fit_path_list),
-  niter = sapply(fit_path_list, \(.) sum(.$niter)),
-  exetime = sapply(fit_path_list, \(.) .$tottime),
-  timegain = sapply(fit_path_list, \(.) {1-fit_path_PQ$tottime/.$tottime}),
-  loglik = sapply(fit_path_list, \(.) mean(.$loglik)),
-  row.names = seq(length(fit_path_list)))
-
-print(df_path_summary)
+if (SHOW) {
+  cat("\n Summary \n")
+  cat(rep("-", 50), "\n", sep="", collapse="")
+  print(fit_path_summary)
+  cat(rep("-", 50), "\n", sep="", collapse="")
+}
 
 if (SAVE) {
   filename <- paste("portland_lasso_path_summary.csv", sep="")
   filepath <- paste(CSVPATH, filename, sep="/")
-  write.csv2(df_path_summary, file=filepath, row.names=FALSE)
+  write.csv2(fit_path_summary, file=filepath, row.names=FALSE)
 }
-
-
-fit_path_coeff <- array(NA, dim = c(p, length(lambdas), 3))
-fit_path_coeff[,,1] <- fit_path_BL$beta
-fit_path_coeff[,,2] <- fit_path_PG$beta
-fit_path_coeff[,,3] <- fit_path_PQ$beta
-dimnames(fit_path_coeff) <- list(beta = 1:p,
-                                 lambda = 1:length(lambdas),
-                                 method = c("BL", "PG", "PQ"))
 
 if (SAVE) {
   filename <- paste(DATALAB, "_lasso_path_coeff.RData", sep="")
   filepath <- paste(RDSPATH, filename, sep="/")
-  save(alpha, lambdas, fit_path_coeff, file=filepath)
+  save(ALPHA, lambdas, fit_path_coeff, file=filepath)
 }
 
 ## END OF FILE ----

@@ -94,6 +94,7 @@ beta_start <- c(qlogis(mean(y)), rep(0, times=p-1))
 
 ### BL fit ----
 {
+  cat("BL  ")
   time_init <- proc.time()
   fit_path_BL <- fit_logit_ridge_path(y, X, type='BL', beta_start=beta_start, 
                                       lambda=lambdas, eps=eps, intercept=intercept, 
@@ -105,6 +106,7 @@ beta_start <- c(qlogis(mean(y)), rep(0, times=p-1))
 
 ### PG fit ----
 {
+  cat("PG  ")
   time_init <- proc.time()
   fit_path_PG <- fit_logit_ridge_path(y, X, type='PG', beta_start=beta_start, 
                                       lambda=lambdas, eps=eps, intercept=intercept, 
@@ -116,6 +118,7 @@ beta_start <- c(qlogis(mean(y)), rep(0, times=p-1))
 
 ### PQ fit ----
 {
+  cat("PQ  ")
   time_init <- proc.time()
   fit_path_PQ <- fit_logit_ridge_path(y, X, type='PQ', beta_start=beta_start, 
                                       lambda=lambdas, eps=eps, intercept=intercept, 

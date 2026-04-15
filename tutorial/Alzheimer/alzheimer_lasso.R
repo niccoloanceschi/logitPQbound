@@ -107,7 +107,7 @@ beta_start <- c(qlogis(mean(y)), rep(0, times=p-1))
                                      lambda=lambdas, alpha=ALPHA, eps=eps, 
                                      phi=phi, intercept=intercept, maxiter=maxiter, 
                                      abstol=objtol, reltol=reltol, etatol=etatol,
-                                     verbose=verbose, freq=freq)
+                                     verbose=verbose, freq=freq, seed=seed)
   fit_path_BL$tottime <- (proc.time() - time_init)[3]
 }
 
@@ -118,7 +118,7 @@ beta_start <- c(qlogis(mean(y)), rep(0, times=p-1))
                                      lambda=lambdas, alpha=ALPHA, eps=eps, 
                                      phi=phi, intercept=intercept, maxiter=maxiter, 
                                      abstol=objtol, reltol=reltol, etatol=etatol, 
-                                     verbose=verbose, freq=freq)
+                                     verbose=verbose, freq=freq, seed=seed)
   fit_path_PG$tottime <- (proc.time() - time_init)[3]
 }
 
@@ -129,7 +129,7 @@ beta_start <- c(qlogis(mean(y)), rep(0, times=p-1))
                                      lambda=lambdas, alpha=ALPHA, eps=eps, 
                                      phi=phi, intercept=intercept, maxiter=maxiter, 
                                      abstol=objtol, reltol=reltol, etatol=etatol, 
-                                     verbose=verbose, freq=freq)
+                                     verbose=verbose, freq=freq, seed=seed)
   fit_path_PQ$tottime <- (proc.time() - time_init)[3]
 }
 

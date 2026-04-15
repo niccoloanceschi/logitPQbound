@@ -112,7 +112,6 @@ beta_start <- c(qlogis(mean(y)), rep(0, times=p-1))
 
 ### BL fit ----
 {
-  cat(" BL...")
   time_init <- proc.time()
   fit_path_BL <- fit_logit_ridge_path(y, X, type='BL', beta_start=beta_start, 
                                       lambda=lambdas, eps=eps, intercept=intercept, 
@@ -124,7 +123,6 @@ beta_start <- c(qlogis(mean(y)), rep(0, times=p-1))
 
 ### PG fit ----
 {
-  cat(" PG...")
   time_init <- proc.time()
   fit_path_PG <- fit_logit_ridge_path(y, X, type='PG', beta_start=beta_start, 
                                       lambda=lambdas, eps=eps, intercept=intercept, 
@@ -136,7 +134,6 @@ beta_start <- c(qlogis(mean(y)), rep(0, times=p-1))
 
 ### PQ fit ----
 {
-  cat(" PQ...")
   time_init <- proc.time()
   fit_path_PQ <- fit_logit_ridge_path(y, X, type='PQ', beta_start=beta_start, 
                                       lambda=lambdas, eps=eps, intercept=intercept, 
@@ -148,36 +145,22 @@ beta_start <- c(qlogis(mean(y)), rep(0, times=p-1))
 
 ### Summary ----
 
-fit_path_list <- list("BL"=fit_path_BL, 
-                      "PG"=fit_path_PG, 
-                      "PQ"=fit_path_PQ)
+fit_path_list <- list("BL"=fit_path_BL, "PG"=fit_path_PG, "PQ"=fit_path_PQ)
+fit_path_summary <- get_path_summary(fit_path_list, ALPHA)
+fit_path_coeff <- get_path_coeff(fit_path_list, lambdas)
 
-df_path_summary <- data.frame(
-  alpha = rep(ALPHA, length(fit_path_list)),
-  method = names(fit_path_list),
-  niter = sapply(fit_path_list, \(.) sum(.$niter)),
-  exetime = sapply(fit_path_list, \(.) .$tottime),
-  timegain = sapply(fit_path_list, \(.) {1-fit_path_PQ$tottime/.$tottime}),
-  loglik = sapply(fit_path_list, \(.) mean(.$loglik)),
-  row.names = seq(length(fit_path_list)))
-
-print(df_path_summary)
-
+if (SHOW) {
+  cat("\n Summary \n")
+  cat(rep("-", 50), "\n", sep="", collapse="")
+  print(fit_path_summary)
+  cat(rep("-", 50), "\n", sep="", collapse="")
+}
 
 if (SAVE) {
   filename <- paste0(DATALAB, "_ridge_path_summary.csv")
   filepath <- paste(CSVPATH, filename, sep="/")
-  write.csv2(df_path_summary, file=filepath, row.names=FALSE)
+  write.csv2(fit_path_summary, file=filepath, row.names=FALSE)
 }
-
-
-fit_path_coeff <- array(NA, dim = c(p, length(lambdas), 3))
-fit_path_coeff[,,1] <- fit_path_BL$beta
-fit_path_coeff[,,2] <- fit_path_PG$beta
-fit_path_coeff[,,3] <- fit_path_PQ$beta
-dimnames(fit_path_coeff) <- list(beta = 1:p,
-                                 lambda = 1:length(lambdas),
-                                 method = c("BL", "PG", "PQ"))
 
 if (SAVE) {
   filename <- paste(DATALAB, "_ridge_path_coeff.RData", sep="")

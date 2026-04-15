@@ -111,7 +111,7 @@ beta_start <- c(qlogis(mean(y)), rep(0, times=p-1))
 
 ### BL fit ----
 {
-  cat(" BL...")
+  cat("\n BL bound")
   time_init <- proc.time()
   fit_1run_BL <- fit_logit_ridge(y, X, type='BL', beta_start=beta_start, 
                                  lambda=lambda, eps=eps, intercept=intercept, 
@@ -123,7 +123,7 @@ beta_start <- c(qlogis(mean(y)), rep(0, times=p-1))
 
 ### PG fit ----
 {
-  cat(" PG...")
+  cat("\n PG bound")
   time_init <- proc.time()
   fit_1run_PG <- fit_logit_ridge(y, X, type='PG', beta_start=beta_start, 
                                  lambda=lambda, eps=eps, intercept=intercept, 
@@ -135,7 +135,7 @@ beta_start <- c(qlogis(mean(y)), rep(0, times=p-1))
 
 ### PQ fit ----
 {
-  cat(" PQ...")
+  cat("\n PQ bound\n")
   time_init <- proc.time()
   fit_1run_PQ <- fit_logit_ridge(y, X, type='PQ', beta_start=beta_start, 
                                  lambda=lambda, eps=eps, intercept=intercept, 
@@ -146,53 +146,29 @@ beta_start <- c(qlogis(mean(y)), rep(0, times=p-1))
 }
 
 ### Summary ----
-cat("BL:", fit_1run_BL$exetime, "\n",
-    "PG:", fit_1run_PG$exetime, "\n",
-    "PQ:", fit_1run_PQ$exetime, "\n")
 
-fit_1run_list <- list("BL"=fit_1run_BL, 
-                      "PG"=fit_1run_PG, 
-                      "PQ"=fit_1run_PQ)
+fit_1run_list <- list("BL"=fit_1run_BL, "PG"=fit_1run_PG, "PQ"=fit_1run_PQ)
+fit_1run_summary <- get_1run_summary(fit_1run_list, ALPHA)
+fit_1run_coeff <- get_1run_coeff(fit_1run_list, lambdas)
 
 
-df_1run_summary <- data.frame(
-  method = names(fit_1run_list),
-  niter = sapply(fit_1run_list, \(.) .$niter),
-  exetime = sapply(fit_1run_list, \(.) .$exetime),
-  timegain = sapply(fit_1run_list, \(.) {1-fit_1run_PQ$exetime/.$exetime}),
-  loglik = sapply(fit_1run_list, \(.) .$loglik),
-  row.names = seq(length(fit_1run_list)))
-
-print(df_1run_summary)
-
-if (SAVE) {
-  filename <- paste(DATALAB, "_logit_1run_fit.RDS", sep="")
-  filepath <- paste(RDSPATH, filename, sep="/")
-  saveRDS(fit_1run_list, file=filepath)
+if (SHOW) {
+  cat("\n Summary \n")
+  cat(rep("-", 50), "\n", sep="", collapse="")
+  print(fit_1run_summary)
+  cat(rep("-", 50), "\n", sep="", collapse="")
 }
 
 if (SAVE) {
   filename <- paste(DATALAB, "_logit_1run_summary.csv", sep="")
   filepath <- paste(CSVPATH, filename, sep="/")
-  write.csv2(df_1run_summary, file=filepath, row.names=FALSE)
+  write.csv2(fit_1run_summary, file=filepath, row.names=FALSE)
 }
 
-if (FALSE) {
-  filename <- paste(DATALAB, "_logit_1run_loglik.pdf", sep="")
-  filepath <- paste(IMGPATH, filename, sep="/")
-  height <- 4; width <- 10; zoom <- 1
-  pdf(file=filepath, height=zoom*height, width=zoom*width)
-  plot_1run_loglik(fit_1run_list, df_1run_summary, COLORS, MARKERS)
-  dev.off()
-}
-
-if (FALSE) {
-  filename <- paste(DATALAB, "_logit_1run_pairs.pdf", sep="")
-  filepath <- paste(IMGPATH, filename, sep="/")
-  height <- 7; width <- 9; zoom <- 1
-  pdf(file=filepath, height=zoom*height, width=zoom*width)
-  plot_1run_pairs(fit_1run_list)
-  dev.off()
+if (SAVE) {
+  filename <- paste(DATALAB, "_logit_1run_coeff.RData", sep="")
+  filepath <- paste(RDSPATH, filename, sep="/")
+  save(fit_1run_coeff, file=filepath)
 }
 
 ## END OF FILE ----

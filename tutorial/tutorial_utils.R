@@ -256,7 +256,7 @@ ggplot_field <- function(lon, lat, field, ngrid, locs=NULL,
   df_locs <- as.data.frame(locs)
   df_locs$z <- factor(df_locs$z, labels=c("safe","risky"))
   
-  # Set the scaling transofrmation
+  # Set the scaling transformation
   if (is.null(fun)) fun <- function(t) t
   df_fems$z <- with(df_fems, fun(z)*max(z, na.rm=TRUE)/max(fun(z), na.rm=TRUE))
   

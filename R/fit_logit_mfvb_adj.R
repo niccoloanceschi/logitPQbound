@@ -146,14 +146,14 @@ fit_logit_mcmc_adj <- function(y, X, D=diag(ncol(X)), beta_start=NULL,
   # Progress bar
   if (verbose) {
     todo <- paste0(rep(".", floor(maxiter/freq)), collapse="")
-    cat(paste0("   0/100 |", todo, "|", collapse=""))
+    cat(paste0(" MCMC   0/100 |", todo, "|", collapse=""))
   }
   
   # Gibbs sampling cycle
   for(iter in 2:maxiter) {
     # Progress bar
     if (verbose && iter%%freq==0) {
-      perc <- gettextf("\r %3.0d/100", floor(100*iter/maxiter))
+      perc <- gettextf("\r MCMC %3.0d/100", floor(100*iter/maxiter))
       done <- paste0(rep("=", floor(iter/freq)), collapse="")
       todo <- paste0(rep(".", floor((maxiter-iter)/freq)), collapse="")
       cat(paste0(perc, " |", done, todo, "|", collapse=""))

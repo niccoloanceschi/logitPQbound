@@ -39,8 +39,16 @@ sandbox/**
 
 # Backup files
 *.RDS
-rds/*
+**/rds/*.RDS
+**/rds/*.RData
 !rds/.gitkeep
+
+# Report files
+**/csv/*.csv
+
+# Report files
+**/img/*.pdf
+**/img/*.png
 
 # Documentation html files
 *.html

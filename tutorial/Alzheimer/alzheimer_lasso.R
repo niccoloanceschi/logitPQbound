@@ -62,9 +62,6 @@ seed <- 123456
 eps <- 1e-8
 intercept <- TRUE
 
-# EDF inflation factor (for GCV computation only)
-gamma <- 1.
-
 # PQ update
 phi <- 0.9
 

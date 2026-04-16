@@ -23,7 +23,7 @@ Each application sub-folder is organized as follows:
 - `*_ridge.R` → Penalized estimation with **ridge** over a solution path [replace `*` with `portland`, `alzheimer` or `spam`]
 - `*_lasso.R` → Penalized estimation with **lasso** over a solution path  [replace `*` with `portland`, `alzheimer` or `spam`]
 - `*_enet.R` → Penalized estimation with **elastic-net** over a solution path  [replace `*` with `portland`, `alzheimer` or `spam`]
-- `*_enet2d.R` → Penalized estimation with **elastic-net** over a two-dimensional tuning grid (only for Portland) [replace `*` with `portland`]
+- `*_enet2d.R` → Penalized estimation with **elastic-net** over 2-dimensional tuning grid (only for Portland) [replace `*` with `portland`]
 - `*_mfvb.R` → Bayesian inference via **variational Bayes** (only for Portland) [replace `*` with `portland`]
 
 The above R scripts are self-contained and can be executed independently to reproduce specific parts of the analysis discussed in the article.

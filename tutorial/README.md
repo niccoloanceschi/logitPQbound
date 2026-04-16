@@ -8,7 +8,7 @@ This repository contains the code required to reproduce the numerical experiment
 
 The `tutorial/` folder is organized in sub-folders, each corresponding to a specific application discussed in the paper and supplementary material:
 
-- `Portland/` → Spatial risk modelling of motor-vehicle theft events in Portland (Oregon). [see, Section 5 and Supplementary Material F.2]
+- `Portland/` → Spatial modelling of motor-vehicle theft events in Portland (Oregon). [see, Section 5 and Supplementary Material F.2]
 - `Alzheimer/` →Alzheimer’s disease classification based on demographic and biological covariates.  [see, Supplementary Material F.2]
 - `Spam/` → Binary email classification (spam vs. non-spam) based on textual features. [see, Supplementary Material F.2]
 

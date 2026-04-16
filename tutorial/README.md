@@ -6,7 +6,7 @@ This repository contains the code required to reproduce the numerical experiment
 
 ## Repository structure
 
-The `tutorial/` folder is organized in sub-folders, each corresponding to a specific application discussed in the paper and supplementary material:
+The `tutorial/` folder is organized in sub-folders, each corresponding to a specific application in the paper and Supplementary Material:
 
 - `Portland/` → Spatial modelling of motor-vehicle theft events in Portland (Oregon). [see, Section 5 and Supplementary Material F.2]
 - `Alzheimer/` →Alzheimer’s disease classification based on demographic and biological covariates.  [see, Supplementary Material F.2]

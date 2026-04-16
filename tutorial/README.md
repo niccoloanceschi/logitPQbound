@@ -18,7 +18,7 @@ Additionally, the `tutorial/` folder contains the R script `tutorial_utils.R`, w
 Each application sub-folder is organized as follows:
 
 - `csv/` → folder where numerical summaries (iterations, runtime, log-likelihood, etc.) will be saved
-- `rds/` → folder where fitted models and intermediate results (in `.RDS` extension) will be saved
+- `rds/` → folder where fitted models and intermediate results will be saved
 - `img/` → folder where optional diagnostic plots (Portland dataset only) will be saved
 - `*_ridge.R` → Penalized estimation with **ridge** over a solution path [replace `*` with `portland`, `alzheimer` or `spam`]
 - `*_lasso.R` → Penalized estimation with **lasso** over a solution path  [replace `*` with `portland`, `alzheimer` or `spam`]

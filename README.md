@@ -3,7 +3,7 @@
 
 The repository provides the R functions implementing the novel piecewise quadratic bound for logistic log-likelihoods from the paper
 
-* Anceschi, N. and Castiglione, C. and Rigon, T. and Zanella, G. and Durante, D. (2025), [Optimal and computationally tractable lower bounds for logistic log-likelihoods](https://arxiv.org/abs/2410.10309), ArXiv. 
+* Anceschi, N., Castiglione, C., Rigon, T., Zanella, G., and Durante, D. (2025), [Optimal and computationally tractable lower bounds for logistic log-likelihoods](https://arxiv.org/abs/2410.10309), arXiv:2410.10309. 
 
 The `logitPQbound` package can be installed by running the following R commands
 
@@ -27,7 +27,7 @@ pak::pak("niccoloanceschi/logitPQbound")
 
 - `src/` contains the Rccp code scripts
 - `R/` contains the R source scripts
-- `man` contains the documentation files for the exported R functions (generated via `roxygen2`)
+- `man/` contains the documentation files for the exported R functions (generated via `roxygen2`)
 - `data/` contains example datasets included in the package (in `.RData` extension)
 - `turorial/` contains scripts to reproduce the numerical results and figures from the main paper
 - `DESCRIPTION` is the package metadata file specifying authors, maintainers, version, and dependencies 

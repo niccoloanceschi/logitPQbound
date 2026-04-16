@@ -20,11 +20,11 @@ Each application sub-folder is organized as follows:
 - `csv/` → folder where numerical summaries (iterations, runtime, log-likelihood, etc.) will be saved
 - `rds/` → folder where fitted models and intermediate results (in `.RDS` extension) will be saved
 - `img/` → folder where optional diagnostic plots (Portland dataset only) will be saved
-- `*_ridge.R` → Penalized likelihood with **ridge penalty** over a solution path [replace `*` with `portland`, `alzheimer` or `spam` depending on the application]
-- `*_lasso.R` → Penalized likelihood with **lasso penalty** over a solution path  [replace `*` with `portland`, `alzheimer` or `spam` depending on the application]
-- `*_enet.R` → Penalized likelihood with **elastic-net penalty** over a solution path  [replace `*` with `portland`, `alzheimer` or `spam` depending on the application]
-- `*_enet2d.R` → Penalized likelihood with **elastic-net penalty** over a two-dimensional tuning grid (Portland dataset only) [replace `*` with `portland`]
-- `*_mfvb.R` → Bayesian inference via **variational Bayes** (Portland dataset only) [replace `*` with `portland`]
+- `*_ridge.R` → Penalized estimation with **ridge penalty** over a solution path [replace `*` with `portland`, `alzheimer` or `spam`]
+- `*_lasso.R` → Penalized estimation with **lasso penalty** over a solution path  [replace `*` with `portland`, `alzheimer` or `spam`]
+- `*_enet.R` → Penalized estimation with **elastic-net penalty** over a solution path  [replace `*` with `portland`, `alzheimer` or `spam`]
+- `*_enet2d.R` → Penalized estimation with **elastic-net penalty** over a two-dimensional tuning grid (only for Portland) [replace `*` with `portland`]
+- `*_mfvb.R` → Bayesian inference via **variational Bayes** (only for Portland) [replace `*` with `portland`]
 
 The above R scripts are self-contained and can be executed independently to reproduce specific parts of the analysis discussed in the article.
 All the application-specific experiments implemented in such R scripts follow the same structure:

@@ -62,12 +62,12 @@ To run all experiments, do the following:
 source("tutorial/Portland/portland_enet.R")
 ```
 
-As discussed in the article and supplementary material, the computational time required for the numerical experiments may range from a few minutes to several hours, depending on:
+As discussed in the article and Supplementary Material, the total runtime required for the different applications may range from a few minutes to several hours, depending on:
 
-- the size of the dataset
-- the type of penalty
-- the number of regression parameters
-- the number of tuning parameters
+- the size of the dataset `n`
+- the type of penalty `ridge`, `lasso`, `elastic-net`
+- the number of regression parameters `p`
+- the number of tuning parameters [1 for `ridge`, `lasso`, 2 for `elastic-net`]
 
 ---
 

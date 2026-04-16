@@ -71,17 +71,15 @@ As discussed in the article and Supplementary Material, the total runtime requir
 
 ---
 
-# Methodology 
+# Reproducibility  notes
 
-- The implementation closely follows the methodology described in Section 5 of the paper and Sections D, E, and F of the supplementary material.
-- The PQ method consistently reduces the number of iterations and almost always improves total runtime, especially in high-dimensional or non-smooth settings.
-- While the number of iterations to convergence is reproducible across systems, the execution time depends on the specific hardware. In particular, the results reported in the paper were obtained on a Dell XPS 15 laptop equipped with a 4.7 GHz processor and 32 GB of RAM.
-
+- The implementation closely follows the methodology described in **Section 5** of the paper and leverages the algorithms presented in detail **Sections D, E, and F** of the Supplementary Material.
+- While the number of iterations to convergence is reproducible across systems, the total execution time depends on the specific hardware employed. Nonetheless, time variations apply to all the minorizers compared, and hence, the relative performance comparisons and final conclusions remain consistent across hardwares. The results reported in the paper and in the Supplementary Material were obtained on **MacBook Air (2020) equipped with an Apple M1 processor and 8 GB of RAM [R version 4.2.2]**.
 ---
 
 # References
 
-* Anceschi, N. Castiglione, C. and Rigon, T. and Zanella, G. and Durante, D. (2025)  
-  [Optimal and computationally tractable lower bounds for logistic log-likelihoods](https://arxiv.org/abs/2410.10309), ArXiv. 
+* Anceschi, N., Castiglione, C., Rigon, T., Zanella, G. and Durante, D. (2025)  
+  [Optimal and computationally tractable lower bounds for logistic log-likelihoods](https://arxiv.org/abs/2410.10309), arXiv:2410.10309. 
 
 

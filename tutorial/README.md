@@ -1,6 +1,6 @@
-# Reproducibility material for: *Optimal and computationally tractable lower bounds for logistic log-likelihoods*
+# Reproducibility material for ''Optimal and computationally tractable lower bounds for logistic log-likelihoods''
 
-This repository contains the code required to reproduce the numerical experiments presented in the paper Anceschi, N. and Castiglione, C. and Rigon, T. and Zanella, G. and Durante, D. (2025), [Optimal and computationally tractable lower bounds for logistic log-likelihoods](https://arxiv.org/abs/2410.10309), with particular focus on Section 5 of the main paper and Section F of the supplementary material.
+This repository contains the code required to reproduce the numerical experiments presented in the paper Anceschi, N., Castiglione, C., Rigon, T., Zanella, G. and Durante, D. (2025), [Optimal and computationally tractable lower bounds for logistic log-likelihoods](https://arxiv.org/abs/2410.10309), with particular focus on **Section 5** of the main paper and **Section F.2** of the Supplementary Material.
 
 ---
 
@@ -8,23 +8,23 @@ This repository contains the code required to reproduce the numerical experiment
 
 The `tutorial/` folder is organized in sub-folders, each corresponding to a specific application discussed in the paper and supplementary material:
 
-- `Portland/` → Spatial risk modelling of motor-vehicle theft events in Portland (Oregon).
-- `Alzheimer/` → Early-stage Alzheimer’s disease classification based on demographic and biological covariates.
-- `Spam/` → Binary email classification (spam vs. non-spam) based on textual features.
+- `Portland/` → Spatial risk modelling of motor-vehicle theft events in Portland (Oregon). [see, Section 5 and Supplementary Material F.2]
+- `Alzheimer/` →Alzheimer’s disease classification based on demographic and biological covariates.  [see, Supplementary Material F.2]
+- `Spam/` → Binary email classification (spam vs. non-spam) based on textual features. [see, Supplementary Material F.2]
+
 
 Additionally, the `tutorial/` folder contains the R script `tutorial_utils.R`, which provides shared utility functions used across all experiments, including data preprocessing, plotting routines, and accuracy metrics (e.g., total variation distance).
 
 Each application sub-folder is organized as follows:
 
-- `csv/` → numerical summaries (iterations, runtime, log-likelihood, etc.)
-- `rds/` → fitted models and intermediate results (in `.RDS` extension)
-- `img/` → optional diagnostic plots (Portland dataset only)
-- `*_logit.R` → Un-penalized likelihood (Spam dataset only)
-- `*_ridge.R` → Penalized likelihood with **ridge penalty** over a solution path
-- `*_lasso.R` → Penalized likelihood with **lasso penalty** over a solution path
-- `*_enet.R` → Penalized likelihood with **elastic-net penalty** over a solution path
-- `*_enet2d.R` → Penalized likelihood with **elastic-net penalty** over a two-dimensional tuning grid (Portland dataset only)
-- `*_mfvb.R` → Bayesian inference via **variational Bayes** (Portland dataset only)
+- `csv/` → folder where numerical summaries (iterations, runtime, log-likelihood, etc.) will be saved
+- `rds/` → folder where fitted models and intermediate results (in `.RDS` extension) will be saved
+- `img/` → folder where optional diagnostic plots (Portland dataset only) will be saved
+- `*_ridge.R` → Penalized likelihood with **ridge penalty** over a solution path [replace `*` with `portland`, `alzheimer` or `spam` depending on the application]
+- `*_lasso.R` → Penalized likelihood with **lasso penalty** over a solution path  [replace `*` with `portland`, `alzheimer` or `spam` depending on the application]
+- `*_enet.R` → Penalized likelihood with **elastic-net penalty** over a solution path  [replace `*` with `portland`, `alzheimer` or `spam` depending on the application]
+- `*_enet2d.R` → Penalized likelihood with **elastic-net penalty** over a two-dimensional tuning grid (Portland dataset only) [replace `*` with `portland`]
+- `*_mfvb.R` → Bayesian inference via **variational Bayes** (Portland dataset only) [replace `*` with `portland`]
 
 The above R scripts are self-contained and can be executed independently to reproduce specific parts of the analysis discussed in the article.
 All the application-specific experiments implemented in such R scripts follow the same structure:

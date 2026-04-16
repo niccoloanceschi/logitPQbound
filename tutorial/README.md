@@ -26,35 +26,34 @@ Each application sub-folder is organized as follows:
 - `*_enet2d.R` → Penalized estimation with **elastic-net** over 2-dimensional tuning grid (only for Portland) [replace `*` with `portland`]
 - `*_mfvb.R` → Bayesian inference via **variational Bayes** (only for Portland) [replace `*` with `portland`]
 
-The above R scripts are self-contained and can be executed independently to reproduce specific parts of the analysis discussed in the article.
-All the application-specific experiments implemented in such R scripts follow the same structure:
+The above R scripts are self-contained and can be executed independently to reproduce specific parts of the analysis discussed in the article and the Supplementary Material.
+All the application-specific experiments implemented in these R scripts follow the same structure:
 
 1. Load the required packages and utility functions
 2. Load the data from the `data/` folder and preprocess the predictors
 3. Set the optimization control parameters (default values are used in all experiments)
-4. Run penalized likelihood optimization or variational inference under different MM bounds:
+4. Run penalized likelihood optimization or variational inference under different **tangent minorizers**:
    - **BL** (Böhning–Lindsay)
    - **PG** (Polya-Gamma)
-   - **PQ** (piecewise quadratic, proposed method)
+   - **PQ** (piecewise quadratic, **proposed method**)
 5. Save the diagnostic information and final results in the output folders `img/`, `csv/`, `rds/`
 
 Reproducing the full set of results requires running all scripts across the three application folders (`Portland/`, `Alzheimer/`, and `Spam/`).
-The following table provides a schematic representation of the main results in the paper and the scripts that can be used to reproduce them.
+The following table provides a schematic representation of the main results in the paper and the scripts to reproduce them.
 
 | Paper element | Location in repo |
 |--------------|----------------|
 | Table 1 (main paper) | `Portland/portland_enet.R`, `Portland/portland_enet2d.R` |
-| Figure 3 (main paper) | `Portland/portland_mfvb.R` |
+| Figure 2 (main paper) | `Portland/portland_mfvb.R` |
 | Table F.1 (supplement) | all `*_ridge.R`, `*_lasso.R`, `*_enet.R` |
 
 ---
 
-# How to reproduce results
+# How to run the codes and reproduce results
 
-To run all experiments, it is necessary to set the working directory to the root folder of the package, i.e., the directory containing the `logitPQbound.Rproj` file.  
-Alternatively, RStudio users can simply open the `logitPQbound.Rproj` file, which will automatically set the working directory.  
-
-R users can run each script independently using, for example:
+To run all experiments, do the following:
+- set the working directory to the root folder of the package, i.e., the directory containing the `logitPQbound.Rproj` file.  Alternatively, RStudio users can simply open the `logitPQbound.Rproj` file, which will automatically set the working directory.  
+- run separately each script [ `*_ridge.R`, `*_lasso.R`, `*_enet.R`,  `*_enet2d.R` (only for Portland), and `*_mfvb.R` (only for Portland), where `*` is replaced by `portland`, `alzheimer` or `spam` depending on the application considered]. For example, to run elastic-net under Portland data, write:
 
 ```r
 # Set the working directory using the path to the package on your system

@@ -14,6 +14,10 @@
 .RData
 .RDataTmp
 
+# ZIP and RAR archives
+.zip
+.rar
+
 # C++ files
 src/*.o
 src/*.so

@@ -9,7 +9,8 @@ This repository contains the code required to reproduce the numerical experiment
 The `tutorial/` folder is organized in sub-folders, each corresponding to a specific application in the paper and Supplementary Material:
 
 - `Portland/` → Spatial modelling of motor-vehicle theft events in Portland (Oregon). [see, Section 5 and Supplementary Material F.2]
-- `Alzheimer/` →Alzheimer’s disease classification based on demographic and biological covariates.  [see, Supplementary Material F.2]
+- `Alzheimer/` → Alzheimer’s disease classification based on demographic and biological covariates.  [see, Supplementary Material F.2]
+- `Leukemia/` → Leukemia disease classification based on genes expression information.  [see, Supplementary Material F.2]
 - `Spam/` → Binary email classification (spam vs. non-spam) based on textual features. [see, Supplementary Material F.2]
 
 
@@ -20,9 +21,9 @@ Each application sub-folder is organized as follows:
 - `csv/` → folder where numerical summaries (iterations, runtime, log-likelihood, etc.) will be saved
 - `rds/` → folder where fitted models and intermediate results will be saved
 - `img/` → folder where optional diagnostic plots (Portland dataset only) will be saved
-- `*_ridge.R` → Penalized estimation with **ridge** over a solution path [replace `*` with `portland`, `alzheimer` or `spam`]
-- `*_lasso.R` → Penalized estimation with **lasso** over a solution path  [replace `*` with `portland`, `alzheimer` or `spam`]
-- `*_enet.R` → Penalized estimation with **elastic-net** over a solution path  [replace `*` with `portland`, `alzheimer` or `spam`]
+- `*_ridge.R` → Penalized estimation with **ridge** over a solution path [replace `*` with `portland`, `alzheimer`, `leukemia` or `spam`]
+- `*_lasso.R` → Penalized estimation with **lasso** over a solution path  [replace `*` with `portland`, `alzheimer`, `leukemia` or `spam`]
+- `*_enet.R` → Penalized estimation with **elastic-net** over a solution path  [replace `*` with `portland`, `alzheimer`, `leukemia` or `spam`]
 - `*_enet2d.R` → Penalized estimation with **elastic-net** over 2-dimensional tuning grid (only for Portland) [replace `*` with `portland`]
 - `*_mfvb.R` → Bayesian inference via **variational Bayes** (only for Portland) [replace `*` with `portland`]
 
@@ -38,7 +39,7 @@ All the application-specific experiments implemented in these R scripts follow t
    - **PQ** (piecewise quadratic, **proposed method**)
 5. Save the diagnostic information and final results in the output folders `img/`, `csv/`, `rds/`
 
-Reproducing the full set of results requires running all scripts across the three application folders (`Portland/`, `Alzheimer/`, and `Spam/`).
+Reproducing the full set of results requires running all scripts across the three application folders (`Portland/`, `Alzheimer/`, `Leukemia/`, and `Spam/`).
 The following table provides a schematic representation of the main results in the paper and the scripts to reproduce them.
 
 | Paper element | Location in repo |
@@ -53,7 +54,7 @@ The following table provides a schematic representation of the main results in t
 
 To run all experiments, do the following:
 - set the working directory to the root folder of the package, i.e., the directory containing the `logitPQbound.Rproj` file.  Alternatively, RStudio users can simply open the `logitPQbound.Rproj` file, which will automatically set the working directory.  
-- run separately each script [ `*_ridge.R`, `*_lasso.R`, `*_enet.R`,  `*_enet2d.R` (only for Portland), and `*_mfvb.R` (only for Portland), where `*` is replaced by `portland`, `alzheimer` or `spam` depending on the application considered]. For example, to run elastic-net under Portland data, write:
+- run separately each script [ `*_ridge.R`, `*_lasso.R`, `*_enet.R`,  `*_enet2d.R` (only for Portland), and `*_mfvb.R` (only for Portland), where `*` is replaced by `portland`, `alzheimer`, `leukemia` or `spam` depending on the application considered]. For example, to run elastic-net under Portland data, write:
 
 ```r
 # Set the working directory using the path to the package on your system

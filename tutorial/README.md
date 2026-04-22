@@ -68,7 +68,7 @@ As discussed in the article and Supplementary Material, the total runtime requir
 - the size of the dataset `n`
 - the type of penalty `ridge`, `lasso`, `elastic-net`
 - the number of regression parameters `p`
-- the number of tuning parameters [1 for `ridge`, `lasso`, 2 for `elastic-net`]
+- the number of tuning parameters [1 for `ridge`, `lasso`, 1 or 2 for `elastic-net`]
 
 ---
 

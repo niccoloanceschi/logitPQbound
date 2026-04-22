@@ -36,7 +36,6 @@ source("tutorial/tutorial_utils.R")
 ## DATA LOAD ----
 
 load(paste(DATAPATH, "Leukemia.RData", sep="/"))
-str(Leukemia)
 
 ## PREPROCESSING ----
 

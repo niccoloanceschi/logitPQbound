@@ -15,10 +15,6 @@
 #' @param etatol (real) Convergence threshold for the relative change in the linear predictor
 #' @param verbose (boolean) Print the intermediate state of the optimization
 #' @param freq (int) How often print the optimization state
-#' @param use_nn (boolean) Use nearest neighbors search as safety check on PQ bounds optimization in later iterations.
-#' @param method (string) Method to be used for the solution of the quadratic programming inner optimization. Must be one of 'dual', or 'admm'
-#' @param ctr_prjg (list) Control parameters for the projected gradient algorithm
-#' @param ctr_dual (list) Control parameters for the dual QP algorithm
 #' @param ctr_admm (list) Control parameters for the ADMM algorithm
 #' 
 #' @return The function returns a list with optimal coefficients and likelihood path through MM iterations
@@ -27,7 +23,7 @@
 #' 
 fit_logit_genlasso_path <- function(y, X, D, type=c('NR','BL','PG','PQ'), 
                                     beta_start=NULL, lambda=NULL, alpha=0.99, 
-                                    eps=1e-10, gamma=1.0, phi=0.9, approx=TRUE, 
+                                    eps=1e-10, gamma=1.0, phi=0.9, prox=TRUE, 
                                     intercept=FALSE, maxiter=1000L, abstol=1e-4, 
                                     reltol=1e-4, etatol=1e-4, verbose=FALSE, 
                                     freq=10L, ctr_admm=set_ctr_admm()){
@@ -87,7 +83,7 @@ fit_logit_genlasso_path <- function(y, X, D, type=c('NR','BL','PG','PQ'),
     # Fit the current model with warm-start initialization
     fitk <- fit_logit_genlasso(y=y, X=X, D=D, type=type, 
                                beta_start=beta_start, lambda=lambda[k], alpha=alpha,
-                               eps=eps, phi=phi, intercept=intercept, approx=approx, 
+                               eps=eps, phi=phi, intercept=intercept, prox=prox, 
                                maxiter=maxiter, abstol=abstol, reltol=reltol, etatol=etatol, 
                                verbose=verbose, freq=freq, ctr_admm=ctr)
     
@@ -155,10 +151,6 @@ fit_logit_genlasso_path <- function(y, X, D, type=c('NR','BL','PG','PQ'),
 #' @param etatol (real) Convergence threshold for the relative change in the linear predictor
 #' @param verbose (boolean) Print the intermediate state of the optimization
 #' @param freq (int) How often print the optimization state
-#' @param use_nn (boolean) Use nearest neighbors search as safety check on PQ bounds optimization in later iterations.
-#' @param method (string) Method to be used for the solution of the quadratic programming inner optimization. Must be one of 'dual', or 'admm'
-#' @param ctr_prjg (list) Control parameters for the projected gradient algorithm
-#' @param ctr_dual (list) Control parameters for the dual QP algorithm
 #' @param ctr_admm (list) Control parameters for the ADMM algorithm
 #' 
 #' @return The function returns a list with optimal coefficients and likelihood path through MM iterations
@@ -167,7 +159,7 @@ fit_logit_genlasso_path <- function(y, X, D, type=c('NR','BL','PG','PQ'),
 #' 
 fit_logit_splasso_path <- function(y, X, D, type=c('NR','BL','PG','PQ'), 
                                    beta_start=NULL, lambda=NULL, alpha=0.99, 
-                                   gamma=1.0, phi=0.9, approx=TRUE, maxiter=1000L, 
+                                   gamma=1.0, phi=0.9, prox=TRUE, maxiter=1000L, 
                                    abstol=1e-4, reltol=1e-4, etatol=1e-4, 
                                    verbose=FALSE, freq=10L, 
                                    ctr_admm=set_ctr_admm()){
@@ -243,7 +235,7 @@ fit_logit_splasso_path <- function(y, X, D, type=c('NR','BL','PG','PQ'),
     # Fit the current model with warm-start initialization
     fitk <- fit_logit_splasso(y=y, X=X, D=D, type=type, 
                               beta_start=beta_start, lambda=lambda[k], alpha=alpha, 
-                              eps=.0, intercept=FALSE, phi=phi, approx=approx, 
+                              eps=.0, intercept=FALSE, phi=phi, prox=prox, 
                               maxiter=maxiter, abstol=abstol, reltol=reltol, 
                               etatol=etatol, verbose=FALSE, freq=freq, ctr_admm=ctr)
     
@@ -307,10 +299,6 @@ fit_logit_splasso_path <- function(y, X, D, type=c('NR','BL','PG','PQ'),
 #' @param etatol (real) Convergence threshold for the relative change in the linear predictor
 #' @param verbose (boolean) Print the intermediate state of the optimization
 #' @param freq (int) How often print the optimization state
-#' @param use_nn (boolean) Use nearest neighbors search as safety check on PQ bounds optimization in later iterations.
-#' @param method (string) Method to be used for the solution of the quadratic programming inner optimization. Must be one of 'dual', or 'admm'
-#' @param ctr_prjg (list) Control parameters for the projected gradient algorithm
-#' @param ctr_dual (list) Control parameters for the dual QP algorithm
 #' @param ctr_admm (list) Control parameters for the ADMM algorithm
 #' 
 #' @return The function returns a list with optimal coefficients and likelihood path through MM iterations
@@ -319,7 +307,7 @@ fit_logit_splasso_path <- function(y, X, D, type=c('NR','BL','PG','PQ'),
 #' 
 fit_logit_splasso_cv <- function(y, X, D, type=c('NR','BL','PG','PQ'), 
                                  nfold=5, seed=1234, beta_start=NULL, lambda=NULL, 
-                                 alpha=0.99, gamma=1.0, phi=0.9, approx=TRUE, 
+                                 alpha=0.99, gamma=1.0, phi=0.9, prox=TRUE, 
                                  maxiter=1000L, abstol=1e-4, reltol=1e-4, etatol=1e-4, 
                                  verbose=FALSE, freq=10L, ctr_admm=set_ctr_admm()) {
   
@@ -352,7 +340,7 @@ fit_logit_splasso_cv <- function(y, X, D, type=c('NR','BL','PG','PQ'),
     # Fit the model on the training set
     fit <- fit_logit_splasso_path(y[train], X[train,], D, type=type, 
                                   beta_start=beta_start, lambda=lambdak, alpha=alpha, 
-                                  gamma=gamma, phi=phi, approx=approx, maxiter=maxiter, 
+                                  gamma=gamma, phi=phi, prox=prox, maxiter=maxiter, 
                                   abstol=abstol, reltol=reltol, etatol=etatol, 
                                   verbose=verbose, freq=freq, ctr_admm=ctr_admm)
     
@@ -379,7 +367,7 @@ fit_logit_splasso_cv <- function(y, X, D, type=c('NR','BL','PG','PQ'),
   ctr_admm$rho <- ctr_admm$rho * lambda_best
   fit <- fit_logit_splasso(y, X, D, type=type, beta_start=beta_start, 
                            lambda=lambda_best, alpha=alpha, phi=phi,
-                           approx=approx, maxiter=maxiter, 
+                           prox=prox, maxiter=maxiter, 
                            abstol=abstol, reltol=reltol, etatol=etatol, 
                            verbose=FALSE, freq=freq, ctr_admm=ctr_admm)
   

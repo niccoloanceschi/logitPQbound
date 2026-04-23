@@ -26,7 +26,7 @@
 #' @export
 fit_logit_genlasso <- function(y, X, D, type=c('NR','BL','PG','PQ'), beta_start=NULL, 
                                lambda=1.0, alpha=.99, eps=1e-10, phi=0.9, intercept=FALSE,
-                               approx=TRUE, maxiter=1000, abstol=1e-4, reltol=1e-4, etatol=1e-4, 
+                               prox=TRUE, maxiter=1000, abstol=1e-4, reltol=1e-4, etatol=1e-4, 
                                verbose=FALSE, freq=10, ctr_admm=set_ctr_admm()){
   
   # Check the bound type and QP method

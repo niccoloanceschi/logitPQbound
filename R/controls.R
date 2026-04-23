@@ -1,16 +1,4 @@
 
-#' @title Set the control parameters of the projected gradient algorithm
-#' @keywords internal
-set_ctr_prjg = function(stepsize=1e-1, tol=1e-2, maxiter=100){
-  list(stepsize=stepsize, tol=tol, maxiter=maxiter)
-}
-
-#' @title Set the control parameters of the dual QP algorithm
-#' @keywords internal
-set_ctr_dual = function(tol=1e-4, maxiter=100){
-  list(tol=tol, maxiter=maxiter)
-}
-
 #' @title Set the control parameters of the ADMM algorithm
 #' 
 #' @param rho Penalty parameter.

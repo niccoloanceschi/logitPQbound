@@ -161,10 +161,7 @@ fit_logit_ridge_path <- function(y, X, type=c('NR','BL','PG','PQ'),
 #' @param etatol (real) Convergence threshold for the relative change in the linear predictor
 #' @param verbose (boolean) Print the intermediate state of the optimization
 #' @param freq (int) How often print the optimization state
-#' @param use_nn (boolean) Use nearest neighbors search as safety check on PQ bounds optimization in later iterations.
 #' @param method (string) Method to be used for the solution of the quadratic programming inner optimization. Must be one of 'dual', or 'admm'
-#' @param ctr_prjg (list) Control parameters for the projected gradient algorithm
-#' @param ctr_dual (list) Control parameters for the dual QP algorithm
 #' @param ctr_admm (list) Control parameters for the ADMM algorithm
 #' 
 #' @return The function returns a list with optimal coefficients and likelihood path through MM iterations
@@ -175,11 +172,7 @@ fit_logit_spridge_path <- function(y, X, D, type=c('NR','BL','PG','PQ'),
                                    beta_start=NULL, lambda=NULL, eps=1e-10, 
                                    gamma=1.0, intercept=FALSE, phi=0.9, maxiter=1000L, 
                                    abstol=1e-4, reltol=1e-4, etatol=1e-4, 
-                                   verbose=FALSE, freq=10L, use_nn=FALSE, 
-                                   method=c("prjg", "dual", "admm"), 
-                                   ctr_admm=set_ctr_admm(), 
-                                   ctr_prjg=set_ctr_prjg(),
-                                   ctr_dual=set_ctr_dual()){
+                                   verbose=FALSE, freq=10L, ctr_admm=set_ctr_admm()){
   
   # Check the bound type and QP method
   type <- match.arg(type)
@@ -234,11 +227,11 @@ fit_logit_spridge_path <- function(y, X, D, type=c('NR','BL','PG','PQ'),
     timek <- proc.time()
     
     # Fit the current model with warm-start initialization
-    fitk <- fit_logit_spridge(y=y, X=X, D=D, type=type, beta_start=beta_start, 
-                              lambda=lambda[k], eps=eps, intercept=intercept, phi=phi,
-                              maxiter=maxiter, abstol=abstol, reltol=reltol, etatol=etatol, 
-                              verbose=FALSE, freq=freq, use_nn=use_nn, method=method,
-                              ctr_admm=ctr_admm, ctr_prjg=ctr_prjg, ctr_dual=ctr_dual)
+    fitk <- fit_logit_spridge(y=y, X=X, D=D, type=type, 
+                              beta_start=beta_start, lambda=lambda[k], eps=eps, 
+                              intercept=intercept, phi=phi, maxiter=maxiter, 
+                              abstol=abstol, reltol=reltol, etatol=etatol, 
+                              verbose=FALSE, freq=freq, ctr_admm=ctr_admm)
     
     # Set the next initial estimate
     beta_start <- fitk$beta
@@ -298,10 +291,6 @@ fit_logit_spridge_path <- function(y, X, D, type=c('NR','BL','PG','PQ'),
 #' @param etatol (real) Convergence threshold for the relative change in the linear predictor
 #' @param verbose (boolean) Print the intermediate state of the optimization
 #' @param freq (int) How often print the optimization state
-#' @param use_nn (boolean) Use nearest neighbors search as safety check on PQ bounds optimization in later iterations.
-#' @param method (string) Method to be used for the solution of the quadratic programming inner optimization. Must be one of 'dual', or 'admm'
-#' @param ctr_prjg (list) Control parameters for the projected gradient algorithm
-#' @param ctr_dual (list) Control parameters for the dual QP algorithm
 #' @param ctr_admm (list) Control parameters for the ADMM algorithm
 #' 
 #' @return The function returns a list with optimal coefficients and likelihood path through MM iterations
@@ -312,11 +301,8 @@ fit_logit_spridge_cv <- function(y, X, D, type=c('NR','BL','PG','PQ'),
                                  nfold=5, seed=1234, beta_start=NULL, 
                                  lambda=NULL, gamma=1.0, phi=0.9, maxiter=1000L, 
                                  abstol=1e-4, reltol=1e-4, etatol=1e-4, 
-                                 verbose=FALSE, freq=10L, use_nn=FALSE,
-                                 method=c("prjg", "dual", "admm"), 
-                                 ctr_admm=set_ctr_admm(), 
-                                 ctr_prjg=set_ctr_prjg(),
-                                 ctr_dual=set_ctr_dual()) {
+                                 verbose=FALSE, freq=10L,
+                                 ctr_admm=set_ctr_admm()) {
   
   # Set the seed for RNG
   set.seed(seed)
@@ -349,8 +335,7 @@ fit_logit_spridge_cv <- function(y, X, D, type=c('NR','BL','PG','PQ'),
                                   beta_start=beta_start, lambda=lambdak, 
                                   gamma=gamma, phi=phi, maxiter=maxiter, 
                                   abstol=abstol, reltol=reltol, etatol=etatol, 
-                                  verbose=verbose, freq=freq, use_nn=use_nn, method=method,
-                                  ctr_admm=ctr_admm, ctr_prjg=ctr_prjg, ctr_dual=ctr_dual)
+                                  verbose=verbose, freq=freq, ctr_admm=ctr_admm)
     
     # Compute the log-likelihood on the test set
     eta_ts <- as.matrix(X[test,] %*% fit$beta)
@@ -376,8 +361,7 @@ fit_logit_spridge_cv <- function(y, X, D, type=c('NR','BL','PG','PQ'),
   fit <- fit_logit_spridge(y, X, D, type=type, beta_start=beta_start, 
                            lambda=lambda_best, phi=phi, maxiter=maxiter, 
                            abstol=abstol, reltol=reltol, etatol=etatol, 
-                           verbose=FALSE, freq=freq, use_nn=use_nn, method=method,
-                           ctr_admm=ctr_admm, ctr_prjg=ctr_prjg, ctr_dual=ctr_dual)
+                           verbose=FALSE, freq=freq, ctr_admm=ctr_admm)
   
   # Append the cross-validation results to the fitted model
   fit$cv <- df

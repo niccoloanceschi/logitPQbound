@@ -10,16 +10,15 @@
 #' @param lambda (real) Regularization parameter for elastic-net regression.
 #' @param alpha (real) Mixing parameter regulating the balancing between lasso and ridge penalties.
 #' @param eps (real) Small value added to the intercept term to avoid numerical issues.
+#' @param phi (real) Relaxation parameter for the dual variables
 #' @param intercept (boolean) Is the intercept included in `X` or not?
+#' @param prox (boolean) Use the proximal primal-dual update
 #' @param maxiter (integer) Maximum number of iterations. If reached, the algorithm raises an error.
 #' @param abstol (real) Convergence threshold for the absolute change in the log-likelihood.
 #' @param reltol (real) Convergence threshold for the relative change in the log-likelihood.
 #' @param etatol (real) Convergence threshold for the relative change in the linear predictor.
 #' @param verbose (boolean) Print the intermediate state of the optimization.
 #' @param freq (int) How often print the optimization state.
-#' @param method (string) Method to be used for the solution of the quadratic programming inner optimization. Must be one of 'dual', or 'admm'.
-#' @param ctr_prjg (list) Control parameters for the projected gradient algorithm
-#' @param ctr_dual (list) Control parameters for the dual QP algorithm
 #' @param ctr_admm (list) Control parameters for the ADMM algorithm
 #' 
 #' @return The function returns a list with optimal coefficients and likelihood path through MM iterations
@@ -68,7 +67,7 @@ fit_logit_genlasso <- function(y, X, D, type=c('NR','BL','PG','PQ'), beta_start=
     nu <- as.vector(coeff_pq[,2])
     # u <- numeric(n+m)
     # z <- c(nu * as.vector(X %*% beta), as.vector(D %*% beta))
-    if (approx) {
+    if (prox) {
       u <- numeric(m)
       z <- as.vector(D %*% beta)
     } else {
@@ -154,7 +153,7 @@ fit_logit_genlasso <- function(y, X, D, type=c('NR','BL','PG','PQ'), beta_start=
       'NR' = update_genlasso_NR(beta, z, u, eta, prob, y, X, w, D, lambda, alpha, eps, ctr_admm),
       'BL' = update_genlasso_BL(beta, z, u, eta, prob, y, X, D, lambda, alpha, eps, ctr_admm),
       'PG' = update_genlasso_PG(beta, z, u, y, X, w, D, lambda, alpha, eps, ctr_admm),
-      'PQ' = update_genlasso_PQ(beta, z, u, s, eta, y, X, w, nu, D, lambda, alpha, eps, phi, approx, ctr_admm)
+      'PQ' = update_genlasso_PQ(beta, z, u, s, eta, y, X, w, nu, D, lambda, alpha, eps, phi, prox, ctr_admm)
     )
     
     beta_old <- beta
@@ -254,24 +253,23 @@ fit_logit_genlasso <- function(y, X, D, type=c('NR','BL','PG','PQ'), beta_start=
 #' @param lambda (real) Regularization parameter for elastic-net regression.
 #' @param alpha (real) Mixing parameter regulating the balancing between lasso and ridge penalties.
 #' @param eps (real) Small value added to the intercept term to avoid numerical issues.
+#' @param phi (real) Relaxation parameter for the dual variables
 #' @param intercept (boolean) Is the intercept included in `X` or not?
+#' @param prox (boolean) Use the proximal primal-dual update
 #' @param maxiter (integer) Maximum number of iterations. If reached, the algorithm raises an error.
 #' @param abstol (real) Convergence threshold for the absolute change in the log-likelihood.
 #' @param reltol (real) Convergence threshold for the relative change in the log-likelihood.
 #' @param etatol (real) Convergence threshold for the relative change in the linear predictor.
 #' @param verbose (boolean) Print the intermediate state of the optimization.
 #' @param freq (int) How often print the optimization state.
-#' @param method (string) Method to be used for the solution of the quadratic programming inner optimization. Must be one of 'dual', or 'admm'.
-#' @param ctr_prjg (list) Control parameters for the projected gradient algorithm
-#' @param ctr_dual (list) Control parameters for the dual QP algorithm
 #' @param ctr_admm (list) Control parameters for the ADMM algorithm
 #' 
 #' @return The function returns a list with optimal coefficients and likelihood path through MM iterations
 #' 
 #' @export
 fit_logit_splasso <- function(y, X, D, type=c('NR','BL','PG','PQ'), beta_start=NULL, 
-                              lambda=1.0, alpha=.99, eps=1e-10, intercept=FALSE, 
-                              phi=0.9, approx=TRUE, maxiter=1000, 
+                              lambda=1.0, alpha=.99, eps=1e-10, phi=0.9, 
+                              intercept=FALSE, prox=TRUE, maxiter=1000, 
                               abstol=1e-4, reltol=1e-4, etatol=1e-4, 
                               verbose=FALSE, freq=10, ctr_admm=set_ctr_admm()){
   
@@ -314,7 +312,7 @@ fit_logit_splasso <- function(y, X, D, type=c('NR','BL','PG','PQ'), beta_start=N
     s  <- sign(eta) * (abs(eta) > 1e-2)
     w  <- as.vector(coeff_pq[,1])
     nu <- as.vector(coeff_pq[,2])
-    if (approx) {
+    if (prox) {
       u <- numeric(m)
       z <- as.vector(D %*% beta)
     } else {
@@ -400,7 +398,7 @@ fit_logit_splasso <- function(y, X, D, type=c('NR','BL','PG','PQ'), beta_start=N
       'NR' = update_splasso_NR(beta, z, u, eta, prob, y, X, w, D, lambda, alpha, eps, ctr_admm),
       'BL' = update_splasso_BL(beta, z, u, eta, prob, y, X, D, lambda, alpha, eps, ctr_admm),
       'PG' = update_splasso_PG(beta, z, u, y, X, w, D, lambda, alpha, eps, ctr_admm),
-      'PQ' = update_splasso_PQ(beta, z, u, s, eta, y, X, w, nu, D, lambda, alpha, eps, phi, approx, ctr_admm)
+      'PQ' = update_splasso_PQ(beta, z, u, s, eta, y, X, w, nu, D, lambda, alpha, eps, phi, prox, ctr_admm)
     )
     
     beta_old <- beta

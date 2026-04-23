@@ -11,41 +11,6 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// prjgrad_large_p
-arma::vec prjgrad_large_p(arma::vec u, const arma::vec& Ny, const arma::vec& NW, const arma::mat& XPXtN, const arma::mat& cholQ, double alpha, double thrs, int maxiter);
-RcppExport SEXP _logitPQbound_prjgrad_large_p(SEXP uSEXP, SEXP NySEXP, SEXP NWSEXP, SEXP XPXtNSEXP, SEXP cholQSEXP, SEXP alphaSEXP, SEXP thrsSEXP, SEXP maxiterSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::vec >::type u(uSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type Ny(NySEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type NW(NWSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type XPXtN(XPXtNSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type cholQ(cholQSEXP);
-    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
-    Rcpp::traits::input_parameter< double >::type thrs(thrsSEXP);
-    Rcpp::traits::input_parameter< int >::type maxiter(maxiterSEXP);
-    rcpp_result_gen = Rcpp::wrap(prjgrad_large_p(u, Ny, NW, XPXtN, cholQ, alpha, thrs, maxiter));
-    return rcpp_result_gen;
-END_RCPP
-}
-// prjgrad_large_n
-arma::vec prjgrad_large_n(arma::vec u, const arma::vec& Ny, const arma::mat& NX, const arma::mat& cholQ, double alpha, double thrs, int maxiter);
-RcppExport SEXP _logitPQbound_prjgrad_large_n(SEXP uSEXP, SEXP NySEXP, SEXP NXSEXP, SEXP cholQSEXP, SEXP alphaSEXP, SEXP thrsSEXP, SEXP maxiterSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::vec >::type u(uSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type Ny(NySEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type NX(NXSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type cholQ(cholQSEXP);
-    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
-    Rcpp::traits::input_parameter< double >::type thrs(thrsSEXP);
-    Rcpp::traits::input_parameter< int >::type maxiter(maxiterSEXP);
-    rcpp_result_gen = Rcpp::wrap(prjgrad_large_n(u, Ny, NX, cholQ, alpha, thrs, maxiter));
-    return rcpp_result_gen;
-END_RCPP
-}
 // coeff_PG
 arma::vec coeff_PG(arma::vec eta);
 RcppExport SEXP _logitPQbound_coeff_PG(SEXP etaSEXP) {
@@ -94,8 +59,6 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_logitPQbound_prjgrad_large_p", (DL_FUNC) &_logitPQbound_prjgrad_large_p, 8},
-    {"_logitPQbound_prjgrad_large_n", (DL_FUNC) &_logitPQbound_prjgrad_large_n, 7},
     {"_logitPQbound_coeff_PG", (DL_FUNC) &_logitPQbound_coeff_PG, 1},
     {"_logitPQbound_coeff_PQ", (DL_FUNC) &_logitPQbound_coeff_PQ, 1},
     {"_logitPQbound_admm_genlasso_PQ", (DL_FUNC) &_logitPQbound_admm_genlasso_PQ, 14},

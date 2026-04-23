@@ -6,91 +6,6 @@
 using namespace Rcpp;
 using namespace arma;
 
-arma::vec chol_solve(const arma::mat& cholQ, const arma::vec& r) {
-  return solve(trimatu(cholQ), solve(trimatl(cholQ.t()), r));
-}
-
-arma::vec soft_threshold(const arma::vec& x, const double& lambda) {
-  arma::vec z = arma::abs(x) - lambda;
-  return 0.5 * arma::sign(x) % (arma::abs(z) + z);
-}
-
-arma::vec soft_threshold(const arma::vec& x, const arma::vec& lambda) {
-  arma::vec z = arma::abs(x) - lambda;
-  return 0.5 * arma::sign(x) % (arma::abs(z) + z);
-}
-
-//' Projected gradient descent, optimized for large-p-small-n problems
-//'
-//' @param u (arma::vec(n)) initial solution
-//' @param y_nu (arma::vec(n)) auxiliary vector 1
-//' @param nu_w (arma::vec(n)) auxiliary vector 2
-//' @param xPxt_nu (arma::mat(n,n)) auxiliary
-//' @param cholQ (arma::mat(n,n)) auxiliary Cholesky matrix
-//' @param alpha (double) gradient step size
-//' @param thrs (double) stopping threshold on relative absolute change
-//' @param maxiter (int) maximum number of iterations
-//' 
-//' @return logistic penalized log likelihood
-//' 
-//' @export
-// [[Rcpp::export]]
-arma::vec prjgrad_large_p(arma::vec u, 
-                          const arma::vec& Ny, 
-                          const arma::vec& NW, 
-                          const arma::mat& XPXtN, 
-                          const arma::mat& cholQ, 
-                          double alpha, 
-                          double thrs,
-                          int maxiter) {
-  arma::vec u_old = u;
-  double u_diff = 2*thrs;
-  int l = 0;
-  while (l < maxiter && u_diff > thrs) {
-    u -= alpha * (XPXtN.t() * chol_solve(cholQ, NW % (u - Ny)));
-    u = arma::clamp(u, -1.0, 1.0);
-    u_diff = arma::max(arma::abs(u - u_old) / (arma::abs(u_old) + 1e-8));
-    u_old = u;
-    l += 1;
-  }
-  return u;
-}
-
-//' Projected gradient descent, optimized for large-n-small-p problems
-//'
-//' @param u (arma::vec(n)) initial solution
-//' @param y_nu (arma::vec(n)) auxiliary vector
-//' @param nu_x (arma::mat(n,p)) auxiliary matrix
-//' @param cholQ (arma::mat(p,p)) auxiliary Cholesky matrix
-//' @param alpha (double) gradient step size
-//' @param thrs (double) stopping threshold on relative absolute change
-//' @param maxiter (int) maximum number of iterations
-//' 
-//' @return logistic penalized log likelihood
-//' 
-//' @export
-// [[Rcpp::export]]
-arma::vec prjgrad_large_n(arma::vec u, 
-                          const arma::vec& Ny, 
-                          const arma::mat& NX, 
-                          const arma::mat& cholQ, 
-                          double alpha, 
-                          double thrs,
-                          int maxiter) {
-  arma::vec u_old = u;
-  double u_diff = 2*thrs;
-  int l = 0;
-  while (l < maxiter && u_diff > thrs) {
-    u -= alpha * (NX * chol_solve(cholQ, NX.t() * (u - Ny)));
-    u = clamp(u, -1.0, 1.0); 
-    u_diff = arma::max(arma::abs(u - u_old) / (arma::abs(u_old) + 1e-8));
-    u_old = u;
-    l += 1;
-  }
-  return u;
-}
-
-
 //' PG bound coefficients
 //'
 //' @param eta (arma::vec(n)) linear predictors
@@ -105,8 +20,8 @@ arma::vec coeff_PG(arma::vec eta) {
   out.replace(arma::datum::nan,0.25);
   return(out);
 }
-
-
+ 
+ 
 //' PQ bound coefficients
 //'     Remark: correcting for numerical instability around 0
 //'             numerical instability still present at Infinity  
@@ -118,24 +33,39 @@ arma::vec coeff_PG(arma::vec eta) {
 //' @export
 // [[Rcpp::export]]
 arma::mat coeff_PQ(arma::vec eta) {
-
+  
   arma::vec etaA = arma::abs(eta);
   arma::vec eta2 = arma::pow(eta,2);
-
+  
   arma::vec vTanh = arma::tanh(eta/2)/(2*eta);
   arma::vec vLogCosh = 2*arma::log(arma::cosh(eta/2))/eta2; // [version 1]
   // arma::vec vLogCosh = 1/etaA + 2*(arma::log1p(arma::exp(-etaA))-log(2.))/eta2; // [version 2]
-
+  
   arma::vec w_out = -vLogCosh+2.*vTanh;
   arma::vec nu_out = etaA%(vLogCosh-vTanh);
-
+  
   arma::uvec eta0 = arma::find(etaA<1.0e-3); 
   
   w_out(eta0) = 0.25 - eta2(eta0)/32.;
   nu_out(eta0) = etaA(eta0) % eta2(eta0)/96.;
-
+  
   return(arma::join_rows(w_out,nu_out));
 }
+ 
+arma::vec chol_solve(const arma::mat& cholQ, const arma::vec& r) {
+  return solve(trimatu(cholQ), solve(trimatl(cholQ.t()), r));
+}
+
+arma::vec soft_threshold(const arma::vec& x, const double& lambda) {
+  arma::vec z = arma::abs(x) - lambda;
+  return 0.5 * arma::sign(x) % (arma::abs(z) + z);
+}
+
+arma::vec soft_threshold(const arma::vec& x, const arma::vec& lambda) {
+  arma::vec z = arma::abs(x) - lambda;
+  return 0.5 * arma::sign(x) % (arma::abs(z) + z);
+}
+
 
 //' ADMM optimizer for generalized lasso problems
 //' 

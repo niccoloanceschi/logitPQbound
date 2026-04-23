@@ -176,7 +176,6 @@ fit_logit_spridge_path <- function(y, X, D, type=c('NR','BL','PG','PQ'),
   
   # Check the bound type and QP method
   type <- match.arg(type)
-  method <- match.arg(method)
   
   # Set the lambda vector
   if (is.null(lambda)) {

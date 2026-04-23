@@ -20,11 +20,7 @@ fit_logit_spridge(
   etatol = 1e-04,
   verbose = FALSE,
   freq = 10L,
-  use_nn = FALSE,
-  method = c("prjg", "dual", "admm"),
-  ctr_admm = set_ctr_admm(),
-  ctr_prjg = set_ctr_prjg(),
-  ctr_dual = set_ctr_dual()
+  ctr_admm = set_ctr_admm()
 )
 }
 \arguments{
@@ -54,17 +50,11 @@ fit_logit_spridge(
 
 \item{freq}{(int) How often print the optimization state}
 
-\item{use_nn}{(boolean) Use nearest neighbors search as safety check on PQ bounds optimization in later iterations.}
-
-\item{method}{(string) Method to be used for the solution of the quadratic programming inner optimization. Must be one of 'dual', or 'admm'}
-
 \item{ctr_admm}{(list) Control parameters for the ADMM algorithm}
 
-\item{ctr_prjg}{(list) Control parameters for the projected gradient algorithm}
-
-\item{ctr_dual}{(list) Control parameters for the dual QP algorithm}
-
 \item{x}{A \verb{n x p} dimensional design matrix. The intercept must be manually included}
+
+\item{method}{(string) Method to be used for the solution of the quadratic programming inner optimization. Must be one of 'dual', or 'admm'}
 }
 \value{
 The function returns a list with optimal coefficients and likelihood path through MM iterations

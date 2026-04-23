@@ -42,6 +42,8 @@ fit_logit_genlasso(
 
 \item{eps}{(real) Small value added to the intercept term to avoid numerical issues.}
 
+\item{phi}{(real) Relaxation parameter for the dual variables}
+
 \item{intercept}{(boolean) Is the intercept included in \code{X} or not?}
 
 \item{maxiter}{(integer) Maximum number of iterations. If reached, the algorithm raises an error.}
@@ -58,11 +60,7 @@ fit_logit_genlasso(
 
 \item{ctr_admm}{(list) Control parameters for the ADMM algorithm}
 
-\item{method}{(string) Method to be used for the solution of the quadratic programming inner optimization. Must be one of 'dual', or 'admm'.}
-
-\item{ctr_prjg}{(list) Control parameters for the projected gradient algorithm}
-
-\item{ctr_dual}{(list) Control parameters for the dual QP algorithm}
+\item{prox}{(boolean) Use the proximal primal-dual update}
 }
 \value{
 The function returns a list with optimal coefficients and likelihood path through MM iterations

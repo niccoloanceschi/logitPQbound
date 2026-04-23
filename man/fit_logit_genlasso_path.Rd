@@ -15,7 +15,7 @@ fit_logit_genlasso_path(
   eps = 1e-10,
   gamma = 1,
   phi = 0.9,
-  approx = TRUE,
+  prox = TRUE,
   intercept = FALSE,
   maxiter = 1000L,
   abstol = 1e-04,
@@ -54,14 +54,6 @@ fit_logit_genlasso_path(
 \item{ctr_admm}{(list) Control parameters for the ADMM algorithm}
 
 \item{x}{A \verb{n x p} dimensional design matrix. The intercept must be manually included}
-
-\item{use_nn}{(boolean) Use nearest neighbors search as safety check on PQ bounds optimization in later iterations.}
-
-\item{method}{(string) Method to be used for the solution of the quadratic programming inner optimization. Must be one of 'dual', or 'admm'}
-
-\item{ctr_prjg}{(list) Control parameters for the projected gradient algorithm}
-
-\item{ctr_dual}{(list) Control parameters for the dual QP algorithm}
 }
 \value{
 The function returns a list with optimal coefficients and likelihood path through MM iterations

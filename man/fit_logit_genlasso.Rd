@@ -15,7 +15,7 @@ fit_logit_genlasso(
   eps = 1e-10,
   phi = 0.9,
   intercept = FALSE,
-  approx = TRUE,
+  prox = TRUE,
   maxiter = 1000,
   abstol = 1e-04,
   reltol = 1e-04,
@@ -46,6 +46,8 @@ fit_logit_genlasso(
 
 \item{intercept}{(boolean) Is the intercept included in \code{X} or not?}
 
+\item{prox}{(boolean) Use the proximal primal-dual update}
+
 \item{maxiter}{(integer) Maximum number of iterations. If reached, the algorithm raises an error.}
 
 \item{abstol}{(real) Convergence threshold for the absolute change in the log-likelihood.}
@@ -59,8 +61,6 @@ fit_logit_genlasso(
 \item{freq}{(int) How often print the optimization state.}
 
 \item{ctr_admm}{(list) Control parameters for the ADMM algorithm}
-
-\item{prox}{(boolean) Use the proximal primal-dual update}
 }
 \value{
 The function returns a list with optimal coefficients and likelihood path through MM iterations

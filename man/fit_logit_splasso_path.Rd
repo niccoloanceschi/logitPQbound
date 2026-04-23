@@ -14,7 +14,7 @@ fit_logit_splasso_path(
   alpha = 0.99,
   gamma = 1,
   phi = 0.9,
-  approx = TRUE,
+  prox = TRUE,
   maxiter = 1000L,
   abstol = 1e-04,
   reltol = 1e-04,
@@ -52,14 +52,6 @@ fit_logit_splasso_path(
 \item{eps}{(real) Small value added to the intercept term to avoid numerical issues}
 
 \item{intercept}{(boolean) Is the intercept included in \code{X} or not?}
-
-\item{use_nn}{(boolean) Use nearest neighbors search as safety check on PQ bounds optimization in later iterations.}
-
-\item{method}{(string) Method to be used for the solution of the quadratic programming inner optimization. Must be one of 'dual', or 'admm'}
-
-\item{ctr_prjg}{(list) Control parameters for the projected gradient algorithm}
-
-\item{ctr_dual}{(list) Control parameters for the dual QP algorithm}
 }
 \value{
 The function returns a list with optimal coefficients and likelihood path through MM iterations
